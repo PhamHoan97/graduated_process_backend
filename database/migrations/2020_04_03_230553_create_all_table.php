@@ -33,6 +33,7 @@ class CreateAllTable extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password');
+            $table->string('auth_token');
             $table->string('token');
             $table->string('provider');
             $table->string('role');
@@ -54,10 +55,11 @@ class CreateAllTable extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password');
+            $table->string('auth_token');
             $table->string('provider');
             $table->string('token');
             $table->integer('company_id')->unsigned();
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->foreign('company_id')->references('id')->on('companies');
         });
         //create department of companies table
         Schema::create('departments', function (Blueprint $table) {
@@ -66,7 +68,7 @@ class CreateAllTable extends Migration
             $table->text('description');
             $table->string('role');
             $table->integer('company_id')->unsigned();
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->foreign('company_id')->references('id')->on('companies');
         });
         //create employee of companies table
         Schema::create('employees', function (Blueprint $table) {
@@ -77,7 +79,7 @@ class CreateAllTable extends Migration
             $table->string('avatar');
             $table->integer('role');
             $table->integer('department_id')->unsigned();
-            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
+            $table->foreign('department_id')->references('id')->on('departments');
         });
         //create account of employees table
         Schema::create('accounts', function (Blueprint $table) {
@@ -85,10 +87,11 @@ class CreateAllTable extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password');
+            $table->string('auth_token');
             $table->string('provider');
             $table->string('token');
             $table->integer('employee_id')->unsigned();
-            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            $table->foreign('employee_id')->references('id')->on('employees');
         });
         //create process of employee table
         Schema::create('processes', function (Blueprint $table) {
@@ -101,7 +104,7 @@ class CreateAllTable extends Migration
             $table->longText('xml');
             $table->dateTime('updated_at');
             $table->integer('employee_id')->unsigned();
-            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            $table->foreign('employee_id')->references('id')->on('employees');
         });
         //create element of process table
         Schema::create('elements', function (Blueprint $table) {
@@ -109,7 +112,7 @@ class CreateAllTable extends Migration
             $table->string('element');
             $table->string('type');
             $table->integer('process_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
+            $table->foreign('process_id')->references('id')->on('processes');
         });
         //create comment of element table
         Schema::create('element_comments', function (Blueprint $table) {
@@ -118,7 +121,7 @@ class CreateAllTable extends Migration
             $table->integer('employee_id')->unsigned();
             $table->longText('comment');
             $table->dateTime('updated_at');
-            $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
+            $table->foreign('element_id')->references('id')->on('elements');
         });
 
         //create form of process table
@@ -126,7 +129,7 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('content');
             $table->integer('process_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
+            $table->foreign('process_id')->references('id')->on('processes');
         });
         //create isos table
         Schema::create('isos', function (Blueprint $table) {
@@ -140,12 +143,9 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->integer('process_id')->unsigned();
             $table->integer('iso_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
-            $table->foreign('iso_id')->references('id')->on('isos')->onDelete('cascade');
+            $table->foreign('process_id')->references('id')->on('processes');
+            $table->foreign('iso_id')->references('id')->on('isos');
         });
-
-
-
     }
 
     /**
@@ -155,28 +155,31 @@ class CreateAllTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('waitings');
-
-        Schema::dropIfExists('systems');
-
-        Schema::dropIfExists('companies');
-
-        Schema::dropIfExists('admins');
-
-        Schema::dropIfExists('departments');
-
-        Schema::dropIfExists('employees');
-
-        Schema::dropIfExists('processes');
-
-        Schema::dropIfExists('elements');
-
-        Schema::dropIfExists('element_comments');
-
-        Schema::dropIfExists('forms');
+        Schema::dropIfExists('rules');
 
         Schema::dropIfExists('isos');
 
-        Schema::dropIfExists('rules');
+        Schema::dropIfExists('forms');
+
+        Schema::dropIfExists('element_comments');
+
+        Schema::dropIfExists('elements');
+
+        Schema::dropIfExists('processes');
+
+        Schema::dropIfExists('accounts');
+
+        Schema::dropIfExists('employees');
+
+        Schema::dropIfExists('departments');
+
+        Schema::dropIfExists('admins');
+
+        Schema::dropIfExists('companies');
+
+        Schema::dropIfExists('systems');
+
+        Schema::dropIfExists('waitings');
+
     }
 }
