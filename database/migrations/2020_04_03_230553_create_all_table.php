@@ -23,8 +23,8 @@ class CreateAllTable extends Migration
             $table->integer('workforce');
             $table->string('ceo');
             $table->string('contact')->unique();
-            $table->integer('approve');
-            $table->integer('approve_by');
+            $table->integer('approve')->default(0);
+            $table->integer('approve_by')->nullable();
         });
 
         //create system account table
@@ -33,9 +33,9 @@ class CreateAllTable extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password');
-            $table->string('auth_token');
-            $table->string('token');
-            $table->string('provider');
+            $table->string('auth_token')->nullable();
+            $table->string('token')->nullable();
+            $table->string('provider')->nullable();
             $table->string('role');
         });
         //create companies table
@@ -55,9 +55,9 @@ class CreateAllTable extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password');
-            $table->string('auth_token');
-            $table->string('provider');
-            $table->string('token');
+            $table->string('auth_token')->nullable();
+            $table->string('provider')->nullable();
+            $table->string('token')->nullable();
             $table->integer('company_id')->unsigned();
             $table->foreign('company_id')->references('id')->on('companies');
         });
@@ -76,7 +76,8 @@ class CreateAllTable extends Migration
             $table->string('name');
             $table->text('address');
             $table->string('phone');
-            $table->string('avatar');
+            $table->string('birth');
+            $table->string('avatar')->nullable();
             $table->integer('role');
             $table->integer('department_id')->unsigned();
             $table->foreign('department_id')->references('id')->on('departments');
@@ -86,9 +87,9 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('email')->unique();
             $table->string('username')->unique();
-            $table->string('password');
-            $table->string('auth_token');
-            $table->string('provider');
+            $table->string('password')->nullable();
+            $table->string('auth_token')->nullable();
+            $table->string('provider')->nullable();
             $table->string('token');
             $table->integer('employee_id')->unsigned();
             $table->foreign('employee_id')->references('id')->on('employees');
@@ -98,10 +99,10 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->longText('description');
-            $table->string('image');
-            $table->string('svg');
-            $table->string('bpmn');
-            $table->longText('xml');
+            $table->string('image')->nullable();
+            $table->string('svg')->nullable();
+            $table->string('bpmn')->nullable();
+            $table->longText('xml')->nullable();
             $table->dateTime('updated_at');
             $table->integer('employee_id')->unsigned();
             $table->foreign('employee_id')->references('id')->on('employees');
