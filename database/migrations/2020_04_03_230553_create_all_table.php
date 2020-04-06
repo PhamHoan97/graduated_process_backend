@@ -25,6 +25,7 @@ class CreateAllTable extends Migration
             $table->string('contact')->unique();
             $table->integer('approve')->default(0);
             $table->integer('approve_by')->nullable();
+            $table->timestamps();
         });
 
         //create system account table
@@ -33,10 +34,11 @@ class CreateAllTable extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password');
-            $table->string('auth_token')->nullable();
+            $table->longText('auth_token')->nullable();
             $table->string('token')->nullable();
             $table->string('provider')->nullable();
             $table->string('role');
+            $table->timestamps();
         });
         //create companies table
         Schema::create('companies', function (Blueprint $table) {
@@ -48,6 +50,7 @@ class CreateAllTable extends Migration
             $table->integer('workforce');
             $table->string('ceo');
             $table->string('contact')->unique();
+            $table->timestamps();
         });
         //create admin of companies table
         Schema::create('admins', function (Blueprint $table) {
@@ -55,11 +58,12 @@ class CreateAllTable extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password');
-            $table->string('auth_token')->nullable();
+            $table->longText('auth_token')->nullable();
             $table->string('provider')->nullable();
             $table->string('token')->nullable();
             $table->integer('company_id')->unsigned();
             $table->foreign('company_id')->references('id')->on('companies');
+            $table->timestamps();
         });
         //create department of companies table
         Schema::create('departments', function (Blueprint $table) {
@@ -69,6 +73,7 @@ class CreateAllTable extends Migration
             $table->string('role');
             $table->integer('company_id')->unsigned();
             $table->foreign('company_id')->references('id')->on('companies');
+            $table->timestamps();
         });
         //create employee of companies table
         Schema::create('employees', function (Blueprint $table) {
@@ -81,6 +86,7 @@ class CreateAllTable extends Migration
             $table->integer('role');
             $table->integer('department_id')->unsigned();
             $table->foreign('department_id')->references('id')->on('departments');
+            $table->timestamps();
         });
         //create account of employees table
         Schema::create('accounts', function (Blueprint $table) {
@@ -88,11 +94,12 @@ class CreateAllTable extends Migration
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password')->nullable();
-            $table->string('auth_token')->nullable();
+            $table->longText('auth_token')->nullable();
             $table->string('provider')->nullable();
             $table->string('token');
             $table->integer('employee_id')->unsigned();
             $table->foreign('employee_id')->references('id')->on('employees');
+            $table->timestamps();
         });
         //create process of employee table
         Schema::create('processes', function (Blueprint $table) {
@@ -103,9 +110,10 @@ class CreateAllTable extends Migration
             $table->string('svg')->nullable();
             $table->string('bpmn')->nullable();
             $table->longText('xml')->nullable();
-            $table->dateTime('updated_at');
+            $table->dateTime('update_at');
             $table->integer('employee_id')->unsigned();
             $table->foreign('employee_id')->references('id')->on('employees');
+            $table->timestamps();
         });
         //create element of process table
         Schema::create('elements', function (Blueprint $table) {
@@ -114,6 +122,7 @@ class CreateAllTable extends Migration
             $table->string('type');
             $table->integer('process_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes');
+            $table->timestamps();
         });
         //create comment of element table
         Schema::create('element_comments', function (Blueprint $table) {
@@ -121,8 +130,9 @@ class CreateAllTable extends Migration
             $table->integer('element_id')->unsigned();
             $table->integer('employee_id')->unsigned();
             $table->longText('comment');
-            $table->dateTime('updated_at');
+            $table->dateTime('update_at');
             $table->foreign('element_id')->references('id')->on('elements');
+            $table->timestamps();
         });
 
         //create form of process table
@@ -131,12 +141,14 @@ class CreateAllTable extends Migration
             $table->string('content');
             $table->integer('process_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes');
+            $table->timestamps();
         });
         //create isos table
         Schema::create('isos', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->longText('content');
+            $table->timestamps();
         });
 
         //create rules of process table
@@ -146,6 +158,7 @@ class CreateAllTable extends Migration
             $table->integer('iso_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes');
             $table->foreign('iso_id')->references('id')->on('isos');
+            $table->timestamps();
         });
     }
 

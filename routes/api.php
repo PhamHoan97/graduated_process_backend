@@ -16,3 +16,13 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('login/system', 'Api\LoginsController@loginSystem')->middleware('loginSystem');
+
+Route::post('logout/system', 'Api\LoginsController@logoutSystem');
+
+Route::group(['middleware' => 'jwt-auth-system'], function () {
+    // all routes of system role to protected resources are registered here
+
+});
+

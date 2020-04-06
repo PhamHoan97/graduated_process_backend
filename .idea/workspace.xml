@@ -103,6 +103,11 @@
       <path value="$PROJECT_DIR$/vendor/monolog/monolog" />
       <path value="$PROJECT_DIR$/vendor/asm89/stack-cors" />
       <path value="$PROJECT_DIR$/vendor/fruitcake/laravel-cors" />
+      <path value="$PROJECT_DIR$/vendor/lcobucci/jwt" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-util" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php56" />
+      <path value="$PROJECT_DIR$/vendor/tymon/jwt-auth" />
+      <path value="$PROJECT_DIR$/vendor/namshi/jose" />
     </include_path>
   </component>
   <component name="ProjectId" id="1YvSqdTWJhdsLZKCpGO3Mv56sjb" />
@@ -157,7 +162,7 @@
       <workItem from="1584212694972" duration="4152000" />
       <workItem from="1584276934513" duration="11519000" />
       <workItem from="1585954495557" duration="8126000" />
-      <workItem from="1586103060783" duration="8656000" />
+      <workItem from="1586103060783" duration="23932000" />
     </task>
     <servers />
   </component>
