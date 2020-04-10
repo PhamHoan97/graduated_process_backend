@@ -40,7 +40,7 @@ class LoginsController extends Controller
             $response = [
                 'success'=>true,
                 'message' => 'Login successful',
-                'data'=> $system
+                'system'=> $system
             ];
         }
         else{

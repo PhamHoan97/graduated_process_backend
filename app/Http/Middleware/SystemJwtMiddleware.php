@@ -22,10 +22,8 @@ class SystemJwtMiddleware
 
         } catch (\Exception $e) {
             if ($e instanceof TokenInvalidException) {
-                return $next($request);
                 return response()->json(['error'=>'Token is Invalid']);
             } else if ($e instanceof TokenExpiredException){
-                return $next($request);
                 return response()->json(['error'=>'Token is Expired']);
             } else {
                 return response()->json(['error'=>'Something is wrong']);

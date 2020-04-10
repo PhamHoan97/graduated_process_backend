@@ -21,8 +21,11 @@ Route::post('login/system', 'Api\LoginsController@loginSystem')->middleware('log
 
 Route::post('logout/system', 'Api\LoginsController@logoutSystem');
 
+Route::post('company/register', 'Api\CompanyController@register')->middleware('registerCompany');
+
 Route::group(['middleware' => 'jwt-auth-system'], function () {
     // all routes of system role to protected resources are registered here
 
 });
+
 

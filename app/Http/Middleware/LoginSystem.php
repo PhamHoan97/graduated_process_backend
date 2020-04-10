@@ -19,13 +19,13 @@ class LoginSystem
         $password = $request->password;
 
         if(!isset($email)){
-            return response()->json(['error' => "Email is empty"], 400);
+            return response()->json(['error' => "email is required"], 400);
         }
         if(!isset($password)){
-            return response()->json(['error' => "Password is empty"], 400);
+            return response()->json(['error' => "password is required"], 400);
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return response()->json(['error' => "Invalid email format"], 400);
+            return response()->json(['error' => "invalid email format"], 400);
         }
 
         return $next($request);
