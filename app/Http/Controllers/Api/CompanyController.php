@@ -17,6 +17,12 @@ class CompanyController extends Controller
         $address = $request->address;
         $contact = $request->contact;
 
+        $record = DB::table('waitings')->where('contact', $contact)->first();
+
+        if($record){
+            return response()->json(["error" => "This email contact is used by someone"], 400);
+        }
+
         try{
             $waitings = new \App\Waitings();
             $waitings->name = $name;
