@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use App\Systems;
 
-class LoginsController extends Controller
+class SystemController extends Controller
 {
 
     private function getToken($role,$email, $password){
@@ -39,12 +39,12 @@ class LoginsController extends Controller
 
             $response = [
                 'success'=>true,
-                'message' => 'Login successful',
+                'message' => 'Login system successful',
                 'system'=> $system
             ];
         }
         else{
-            $response = ['success'=>false, 'error'=>'Record doesnt exists'];
+            $response = ['error'=>true, 'message'=>'Record doesnt exists'];
         }
 
         return response()->json($response, 201);

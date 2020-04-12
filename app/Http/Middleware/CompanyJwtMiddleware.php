@@ -5,7 +5,7 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Closure;
 
-class SystemJwtMiddleware
+class CompanyJwtMiddleware
 {
     /**
      * Handle an incoming request.
@@ -17,7 +17,7 @@ class SystemJwtMiddleware
     public function handle($request, Closure $next)
     {
         try {
-            $system = auth('systems')->user();
+            $admin = auth('admins')->user();
 
         } catch (\Exception $e) {
             if ($e instanceof TokenInvalidException) {

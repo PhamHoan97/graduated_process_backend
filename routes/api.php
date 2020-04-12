@@ -17,13 +17,22 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('login/system', 'Api\LoginsController@loginSystem')->middleware('loginSystem');
+Route::post('login/system', 'Api\SystemController@loginSystem')->middleware('login');
 
-Route::post('logout/system', 'Api\LoginsController@logoutSystem');
+Route::post('logout/system', 'Api\SystemController@logoutSystem');
+
+Route::post('login/company', 'Api\CompanyController@loginCompany')->middleware('login');
+
+Route::post('logout/company', 'Api\CompanyController@logoutCompany');
 
 Route::post('company/register', 'Api\CompanyController@register')->middleware('registerCompany');
 
 Route::group(['middleware' => 'jwt-auth-system'], function () {
+    // all routes of system role to protected resources are registered here
+
+});
+
+Route::group(['middleware' => 'jwt-auth-company'], function () {
     // all routes of system role to protected resources are registered here
 
 });
