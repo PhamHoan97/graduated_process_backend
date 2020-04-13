@@ -30,6 +30,7 @@ Route::post('company/register', 'Api\CompanyController@register')->middleware('r
 Route::group(['middleware' => 'jwt-auth-system'], function () {
     // all routes of system role to protected resources are registered here
     Route::get('system/registration', 'Api\SystemController@getRegistrationListOfCompanies');
+    Route::get('system/registration/information/{idCompany}', 'Api\SystemController@getRegistrationInformationOfCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {

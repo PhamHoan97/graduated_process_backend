@@ -96,4 +96,17 @@ class SystemController extends Controller
         ]);
     }
 
+    public function getRegistrationInformationOfCompany(Request $request){
+        if(!$request->idCompany){
+            return response()->json(['error' => true, 'message' => $request->idCompany]);
+        }else{
+            $company = \App\Waitings::find($request->idCompany);
+            return response()->json([
+                'success' => true,
+                'message' => "Get data successful",
+                'information' => $company
+            ]);
+        }
+    }
+
 }
