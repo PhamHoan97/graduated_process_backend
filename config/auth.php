@@ -47,12 +47,12 @@ return [
             'hash' => false,
         ],
         'systems' => [
-            'driver' => 'jwt',
+            'driver' => 'token',
             'provider' => 'systems',
         ],
 
         'admins' => [
-            'driver' => 'jwt',
+            'driver' => 'token',
             'provider' => 'admins',
         ],
     ],
@@ -85,10 +85,11 @@ return [
             'model' => App\Systems::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Admins::class,
+        ],
+
     ],
 
     /*

@@ -169,7 +169,8 @@
       <workItem from="1586543222291" duration="2954000" />
       <workItem from="1586572743800" duration="3304000" />
       <workItem from="1586612474033" duration="1080000" />
-      <workItem from="1586643427905" duration="7725000" />
+      <workItem from="1586643427905" duration="8962000" />
+      <workItem from="1586708992550" duration="17481000" />
     </task>
     <servers />
   </component>
@@ -188,5 +189,29 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="php-line-method">
+          <url>file://$PROJECT_DIR$/vendor/laravel/framework/src/Illuminate/Auth/SessionGuard.php</url>
+          <line>344</line>
+          <properties>
+            <option name="className" value="\Illuminate\Auth\SessionGuard" />
+            <option name="methodName" value="attempt" />
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php-line-method">
+          <url>file://$PROJECT_DIR$/vendor/tymon/jwt-auth/src/Facades/JWTAuth.php</url>
+          <line>22</line>
+          <properties>
+            <option name="className" value="\Tymon\JWTAuth\Facades\JWTAuth" />
+            <option name="methodName" value="getFacadeAccessor" />
+          </properties>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

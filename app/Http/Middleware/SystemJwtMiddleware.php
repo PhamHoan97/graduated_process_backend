@@ -1,8 +1,12 @@
 <?php
 
 namespace App\Http\Middleware;
+use App\Systems;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\UserNotDefinedException;
+use Config;
+use JWTAuth;
 use Closure;
 
 class SystemJwtMiddleware
@@ -17,14 +21,17 @@ class SystemJwtMiddleware
     public function handle($request, Closure $next)
     {
         try {
-            $system = auth('systems')->user();
-
+            Config::set( 'jwt.user', 'App\Systems' );
+            Config::set( 'auth.providers.users.model', Systems::class );
+            $system = JWTAuth::parseToken()->authenticate();
         } catch (\Exception $e) {
             if ($e instanceof TokenInvalidException) {
                 return response()->json(['error'=>'Token is Invalid']);
             } else if ($e instanceof TokenExpiredException){
                 return response()->json(['error'=>'Token is Expired']);
-            } else {
+            }  else if ($e instanceof UserNotDefinedException ){
+                return response()->json(['error'=>'Authorization is required']);
+            }  else {
                 return response()->json(['error'=>'Authorization Token not found']);
             }
         }

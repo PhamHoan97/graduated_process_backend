@@ -7,9 +7,27 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Config;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Auth;
+
 
 class CompanyController extends Controller
 {
+    public function __construct()
+    {
+        Config::set('jwt.user', Admins::class);
+        Config::set('auth.providers', ['users' => [
+            'driver' => 'eloquent',
+            'model' => Admins::class,
+        ]]);
+    }
+
+    public function guard() {
+        return Auth::guard();
+    }
+
     public function register(Request $request){
         $name = $request->name;
         $signature = $request->signature;
@@ -36,24 +54,24 @@ class CompanyController extends Controller
             $waitings->contact = $contact;
             $waitings->save();
 
-            return response()->json(["message" => "Sent to admin of system","company" => $waitings], 200);
+            return response()->json(["success" => true, "message" => "Sent to admin of system","company" => $waitings], 200);
         }catch (\Exception $e){
-            return response()->json(["error" => "Something was wrong with information company"], 400);
+            return response()->json(["error" => true, "message" => "Something was wrong with information company"], 400);
         }
     }
 
-    private function getToken($role,$email, $password){
+    private function getToken($credentials){
         $token = null;
         try {
-            if (!$token = auth($role)->attempt(['email'=>$email, 'password'=>$password])) {
+            if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
-                    'response' => 'error',
+                    'error' => true,
                     'message' => 'Password or email is invalid',
                 ]);
             }
         } catch (JWTException $e) {
             return response()->json([
-                'response' => 'error',
+                'error' => true,
                 'message' => 'Token creation failed',
             ]);
         }
@@ -65,14 +83,15 @@ class CompanyController extends Controller
         $admin = Admins::where('email', $request->email)->get()->first();
         if ($admin && Hash::check($request->password, $admin->password))
         {
-            $token = self::getToken('admins', $request->email, $request->password);
+            $credentials = $request->only('email', 'password');
+            $token = self::getToken($credentials);
             $admin->auth_token = $token;
             $admin->save();
 
             $response = [
                 'success'=>true,
                 'message' => 'Login company successful',
-                'system'=> $admin
+                'token'=> $token
             ];
         }
         else{
@@ -89,7 +108,7 @@ class CompanyController extends Controller
      */
     public function logoutCompany()
     {
-        auth()->logout();
+        $this->guard()->logout();
 
         return response()->json(['success'=>true,'message' => 'Logged out']);
     }

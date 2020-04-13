@@ -12,7 +12,7 @@ class Waitings extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'signature', 'ceo', 'workforce', 'field', 'address', 'contact'
+        'id', 'name', 'signature', 'ceo', 'workforce', 'field', 'address', 'contact', 'approve'
     ];
 
     public $table = "waitings";
