@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Companies;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -85,7 +86,7 @@ class SystemController extends Controller
 
     public function getRegistrationListOfCompanies(){
         try{
-            $registrations = Waitings::all();
+            $registrations = Waitings::where('approve',0)->get();
         }catch (ModelNotFoundException $exception){
             return response()->json(['error' => true, 'message' => $exception->getMessage()]);
         }
@@ -98,7 +99,7 @@ class SystemController extends Controller
 
     public function getRegistrationInformationOfCompany(Request $request){
         if(!$request->idCompany){
-            return response()->json(['error' => true, 'message' => $request->idCompany]);
+            return response()->json(['error' => true, 'message' => "idCompany is required"]);
         }else{
             $company = \App\Waitings::find($request->idCompany);
             return response()->json([
@@ -106,6 +107,37 @@ class SystemController extends Controller
                 'message' => "Get data successful",
                 'information' => $company
             ]);
+        }
+    }
+
+    public  function approveCompany(Request $request){
+        if(!$request->idCompany){
+            return response()->json(['error' => true, 'message' => "idCompany is required"]);
+        }else if(!$request->tokenData){
+            return response()->json(['error' => true, 'message' => "tokenData is required to verify user"]);
+        }else{
+            try{
+                $system = Systems::where('auth_token',$request->tokenData)->first();
+                //save data
+                $registration = Waitings::find($request->idCompany);
+                $registration->approve = 1;
+                $request->approve_by = $system->id;
+                $registration->save();
+                //insert to Company table
+                $company = new Companies();
+                $company->name = $registration->name;
+                $company->signature = $registration->signature;
+                $company->address = $registration->address;
+                $company->ceo = $registration->ceo;
+                $company->field = $registration->field;
+                $company->workforce = $registration->workforce;
+                $company->contact = $registration->contact;
+                $company->save();
+                //send email
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
+            }
+            return response()->json(['success' => true, 'message' => "Approved this company"]);
         }
     }
 
