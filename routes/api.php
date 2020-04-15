@@ -30,8 +30,10 @@ Route::post('company/register', 'Api\CompanyController@register')->middleware('r
 Route::group(['middleware' => 'jwt-auth-system'], function () {
     // all routes of system role to protected resources are registered here
     Route::get('system/registration', 'Api\SystemController@getRegistrationListOfCompanies');
-    Route::get('system/registration/information/{idCompany}', 'Api\SystemController@getRegistrationInformationOfCompany');
+    Route::get('system/registration/information/{idRegistration}', 'Api\SystemController@getRegistrationInformationOfCompany');
     Route::post('system/registration/approve','Api\SystemController@approveCompany');
+    Route::post('system/create/admin','Api\SystemController@createAdmin');
+    Route::get('system/company/{idCompany}/admin/accounts','Api\SystemController@getAdminAccountsOfCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {

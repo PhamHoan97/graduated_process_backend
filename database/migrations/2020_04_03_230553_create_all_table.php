@@ -32,7 +32,7 @@ class CreateAllTable extends Migration
         Schema::create('systems', function (Blueprint $table) {
             $table->increments('id');
             $table->string('email')->unique();
-            $table->string('username')->unique();
+            $table->string('username')->nullable()->unique();
             $table->string('password');
             $table->longText('auth_token')->nullable();
             $table->string('token')->nullable();
@@ -40,6 +40,19 @@ class CreateAllTable extends Migration
             $table->string('role');
             $table->timestamps();
         });
+
+        //create email history table
+        Schema::create('emails', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('type');
+            $table->string('to');
+            $table->string('content')->nullable();
+            $table->date('time');
+            $table->integer('system_id')->unsigned();
+            $table->foreign('system_id')->references('id')->on('systems');
+            $table->timestamps();
+        });
+
         //create companies table
         Schema::create('companies', function (Blueprint $table) {
             $table->increments('id');
@@ -50,12 +63,14 @@ class CreateAllTable extends Migration
             $table->integer('workforce');
             $table->string('ceo');
             $table->string('contact')->unique();
+            $table->integer('registration_id')->unsigned();
+            $table->foreign('registration_id')->references('id')->on('waitings');
             $table->timestamps();
         });
         //create admin of companies table
         Schema::create('admins', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email')->unique();
+            $table->string('email')->nullable()->unique();
             $table->string('username')->unique();
             $table->string('password');
             $table->longText('auth_token')->nullable();
@@ -70,7 +85,7 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->text('description');
-            $table->string('role');
+            $table->string('role')->nullable();
             $table->integer('company_id')->unsigned();
             $table->foreign('company_id')->references('id')->on('companies');
             $table->timestamps();
@@ -83,7 +98,7 @@ class CreateAllTable extends Migration
             $table->string('phone');
             $table->string('birth');
             $table->string('avatar')->nullable();
-            $table->integer('role');
+            $table->integer('role')->nullable();
             $table->integer('department_id')->unsigned();
             $table->foreign('department_id')->references('id')->on('departments');
             $table->timestamps();
@@ -91,9 +106,9 @@ class CreateAllTable extends Migration
         //create account of employees table
         Schema::create('accounts', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email')->unique();
+            $table->string('email')->nullable()->unique();
             $table->string('username')->unique();
-            $table->string('password')->nullable();
+            $table->string('password');
             $table->longText('auth_token')->nullable();
             $table->string('provider')->nullable();
             $table->string('token');
@@ -190,6 +205,8 @@ class CreateAllTable extends Migration
         Schema::dropIfExists('admins');
 
         Schema::dropIfExists('companies');
+
+        Schema::dropIfExists('emails');
 
         Schema::dropIfExists('systems');
 

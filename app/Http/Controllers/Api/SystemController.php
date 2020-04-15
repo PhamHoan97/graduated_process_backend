@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Admins;
 use App\Companies;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -98,10 +99,10 @@ class SystemController extends Controller
     }
 
     public function getRegistrationInformationOfCompany(Request $request){
-        if(!$request->idCompany){
-            return response()->json(['error' => true, 'message' => "idCompany is required"]);
+        if(!$request->idRegistration){
+            return response()->json(['error' => true, 'message' => "idRegistration is required"]);
         }else{
-            $company = \App\Waitings::find($request->idCompany);
+            $company = \App\Waitings::find($request->idRegistration);
             return response()->json([
                 'success' => true,
                 'message' => "Get data successful",
@@ -111,15 +112,15 @@ class SystemController extends Controller
     }
 
     public  function approveCompany(Request $request){
-        if(!$request->idCompany){
-            return response()->json(['error' => true, 'message' => "idCompany is required"]);
+        if(!$request->idRegistration){
+            return response()->json(['error' => true, 'message' => "idRegistration is required"]);
         }else if(!$request->tokenData){
             return response()->json(['error' => true, 'message' => "tokenData is required to verify user"]);
         }else{
             try{
                 $system = Systems::where('auth_token',$request->tokenData)->first();
                 //save data
-                $registration = Waitings::find($request->idCompany);
+                $registration = Waitings::find($request->idRegistration);
                 $registration->approve = 1;
                 $request->approve_by = $system->id;
                 $registration->save();
@@ -132,6 +133,7 @@ class SystemController extends Controller
                 $company->field = $registration->field;
                 $company->workforce = $registration->workforce;
                 $company->contact = $registration->contact;
+                $company->registration_id = $request->idRegistration;
                 $company->save();
                 //send email
             }catch (\Exception $e){
@@ -141,4 +143,46 @@ class SystemController extends Controller
         }
     }
 
+    public function createAdmin(Request $request){
+        if(!$request->username){
+            return response()->json(['error' => true, 'message' => "username is required"]);
+        }else if(!$request->password){
+            return response()->json(['error' => true, 'message' => "password is required"]);
+        }else if(!$request->idRegistration){
+            return response()->json(['error' => true, 'message' => "idRegistration is required"]);
+        }else{
+            try{
+                $checkUsername = Admins::where('username', $request->username)->first();
+                if($checkUsername){
+                    return response()->json(['error' => true, 'errorUsername' => 1, 'message' => 'username must be unique']);
+                }else{
+                    $company = Companies::where('registration_id',$request->idRegistration)->first();
+                    if(!$company){
+                        return response()->json(['error' => true, 'message' => "something was wrong with idRegistration"]);
+                    }
+                    $admin  = new Admins();
+                    $admin->username = $request->username;
+                    $admin->password = Hash::make($request->password);
+                    $admin->company_id = $company->id;
+                    $admin->save();
+                }
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
+            }
+            return response()->json(['success' => true, 'message' => "Created account", 'admin' => $admin]);
+        }
+    }
+
+    public function getAdminAccountsOfCompany(Request $request){
+        if(!$request->idCompany){
+            return response()->json(['error' => true, 'message' => "idCompany is required"]);
+        }else{
+            try{
+                $admins = Admins::where('company_id', $request->idCompany)->get();
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
+            }
+            return response()->json(['success' => true, 'message' => 'got admin accounts of the company', 'admins' => $admins]);
+        }
+    }
 }

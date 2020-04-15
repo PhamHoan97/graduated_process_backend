@@ -12,7 +12,7 @@ class Companies extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'name', 'signature', 'ceo', 'workforce', 'field', 'address', 'contact',
+        'id', 'name', 'signature', 'ceo', 'workforce', 'field', 'address', 'contact', 'registration_id'
     ];
 
     public $table = "companies";
