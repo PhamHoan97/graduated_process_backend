@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Waitings extends Model
+class Emails extends Model
 {
     /**
      * The attributes that are mass assignable.
@@ -12,8 +12,8 @@ class Waitings extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'name', 'signature', 'ceo', 'workforce', 'field', 'address', 'contact', 'approve'
+        'id', 'type', 'to', 'content', 'time', 'system_id'
     ];
 
-    public $table = "waitings";
+    public $table = "emails";
 }

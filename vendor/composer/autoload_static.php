@@ -453,6 +453,7 @@ class ComposerStaticInit65060a10e2a3d150895db00ac0c23666
         'App\\Admins' => __DIR__ . '/../..' . '/app/Admins.php',
         'App\\Companies' => __DIR__ . '/../..' . '/app/Companies.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
+        'App\\Emails' => __DIR__ . '/../..' . '/app/Emails.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
         'App\\Http\\Controllers\\Api\\CompanyController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/CompanyController.php',
         'App\\Http\\Controllers\\Api\\SystemController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/SystemController.php',

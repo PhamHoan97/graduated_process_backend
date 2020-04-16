@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Admins;
 use App\Companies;
+use App\Emails;
+use App\Mail\SendAdminAccount;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Systems;
 use App\Waitings;
 use Config;
+use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
@@ -67,7 +70,7 @@ class SystemController extends Controller
                 $response = ['error' => true, 'message' => 'Record doesnt exists'];
             }
         }catch (\Exception $e){
-            $response = ['error' => true, 'message' => $e->getMessage()];
+            $response = ['error' => true, 'message' =>"123"];
         }
 
         return response()->json($response, 201);
@@ -119,10 +122,13 @@ class SystemController extends Controller
         }else{
             try{
                 $system = Systems::where('auth_token',$request->tokenData)->first();
+                if(!$system){
+                    return response()->json(['error' => true, 'message' => "Something was wrong with the token"]);
+                }
                 //save data
                 $registration = Waitings::find($request->idRegistration);
                 $registration->approve = 1;
-                $request->approve_by = $system->id;
+                $registration->approve_by = $system->id;
                 $registration->save();
                 //insert to Company table
                 $company = new Companies();
@@ -183,6 +189,35 @@ class SystemController extends Controller
                 return response()->json(['error' => true, 'message' => $e->getMessage()]);
             }
             return response()->json(['success' => true, 'message' => 'got admin accounts of the company', 'admins' => $admins]);
+        }
+    }
+
+    public function sendEmailAdminAccount(Request $request){
+        if(!$request->idAdmin){
+            return response()->json(['error' => true, 'message' => "idAdmin is required"]);
+        }else if(!$request->tokenData){
+            return response()->json(['error' => true, 'message' => "tokenData is required"]);
+        }else{
+            try{
+                $system = Systems::where('auth_token',$request->tokenData)->first();
+                $admin = Admins::find($request->idAdmin);
+                if(!$system){
+                    return response()->json(['error' => true, 'message' => "Something was wrong with the token"]);
+                }
+                if(!$admin){
+                    return response()->json(['error' => true, 'message' => "Something was wrong with the admin account"]);
+                }
+                $company = Companies::find($admin->company_id);
+                Mail::to($company->contact)->send(new SendAdminAccount($admin,$system,$company));
+                $email = new Emails();
+                $email->type = "Send Account";
+                $email->to = $company->contact;
+                $email->system_id = $system->id;
+                $email->save();
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
+            }
+            return response()->json(['success' => true, 'message' => 'sent account to company']);
         }
     }
 }

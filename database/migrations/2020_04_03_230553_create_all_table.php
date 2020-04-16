@@ -47,8 +47,8 @@ class CreateAllTable extends Migration
             $table->string('type');
             $table->string('to');
             $table->string('content')->nullable();
-            $table->date('time');
             $table->integer('system_id')->unsigned();
+            $table->integer('status')->default(1);
             $table->foreign('system_id')->references('id')->on('systems');
             $table->timestamps();
         });
@@ -63,6 +63,7 @@ class CreateAllTable extends Migration
             $table->integer('workforce');
             $table->string('ceo');
             $table->string('contact')->unique();
+            $table->string('avatar')->nullable();
             $table->integer('registration_id')->unsigned();
             $table->foreign('registration_id')->references('id')->on('waitings');
             $table->timestamps();
