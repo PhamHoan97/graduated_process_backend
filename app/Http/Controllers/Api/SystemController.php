@@ -287,4 +287,61 @@ class SystemController extends Controller
             return response()->json(['success' => true, 'message' => 'sent reject email']);
         }
     }
+
+    public function getListCompanies(Request $request){
+        try{
+            $companies = Companies::where('active',1)->get();
+        }catch (ModelNotFoundException $exception){
+            return response()->json(['error' => true, 'message' => $exception->getMessage()]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Get data successful",
+            'companies' => $companies
+        ]);
+    }
+
+    public function getformationOfCompany(Request $request){
+        if(!$request->idCompany){
+            return response()->json(['error' => true, 'message' => "idCompany is required"]);
+        }else{
+            $company = \App\Companies::find($request->idCompany);
+            return response()->json([
+                'success' => true,
+                'message' => "Get data successful",
+                'information' => $company
+            ]);
+        }
+    }
+
+    public function moreAdmin(Request $request){
+        if(!$request->username){
+            return response()->json(['error' => true, 'message' => "username is required"]);
+        }else if(!$request->password){
+            return response()->json(['error' => true, 'message' => "password is required"]);
+        }else if(!$request->idCompany){
+            return response()->json(['error' => true, 'message' => "idCompany is required"]);
+        }else{
+            try{
+                $checkUsername = Admins::where('username', $request->username)->first();
+                if($checkUsername){
+                    return response()->json(['error' => true, 'errorUsername' => 1, 'message' => 'username must be unique']);
+                }else{
+                    $company = Companies::find($request->idCompany);
+                    if(!$company){
+                        return response()->json(['error' => true, 'message' => "something was wrong with idCompany"]);
+                    }
+                    $admin  = new Admins();
+                    $admin->username = $request->username;
+                    $admin->password = Hash::make($request->password);
+                    $admin->initial_password = $request->password;
+                    $admin->company_id = $company->id;
+                    $admin->save();
+                }
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
+            }
+            return response()->json(['success' => true, 'message' => "Created account", 'admin' => $admin]);
+        }
+    }
 }

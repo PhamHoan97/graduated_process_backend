@@ -65,6 +65,7 @@ class CreateAllTable extends Migration
             $table->string('ceo');
             $table->string('contact')->unique();
             $table->string('avatar')->nullable();
+            $table->integer('active')->default(1);
             $table->integer('registration_id')->unsigned();
             $table->foreign('registration_id')->references('id')->on('waitings');
             $table->timestamps();

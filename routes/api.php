@@ -36,6 +36,10 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/company/{idCompany}/admin/accounts','Api\SystemController@getAdminAccountsOfCompany');
     Route::post('system/send/email/admin/account','Api\SystemController@sendEmailAdminAccount');
     Route::post('system/send/email/reject','Api\SystemController@sendRejectEmail');
+    Route::get('system/companies', 'Api\SystemController@getListCompanies');
+    Route::get('system/company/information/{idCompany}', 'Api\SystemController@getformationOfCompany');
+    Route::post('system/more/admin','Api\SystemController@moreAdmin');
+
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
