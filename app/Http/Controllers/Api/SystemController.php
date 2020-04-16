@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Admins;
 use App\Companies;
 use App\Emails;
+use App\Mail\Reject;
 use App\Mail\SendAdminAccount;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -169,6 +170,7 @@ class SystemController extends Controller
                     $admin  = new Admins();
                     $admin->username = $request->username;
                     $admin->password = Hash::make($request->password);
+                    $admin->initial_password = $request->password;
                     $admin->company_id = $company->id;
                     $admin->save();
                 }
@@ -208,16 +210,81 @@ class SystemController extends Controller
                     return response()->json(['error' => true, 'message' => "Something was wrong with the admin account"]);
                 }
                 $company = Companies::find($admin->company_id);
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => "Something was wrong with request data"]);
+            }
+
+            try{
                 Mail::to($company->contact)->send(new SendAdminAccount($admin,$system,$company));
+            }catch (\Exception $e){
                 $email = new Emails();
                 $email->type = "Send Account";
                 $email->to = $company->contact;
                 $email->system_id = $system->id;
+                $email->status = 2;
+                $email->response = $e->getMessage();
                 $email->save();
-            }catch (\Exception $e){
                 return response()->json(['error' => true, 'message' => $e->getMessage()]);
             }
+
+            $email = new Emails();
+            $email->type = "Send Account";
+            $email->to = $company->contact;
+            $email->system_id = $system->id;
+            $email->response = "success";
+            $email->save();
             return response()->json(['success' => true, 'message' => 'sent account to company']);
+        }
+    }
+
+    public function sendRejectEmail(Request $request){
+        if(!$request->idRegistration){
+            return response()->json(['error' => true, 'message' => "idRegistration is required"]);
+        }else if(!$request->tokenData){
+            return response()->json(['error' => true, 'message' => "tokenData is required"]);
+        }else if(!$request->reason){
+            return response()->json(['error' => true, 'message' => "reason is required"]);
+        }else{
+            try{
+                $registration = Waitings::find($request->idRegistration);
+                $system = Systems::where('auth_token',$request->tokenData)->first();
+                if(!$system){
+                    return response()->json(['error' => true, 'message' => "Something was wrong with the token"]);
+                }
+                if(!$registration){
+                    return response()->json(['error' => true, 'message' => "Something was wrong with the registration"]);
+                }
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => "Something was wrong with request data"]);
+            }
+
+            try{
+                Mail::to($registration->contact)->send(new Reject($request->reason,$registration,$system));
+            }catch (\Exception $e){
+                $email = new Emails();
+                $email->type = "Reject";
+                $email->to = $registration->contact;
+                $email->content = $request->reason;
+                $email->system_id = $system->id;
+                $email->status = 2;
+                $email->response = $e->getMessage();
+                $email->save();
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
+            }
+
+            $email = new Emails();
+            $email->type = "Reject";
+            $email->to = $registration->contact;
+            $email->content = $request->reason;
+            $email->system_id = $system->id;
+            $email->response = "success";
+            $email->save();
+
+            $registration->approve = 2;
+            $registration->approve_by = $system->id;
+            $registration->save();
+
+            return response()->json(['success' => true, 'message' => 'sent reject email']);
         }
     }
 }

@@ -49,6 +49,7 @@ class CreateAllTable extends Migration
             $table->string('content')->nullable();
             $table->integer('system_id')->unsigned();
             $table->integer('status')->default(1);
+            $table->text('response')->nullable();
             $table->foreign('system_id')->references('id')->on('systems');
             $table->timestamps();
         });
@@ -74,6 +75,7 @@ class CreateAllTable extends Migration
             $table->string('email')->nullable()->unique();
             $table->string('username')->unique();
             $table->string('password');
+            $table->string('initial_password');
             $table->longText('auth_token')->nullable();
             $table->string('provider')->nullable();
             $table->string('token')->nullable();
@@ -110,6 +112,7 @@ class CreateAllTable extends Migration
             $table->string('email')->nullable()->unique();
             $table->string('username')->unique();
             $table->string('password');
+            $table->string('initial_password');
             $table->longText('auth_token')->nullable();
             $table->string('provider')->nullable();
             $table->string('token');

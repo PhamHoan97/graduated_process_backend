@@ -2,33 +2,32 @@
 
 namespace App\Mail;
 
-use App\Admins;
-use App\Companies;
 use App\Systems;
+use App\Waitings;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class SendAdminAccount extends Mailable
+class Reject extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $admin;
+    public $reason;
 
     public $system;
 
-    public $company;
+    public $registration;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Admins $admin, Systems $system, Companies $company)
+    public function __construct($reason, Waitings $registration, Systems $system)
     {
-        $this->admin = $admin;
+        $this->reason = $reason;
         $this->system = $system;
-        $this->company = $company;
+        $this->registration = $registration;
     }
 
     /**
@@ -38,11 +37,10 @@ class SendAdminAccount extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.send_admin_account')->with([
-            'username' => $this->admin->username,
-            'password' => $this->admin->initial_password,
+        return $this->view('emails.reject')->with([
+            'reason' => $this->reason,
             'sender' => $this->system->username,
-            'recipient' => $this->company->ceo,
+            'recipient' => $this->registration->ceo,
         ]);
     }
 }
