@@ -91,22 +91,32 @@ class CreateAllTable extends Migration
             $table->text('description');
             $table->string('role')->nullable();
             $table->integer('company_id')->unsigned();
-            $table->foreign('company_id')->references('id')->on('companies');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create roles of employees table
+        Schema::create('roles', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('department_id')->unsigned();
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
             $table->timestamps();
         });
         //create employee of companies table
         Schema::create('employees', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->text('address');
-            $table->string('phone');
-            $table->string('birth');
+            $table->text('address')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('birth')->nullable();
             $table->string('avatar')->nullable();
-            $table->integer('role')->nullable();
+            $table->integer('role_id')->unsigned();
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->integer('department_id')->unsigned();
-            $table->foreign('department_id')->references('id')->on('departments');
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
             $table->timestamps();
         });
+
         //create account of employees table
         Schema::create('accounts', function (Blueprint $table) {
             $table->increments('id');
@@ -118,7 +128,7 @@ class CreateAllTable extends Migration
             $table->string('provider')->nullable();
             $table->string('token');
             $table->integer('employee_id')->unsigned();
-            $table->foreign('employee_id')->references('id')->on('employees');
+            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
         });
         //create process of employee table
@@ -132,7 +142,7 @@ class CreateAllTable extends Migration
             $table->longText('xml')->nullable();
             $table->dateTime('update_at');
             $table->integer('employee_id')->unsigned();
-            $table->foreign('employee_id')->references('id')->on('employees');
+            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
         });
         //create element of process table
@@ -141,7 +151,7 @@ class CreateAllTable extends Migration
             $table->string('element');
             $table->string('type');
             $table->integer('process_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes');
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
             $table->timestamps();
         });
         //create comment of element table
@@ -151,7 +161,7 @@ class CreateAllTable extends Migration
             $table->integer('employee_id')->unsigned();
             $table->longText('comment');
             $table->dateTime('update_at');
-            $table->foreign('element_id')->references('id')->on('elements');
+            $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -160,7 +170,7 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('content');
             $table->integer('process_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes');
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
             $table->timestamps();
         });
         //create isos table
@@ -176,7 +186,7 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->integer('process_id')->unsigned();
             $table->integer('iso_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes');
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
             $table->foreign('iso_id')->references('id')->on('isos');
             $table->timestamps();
         });
@@ -204,6 +214,8 @@ class CreateAllTable extends Migration
         Schema::dropIfExists('accounts');
 
         Schema::dropIfExists('employees');
+
+        Schema::dropIfExists('roles');
 
         Schema::dropIfExists('departments');
 
