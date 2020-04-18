@@ -66,7 +66,7 @@ class CompanyController extends Controller
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Password or email is invalid',
+                    'message' => 'Password or account is invalid',
                 ]);
             }
         } catch (JWTException $e) {
@@ -80,21 +80,36 @@ class CompanyController extends Controller
     }
 
     public function loginCompany(Request $request){
-        $admin = Admins::where('email', $request->email)->get()->first();
-        if ($admin && Hash::check($request->password, $admin->password))
+        $adminEmail = Admins::where('email', $request->account)->first();
+        $adminUserName = Admins::where('username', $request->account)->first();
+        if ($adminEmail && Hash::check($request->password, $adminEmail->password))
         {
-            $credentials = $request->only('email', 'password');
+            $credentials = ["email" => $request->account, "password" => $request->password];
             $token = self::getToken($credentials);
-            $admin->auth_token = $token;
-            $admin->save();
+            $adminEmail->auth_token = $token;
+            $adminEmail->save();
 
             $response = [
                 'success'=>true,
                 'message' => 'Login company successful',
-                'token'=> $token
+                'token'=> $token,
+                'id' => $adminEmail->id,
+                'isAdmin' => true
             ];
-        }
-        else{
+        } else if($adminUserName && Hash::check($request->password, $adminUserName->password)){
+            $credentials = ["username" => $request->account, "password" => $request->password];
+            $token = self::getToken($credentials);
+            $adminUserName->auth_token = $token;
+            $adminUserName->save();
+
+            $response = [
+                'success'=>true,
+                'message' => 'Login company successful',
+                'token'=> $token,
+                'id' => $adminUserName->id,
+                'isAdmin' => true
+            ];
+        }else{
             $response = ['error'=>true, 'message'=>'Record doesnt exists'];
         }
 

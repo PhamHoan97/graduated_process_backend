@@ -21,7 +21,7 @@ Route::post('login/system', 'Api\SystemController@loginSystem')->middleware('log
 
 Route::post('logout/system', 'Api\SystemController@logoutSystem');
 
-Route::post('login/company', 'Api\CompanyController@loginCompany')->middleware('login');
+Route::post('login/company', 'Api\CompanyController@loginCompany')->middleware('loginCompany');
 
 Route::post('logout/company', 'Api\CompanyController@logoutCompany');
 
