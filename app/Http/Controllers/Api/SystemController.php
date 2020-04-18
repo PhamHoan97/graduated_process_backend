@@ -10,7 +10,6 @@ use App\Mail\SendAdminAccount;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Systems;
 use App\Waitings;
@@ -30,6 +29,7 @@ class SystemController extends Controller
             'model' => Systems::class,
         ]]);
     }
+
     public function guard() {
         return Auth::guard();
     }
@@ -66,13 +66,15 @@ class SystemController extends Controller
                 $response = [
                     'success' => true,
                     'message' => 'Login system successful',
-                    'token' => $token
+                    'token' => $token,
+                    'id' => $system->id,
+                    'isSystem' => true
                 ];
             } else {
-                $response = ['error' => true, 'message' => 'Record doesnt exists'];
+                $response = ['error' => true, 'message' => 'Record doesn\'t exists'];
             }
         }catch (\Exception $e){
-            $response = ['error' => true, 'message' =>"123"];
+            $response = ['error' => true, 'message' => $e->getMessage()];
         }
 
         return response()->json($response, 201);
@@ -170,6 +172,7 @@ class SystemController extends Controller
                     }
                     $admin  = new Admins();
                     $admin->username = $request->username;
+                    $admin->email = $company->contact;
                     $admin->password = Hash::make($request->password);
                     $admin->initial_password = $request->password;
                     $admin->company_id = $company->id;
@@ -334,6 +337,7 @@ class SystemController extends Controller
                     }
                     $admin  = new Admins();
                     $admin->username = $request->username;
+                    $admin->email = $company->contact;
                     $admin->password = Hash::make($request->password);
                     $admin->initial_password = $request->password;
                     $admin->company_id = $company->id;
