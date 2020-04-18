@@ -32,10 +32,10 @@ class OrganizationController extends Controller
         }
     }
 
-    public function getDetailCompany(Request $request,$idDepartment){
+    public function getDetailCompany(Request $request,$idCompany){
         try {
-            $department = DB::table('departments')->where('id',$idDepartment)->first();
-            return response()->json(['message'=>'get detail department','department'=>$department],200);
+            $company = DB::table('companies')->where('id',$idCompany)->first();
+            return response()->json(['message'=>'get detail department','company'=>$company],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -155,6 +155,69 @@ class OrganizationController extends Controller
 
     // Get JSON which support to display chart organization
     public function getJsonOrganization(Request $request){
-        // 3 cap employee, department, company
+        try {
+            $idCompany = $request->idCompany;
+            $dataOrganization = [];
+            $company = DB::table('companies')->where('id',$idCompany)->first();
+            $organizationCompany =  array(
+                "id"=>1,
+                "tags"=>array(
+                    'Company'
+                ),
+                "name"=>$company->name
+            );
+            array_push($dataOrganization, $organizationCompany);
+            $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments()->get(['name','id']);
+            $id = 2;
+            if($departments !==null){
+                foreach($departments as $keyDepartment=>$department) {
+                    $organizationDepartment =  array(
+                        "id"=>$id,
+                        "pid"=>1,
+                        "tags"=>array(
+                            'Department'
+                        ),
+                        "name"=>$department->name
+                    );
+                    array_push($dataOrganization, $organizationDepartment);
+                    $idDepartment = $id;
+                    $id++;
+                    $roles = \App\Departments::where('id', '=', $department->id)->first()->roles()->get(['name','id']);
+                    if($roles !==null){
+                        foreach ($roles as $keyRole =>$role){
+                            $organizationRole = array(
+                                "id"=>$id,
+                                "pid"=>$idDepartment,
+                                "tags"=>array(
+                                    'Role'
+                                ),
+                                "name"=>$role->name
+                            );
+                            array_push($dataOrganization, $organizationRole);
+                            $idRole = $id;
+                            $id++;
+                            $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','id']);
+                            if($employees !==null){
+                                foreach ($employees as $keyEmployee => $employee){
+                                    $organizationEmployee = array(
+                                        "id"=>$id,
+                                        "pid"=>$idRole,
+                                        "tags"=>array(
+                                            'Staff'
+                                        ),
+                                        "name"=>$employee->name
+                                    );
+                                    array_push($dataOrganization, $organizationEmployee);
+                                    $id++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return response()->json(['message'=>'Get success all data json organization','dataOrganization'=>$dataOrganization],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
     }
 }

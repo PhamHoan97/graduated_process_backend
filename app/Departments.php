@@ -17,4 +17,8 @@ class Departments extends Model
     public function employees(){
         return $this->hasMany('App\Employees', 'department_id');
     }
+
+    public function roles(){
+        return $this->hasMany('App\Roles', 'department_id');
+    }
 }

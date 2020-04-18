@@ -27,6 +27,7 @@ Route::post('logout/company', 'Api\CompanyController@logoutCompany');
 
 Route::post('company/register', 'Api\CompanyController@register')->middleware('registerCompany');
 
+Route::post('system/organization/chart','Api\System\OrganizationController@getJsonOrganization');
 
 Route::group(['middleware' => 'jwt-auth-system'], function () {
     // all routes of system role to protected resources are registered here
@@ -50,7 +51,7 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     // add new company
     Route::post('system/organization/department/new','Api\System\OrganizationController@addDepartment');
     // get detail information company
-    Route::get('system/organization/department/{idDepartment}','Api\System\OrganizationController@getDetailCompany');
+    Route::get('system/organization/company/{idCompany}','Api\System\OrganizationController@getDetailCompany');
     // delete department
     Route::post('system/organization/department/delete','Api\System\OrganizationController@deleteDepartment');
     // get all department in a company
