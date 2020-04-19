@@ -17,4 +17,5 @@ class Roles extends Model
     public function employees(){
         return $this->hasMany('App\Employees', 'role_id');
     }
+
 }

@@ -32,10 +32,10 @@ class OrganizationController extends Controller
         }
     }
 
-    public function getDetailCompany(Request $request,$idCompany){
+    public function getDetailDepartment(Request $request,$idDepartment){
         try {
-            $company = DB::table('companies')->where('id',$idCompany)->first();
-            return response()->json(['message'=>'get detail department','company'=>$company],200);
+            $department = DB::table('departments')->where('id',$idDepartment)->first();
+            return response()->json(['message'=>'get detail department','department'=>$department],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -94,10 +94,12 @@ class OrganizationController extends Controller
             $employees = DB::table('companies')
                 ->join('departments', 'companies.id', '=', 'departments.company_id')
                 ->join('employees', 'departments.id', '=', 'employees.department_id')
+                ->join('roles', 'employees.role_id', '=', 'roles.id')
                 ->where('companies.id', $idCompany)
                 ->select('employees.id',
-                    'employees.name as employee_name',
-                    'employees.address as employee_address',
+                    'employees.name as name',
+                    'employees.phone as phone',
+                    'roles.name as role',
                     'departments.id as id_department',
                     'departments.name as department_name')
                 ->get();
@@ -109,13 +111,13 @@ class OrganizationController extends Controller
 
     // New item employee
     public function addEmployee(Request $request){
-        $name = $request->newNameUser;
-        $phone = $request->newPhoneUser;
-        $role = $request->newRoleUser;
-        $idChooseDepartment = $request->idChooseDepartment;
+        $name = $request->newNameEmployee;
+        $phone = $request->newPhoneEmployee;
+        $idChooseRole = $request->newRoleEmployee;
+        $idChooseDepartment = $request->newDepartmentEmployee;
         try {
             DB::table('employees')->insert(
-                ['name' => $name, 'phone' => $phone,'role'=>$role,'department_id' => $idChooseDepartment]
+                ['name' => $name, 'phone' => $phone,'role_id'=>$idChooseRole,'department_id' => $idChooseDepartment]
             );
             return response()->json(['message'=>'Add success new employee'],200);
         }catch(\Exception $e) {
@@ -125,10 +127,10 @@ class OrganizationController extends Controller
 
     // delete item employee
     public function deleteEmployee(Request $request){
-        $idDeleteUser = $request->idDeleteUser;
+        $idDeleteEmployee= $request->idDeleteEmployee;
         try {
             DB::table('employees')
-                ->where('id', $idDeleteUser)
+                ->where('id', $idDeleteEmployee)
                 ->delete();
             return response()->json(['message'=>'delete success user'],200);
         }catch(\Exception $e) {
@@ -138,19 +140,102 @@ class OrganizationController extends Controller
 
     // update item employee
     public function updateEmployee(Request $request){
-        $newName = $request->editNameUser;
-        $newPhone = $request->editPhoneUser;
-        $newRole = $request->editRoleUser;
-        $idChooseUser = $request->idChooseUser;
+        $newName = $request->editNameEmployee;
+        $newPhone = $request->editPhoneEmployee;
+        $idChooseRole= $request->idChooseRole;
+        $idChooseEmployee = $request->idChooseEmployee;
         $idChooseDepartment = $request->idChooseDepartment;
         try {
             DB::table('employees')
-                ->Where('id', '=', $idChooseUser)
-                ->update(['name' => $newName,'phone'=>$newPhone,'role'=>$newRole,'department_id'=>$idChooseDepartment]);
+                ->Where('id', '=', $idChooseEmployee)
+                ->update(['name' => $newName,'phone'=>$newPhone,'role_id'=>$idChooseRole,'department_id'=>$idChooseDepartment]);
             return response()->json(['message'=>'update success user'],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
+    }
+
+    public function getDetailEmployee(Request $request,$idEmployee){
+        try {
+            $employee = DB::table('employees')->where('id',$idEmployee)->first();
+            return response()->json(['message'=>'get detail employee','employee'=>$employee],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+
+    }
+
+    // New item role
+    public function addRole(Request $request){
+        $name = $request->newNameRole;
+        $idChooseDepartment = $request->newDepartmentRole;
+        try {
+            DB::table('roles')->insert(
+                ['name' => $name,'department_id' => $idChooseDepartment]
+            );
+            return response()->json(['message'=>'Add success new role'],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // delete item role
+    public function deleteRole(Request $request){
+        $idDeleteRole= $request->idDeleteRole;
+        try {
+            DB::table('roles')
+                ->where('id', $idDeleteRole)
+                ->delete();
+            return response()->json(['message'=>'delete success roles'],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // update item role
+    public function updateRole(Request $request){
+        $newName = $request->editNameRole;
+        $idChooseRole = $request->idChooseRole;
+        $idChooseDepartment = $request->idChooseDepartment;
+        try {
+            DB::table('roles')
+                ->Where('id', '=', $idChooseRole)
+                ->update(['name' => $newName,'department_id'=>$idChooseDepartment]);
+            return response()->json(['message'=>'update success role'],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // get detail information role
+    public function getDetailRole(Request $request,$idRole){
+        try {
+            $role = DB::table('roles')->where('id',$idRole)->first();
+            return response()->json(['message'=>'get detail employee','role'=>$role],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+
+    }
+
+    // get all  role of company
+    public function getAllRoles(Request $request,$idCompany){
+        try {
+            $roles = DB::table('roles')
+                ->join('departments', 'departments.id', '=', 'roles.department_id')
+                ->join('companies', 'companies.id', '=', 'departments.company_id')
+                ->where('companies.id',$idCompany)
+                ->select(
+                    'roles.id as id',
+                    'roles.name as name',
+                    'companies.name as company_name',
+                    'departments.name as department_name')
+                ->get();
+            return response()->json(['message'=>'get detail employee','roles'=>$roles],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+
     }
 
     // Get JSON which support to display chart organization
@@ -220,4 +305,16 @@ class OrganizationController extends Controller
             return response()->json(["error" => $e->getMessage()],400);
         }
     }
+
+    // get all role in a department
+    public function getRolesDepartment(Request $request,$idDepartment){
+        try {
+            $roles = \App\Departments::where('id', '=', $idDepartment)->first()->roles;
+            return response()->json(['message'=>'Get success all roles in department','roleDepartment'=>$roles],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+
 }

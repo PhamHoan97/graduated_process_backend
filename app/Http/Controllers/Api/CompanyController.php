@@ -94,6 +94,7 @@ class CompanyController extends Controller
                 'message' => 'Login company successful',
                 'token'=> $token,
                 'id' => $adminEmail->id,
+                'company_id' => $adminEmail->company_id,
                 'isAdmin' => true
             ];
         } else if($adminUserName && Hash::check($request->password, $adminUserName->password)){
@@ -107,6 +108,7 @@ class CompanyController extends Controller
                 'message' => 'Login company successful',
                 'token'=> $token,
                 'id' => $adminUserName->id,
+                'company_id' => $adminUserName->company_id,
                 'isAdmin' => true
             ];
         }else{
