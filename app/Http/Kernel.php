@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'registerCompany' => \App\Http\Middleware\RegisterCompany::class,
         'jwt-auth-company' => \App\Http\Middleware\CompanyJwtMiddleware::class,
         'loginCompany' => \App\Http\Middleware\LoginCompany::class,
+        'jwt-auth-account' => \App\Http\Middleware\AccountJwtMiddleware::class,
     ];
 
     /**

@@ -27,6 +27,10 @@ Route::post('logout/company', 'Api\CompanyController@logoutCompany');
 
 Route::post('company/register', 'Api\CompanyController@register')->middleware('registerCompany');
 
+Route::post('login/account', 'Api\AccountController@loginAccount')->middleware('loginCompany');
+
+Route::post('logout/account', 'Api\AccountController@logoutAccount');
+
 
 // ROUTE DASHBOARD
 
@@ -57,7 +61,9 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/companies', 'Api\SystemController@getListCompanies');
     Route::get('system/company/information/{idCompany}', 'Api\SystemController@getformationOfCompany');
     Route::post('system/more/admin','Api\SystemController@moreAdmin');
-
+    Route::get('system/email', 'Api\SystemController@getSentEmailInSystem');
+    Route::get('system/email/information/{idEmail}', 'Api\SystemController@getEmailInformation');
+    Route::post('system/email/resend','Api\SystemController@resendEmail');
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
@@ -104,6 +110,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('system/organization/role/detail/{idRole}','Api\System\OrganizationController@getDetailRole');
     // get all roles in system
     Route::get('system/organization/role/{idCompany}','Api\System\OrganizationController@getAllRoles');
+});
+
+Route::group(['middleware' => 'jwt-auth-account'], function () {
+
 });
 
 

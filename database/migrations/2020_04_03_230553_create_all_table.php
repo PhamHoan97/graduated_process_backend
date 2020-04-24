@@ -46,7 +46,7 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('type');
             $table->string('to');
-            $table->string('content')->nullable();
+            $table->longText('content')->nullable();
             $table->integer('system_id')->unsigned();
             $table->integer('status')->default(1);
             $table->text('response')->nullable();

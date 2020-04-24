@@ -118,11 +118,6 @@ class CompanyController extends Controller
         return response()->json($response, 201);
     }
 
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function logoutCompany()
     {
         $this->guard()->logout();
