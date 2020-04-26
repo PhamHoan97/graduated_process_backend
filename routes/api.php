@@ -64,6 +64,10 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/email', 'Api\SystemController@getSentEmailInSystem');
     Route::get('system/email/information/{idEmail}', 'Api\SystemController@getEmailInformation');
     Route::post('system/email/resend','Api\SystemController@resendEmail');
+    Route::post('system/iso/create','Api\IsoController@createIso')->middleware('createIso');
+    Route::get('system/iso','Api\IsoController@getIsos');
+    Route::get('system/iso/download/{name}','Api\IsoController@downloadDocumentIso');
+    Route::post('system/iso/delete','Api\IsoController@deleteIso');
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {

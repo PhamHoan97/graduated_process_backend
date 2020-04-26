@@ -25,13 +25,13 @@ class CompanyJwtMiddleware
             $admin = JWTAuth::parseToken()->authenticate();
         } catch (\Exception $e) {
             if ($e instanceof TokenInvalidException) {
-                return response()->json(['error'=>'Token is Invalid']);
+                return response()->json(['error' => 1, 'message'=>'Token is Invalid']);
             } else if ($e instanceof TokenExpiredException){
-                return response()->json(['error'=>'Token is Expired']);
+                return response()->json(['error' => 1, 'message'=>'Token is Expired']);
             }  else if ($e instanceof UserNotDefinedException ){
-                return response()->json(['error'=>'Authorization is required']);
+                return response()->json(['error' => 1, 'message'=>'Authorization is required']);
             }  else {
-                return response()->json(['error'=>'Authorization Token not found']);
+                return response()->json(['error' => 1, 'message'=>'Authorization Token not found']);
             }
         }
         return $next($request);

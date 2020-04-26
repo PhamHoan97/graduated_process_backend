@@ -19,10 +19,10 @@ class LoginCompany
         $password = $request->password;
 
         if(!isset($account)){
-            return response()->json(['error' => "email or username is required"], 400);
+            return response()->json(['error' => 1, 'message' => "email or username is required"], 400);
         }
         if(!isset($password)){
-            return response()->json(['error' => "password is required"], 400);
+            return response()->json(['error' => 1, 'message' => "password is required"], 400);
         }
 
         return $next($request);

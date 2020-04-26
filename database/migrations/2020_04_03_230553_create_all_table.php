@@ -192,7 +192,20 @@ class CreateAllTable extends Migration
         Schema::create('isos', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('year');
             $table->longText('content');
+            $table->string('name_download')->nullable();
+            $table->longText('download')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('iso_processes', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('content');
+            $table->longText('process');
+            $table->integer('iso_id')->unsigned();
+            $table->foreign('iso_id')->references('id')->on('isos');
             $table->timestamps();
         });
 
@@ -200,9 +213,9 @@ class CreateAllTable extends Migration
         Schema::create('rules', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('process_id')->unsigned();
-            $table->integer('iso_id')->unsigned();
+            $table->integer('iso_process_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
-            $table->foreign('iso_id')->references('id')->on('isos');
+            $table->foreign('iso_process_id')->references('id')->on('iso_processes');
             $table->timestamps();
         });
     }
@@ -215,6 +228,8 @@ class CreateAllTable extends Migration
     public function down()
     {
         Schema::dropIfExists('rules');
+
+        Schema::dropIfExists('iso_processes');
 
         Schema::dropIfExists('isos');
 
