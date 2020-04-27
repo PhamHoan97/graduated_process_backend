@@ -114,6 +114,8 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('system/organization/role/detail/{idRole}','Api\System\OrganizationController@getDetailRole');
     // get all roles in system
     Route::get('system/organization/role/{idCompany}','Api\System\OrganizationController@getAllRoles');
+
+
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

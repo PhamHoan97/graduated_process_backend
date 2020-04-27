@@ -96,10 +96,11 @@ class OrganizationController extends Controller
                 ->join('employees', 'departments.id', '=', 'employees.department_id')
                 ->join('roles', 'employees.role_id', '=', 'roles.id')
                 ->where('companies.id', $idCompany)
-                ->select('employees.id',
+                ->select('employees.id as id_employee',
                     'employees.name as name',
                     'employees.phone as phone',
                     'roles.name as role',
+                    'roles.id as id_role',
                     'departments.id as id_department',
                     'departments.name as department_name')
                 ->get();

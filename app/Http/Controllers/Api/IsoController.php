@@ -58,10 +58,12 @@ class IsoController extends Controller
             if(!is_file($url)){
                 return response()->json(['error' => 1, 'message' => "file does not exist"], 400);
             }
+            $headers = ['Content-Type: application/octet-stream'];
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
         }
-        return response()->download($url,$name);
+        ob_clean();
+        return response()->download($url,$name,$headers);
     }
 
     public function deleteIso(Request $request){

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Admins;
+use App\Departments;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -113,6 +114,7 @@ class CompanyController extends Controller
             ];
         }else{
             $response = ['error'=>true, 'message'=>'Record doesnt exists'];
+            return response()->json($response, 400);
         }
 
         return response()->json($response, 201);
@@ -123,5 +125,30 @@ class CompanyController extends Controller
         $this->guard()->logout();
 
         return response()->json(['success'=>true,'message' => 'Logged out']);
+    }
+
+    public function getAllDepartmentsOfCompany(Request $request){
+        $idCompany = $request->idCompany;
+        if(!isset($idCompany)){
+            return response()->json(['error' => 1, 'message' => "idCompany is required"], 400);
+        }
+        try{
+            $departments = Departments::where('company_id', $idCompany)->get();
+        }catch (\Exception $e){
+            return response()->json(['error'=>true, 'message'=> $e->getMessage()], 400);
+        }
+
+        return response()->json(['success'=>true,'message' => 'Got departments', 'department' => $departments]);
+    }
+    public function getAllEmployeesOfCompany(Request $request){
+        $idCompany = $request->idCompany;
+        if(!isset($idCompany)){
+            return response()->json(['error' => 1, 'message' => "idCompany is required"], 400);
+        }
+        try{
+
+        }catch (\Exception $e){
+            return response()->json(['error'=>true, 'message'=> $e->getMessage()], 400);
+        }
     }
 }
