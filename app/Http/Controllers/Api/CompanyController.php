@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Admins;
-use App\Departments;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -127,28 +126,28 @@ class CompanyController extends Controller
         return response()->json(['success'=>true,'message' => 'Logged out']);
     }
 
-    public function getAllDepartmentsOfCompany(Request $request){
-        $idCompany = $request->idCompany;
-        if(!isset($idCompany)){
-            return response()->json(['error' => 1, 'message' => "idCompany is required"], 400);
+    public function getAllEmployeeDepartment(Request $request){
+        $idDepartment = $request->idDepartment;
+        if(!isset($idDepartment)){
+            return response()->json(['error' => 1, 'message' => "idDepartment is required"], 400);
         }
         try{
-            $departments = Departments::where('company_id', $idCompany)->get();
+            $employees = DB::table('departments')
+                ->join('employees', 'departments.id', '=', 'employees.department_id')
+                ->join('roles', 'employees.role_id', '=', 'roles.id')
+                ->where('departments.id', $idDepartment)
+                ->select('employees.id as id_employee',
+                    'employees.name as name',
+                    'employees.phone as phone',
+                    'employees.address as address',
+                    'roles.name as role',
+                    'roles.id as id_role',
+                    'departments.id as id_department',
+                    'departments.name as department_name')
+                ->get();
         }catch (\Exception $e){
             return response()->json(['error'=>true, 'message'=> $e->getMessage()], 400);
         }
-
-        return response()->json(['success'=>true,'message' => 'Got departments', 'department' => $departments]);
-    }
-    public function getAllEmployeesOfCompany(Request $request){
-        $idCompany = $request->idCompany;
-        if(!isset($idCompany)){
-            return response()->json(['error' => 1, 'message' => "idCompany is required"], 400);
-        }
-        try{
-
-        }catch (\Exception $e){
-            return response()->json(['error'=>true, 'message'=> $e->getMessage()], 400);
-        }
+        return response()->json(['success'=>true, 'message'=> "got employees from department", "employees" => $employees]);
     }
 }

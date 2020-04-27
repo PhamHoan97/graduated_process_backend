@@ -99,6 +99,7 @@ class OrganizationController extends Controller
                 ->select('employees.id as id_employee',
                     'employees.name as name',
                     'employees.phone as phone',
+                    'employees.address as address',
                     'roles.name as role',
                     'roles.id as id_role',
                     'departments.id as id_department',
