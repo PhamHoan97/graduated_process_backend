@@ -216,7 +216,7 @@ class Payment extends Base
     }
 
     /**
-     * International Bank Account Number (IBAN)
+     * International Bank Accounts Number (IBAN)
      *
      * @link http://en.wikipedia.org/wiki/International_Bank_Account_Number
      * @param  string  $countryCode ISO 3166-1 alpha-2 country code

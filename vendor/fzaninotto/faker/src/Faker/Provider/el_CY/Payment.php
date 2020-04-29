@@ -5,7 +5,7 @@ namespace Faker\Provider\el_CY;
 class Payment extends \Faker\Provider\Payment
 {
     /**
-     * International Bank Account Number (IBAN).
+     * International Bank Accounts Number (IBAN).
      *
      * @link http://en.wikipedia.org/wiki/International_Bank_Account_Number
      *

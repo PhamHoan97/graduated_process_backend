@@ -98,6 +98,7 @@ class OrganizationController extends Controller
                 ->where('companies.id', $idCompany)
                 ->select('employees.id',
                     'employees.name as name',
+                    'employees.email as email',
                     'employees.phone as phone',
                     'roles.name as role',
                     'departments.id as id_department',
@@ -109,15 +110,30 @@ class OrganizationController extends Controller
         }
     }
 
+    public function checkAddInputEmail($email){
+        $allEmails =  DB::table('employees')->get('email');
+        foreach ($allEmails as $value){
+            if($value->email == $email){
+                return true;
+            }
+        }
+        return false;
+    }
+
     // New item employee
     public function addEmployee(Request $request){
         $name = $request->newNameEmployee;
+        $email = $request->newEmailEmployee;
+        // check email unique
         $phone = $request->newPhoneEmployee;
         $idChooseRole = $request->newRoleEmployee;
         $idChooseDepartment = $request->newDepartmentEmployee;
         try {
+            if($this->checkAddInputEmail($email)){
+                return response()->json(['error'=>'Add fail new employee'],200);
+            }
             DB::table('employees')->insert(
-                ['name' => $name, 'phone' => $phone,'role_id'=>$idChooseRole,'department_id' => $idChooseDepartment]
+                ['name' => $name, 'email' => $email,'phone' => $phone,'role_id'=>$idChooseRole,'department_id' => $idChooseDepartment]
             );
             return response()->json(['message'=>'Add success new employee'],200);
         }catch(\Exception $e) {
@@ -138,18 +154,32 @@ class OrganizationController extends Controller
         }
     }
 
+    public function checkEditInputEmail($email,$idEmployee){
+        $allEmailCheck =  DB::table('employees')->where('id','!=',$idEmployee)->get('email');
+        foreach ($allEmailCheck as $value){
+            if($value->email == $email){
+                return true;
+            }
+        }
+        return false;
+    }
     // update item employee
     public function updateEmployee(Request $request){
         $newName = $request->editNameEmployee;
         $newPhone = $request->editPhoneEmployee;
+        $newEmail = $request->editEmailEmployee;
         $idChooseRole= $request->idChooseRole;
         $idChooseEmployee = $request->idChooseEmployee;
         $idChooseDepartment = $request->idChooseDepartment;
         try {
-            DB::table('employees')
-                ->Where('id', '=', $idChooseEmployee)
-                ->update(['name' => $newName,'phone'=>$newPhone,'role_id'=>$idChooseRole,'department_id'=>$idChooseDepartment]);
-            return response()->json(['message'=>'update success user'],200);
+            if($this->checkEditInputEmail($newEmail,$idChooseEmployee)){
+                return response()->json(['error'=>'update fail user'],200);
+            }else{
+                DB::table('employees')
+                    ->Where('id', '=', $idChooseEmployee)
+                    ->update(['name' => $newName,'email'=>$newEmail,'phone'=>$newPhone,'role_id'=>$idChooseRole,'department_id'=>$idChooseDepartment]);
+                return response()->json(['message'=>'update success user'],200);
+            }
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -157,7 +187,20 @@ class OrganizationController extends Controller
 
     public function getDetailEmployee(Request $request,$idEmployee){
         try {
-            $employee = DB::table('employees')->where('id',$idEmployee)->first();
+            $employee = DB::table('companies')
+                ->join('departments', 'companies.id', '=', 'departments.company_id')
+                ->join('employees', 'departments.id', '=', 'employees.department_id')
+                ->join('roles', 'employees.role_id', '=', 'roles.id')
+                ->where('employees.id', $idEmployee)
+                ->select('employees.id as id',
+                    'employees.name as name',
+                    'employees.email as email',
+                    'employees.phone as phone',
+                    'employees.role_id as role_id',
+                    'employees.department_id as department_id',
+                    'roles.name as role_name',
+                    'departments.name as department_name')
+                ->first();
             return response()->json(['message'=>'get detail employee','employee'=>$employee],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
@@ -168,10 +211,11 @@ class OrganizationController extends Controller
     // New item role
     public function addRole(Request $request){
         $name = $request->newNameRole;
+        $isProcess = $request->newIsProcessRole;
         $idChooseDepartment = $request->newDepartmentRole;
         try {
             DB::table('roles')->insert(
-                ['name' => $name,'department_id' => $idChooseDepartment]
+                ['name' => $name,'is_process' => $isProcess,'department_id' => $idChooseDepartment]
             );
             return response()->json(['message'=>'Add success new role'],200);
         }catch(\Exception $e) {
@@ -195,12 +239,17 @@ class OrganizationController extends Controller
     // update item role
     public function updateRole(Request $request){
         $newName = $request->editNameRole;
+        $newIsProcess = $request->editIsProcessRole;
         $idChooseRole = $request->idChooseRole;
         $idChooseDepartment = $request->idChooseDepartment;
         try {
             DB::table('roles')
                 ->Where('id', '=', $idChooseRole)
-                ->update(['name' => $newName,'department_id'=>$idChooseDepartment]);
+                ->update([
+                    'name' => $newName,
+                    'is_process' => $newIsProcess,
+                    'department_id'=>$idChooseDepartment
+                ]);
             return response()->json(['message'=>'update success role'],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
