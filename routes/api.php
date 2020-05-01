@@ -118,6 +118,12 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
     // get all employee in department
     Route::get('company/department/{idDepartment}/employee','Api\CompanyController@getAllEmployeeDepartment');
+    //save process
+    Route::post('company/process/new','Api\CompanyController@newProcessCompany')->middleware('create-or-edit-process');
+    //get all information of process
+    Route::get('company/process/information/{idProcess}','Api\CompanyController@getAllInformationOfProcess');
+    //edit process
+    Route::post('company/process/edit','Api\CompanyController@editProcessCompany')->middleware('create-or-edit-process');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

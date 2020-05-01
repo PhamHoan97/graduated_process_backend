@@ -142,8 +142,16 @@ class CreateAllTable extends Migration
             $table->longText('xml')->nullable();
             $table->dateTime('update_at');
             $table->integer('admin_id')->unsigned();
-            $table->integer('employee_id')->unsigned();
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
+            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create link table between process and employee
+        Schema::create('processes_employees', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('process_id')->unsigned();
+            $table->integer('employee_id')->unsigned();
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
         });
@@ -163,7 +171,7 @@ class CreateAllTable extends Migration
             $table->integer('admin_id')->unsigned()->nullable();
             $table->integer('employee_id')->unsigned()->nullable();
             $table->longText('comment');
-            $table->dateTime('update_at');
+            $table->string('update_at');
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
@@ -173,9 +181,7 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->integer('element_id')->unsigned();
             $table->integer('admin_id')->unsigned()->nullable();
-            $table->integer('employee_id')->unsigned()->nullable();
             $table->longText('content');
-            $table->dateTime('update_at');
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
@@ -240,6 +246,8 @@ class CreateAllTable extends Migration
         Schema::dropIfExists('element_notes');
 
         Schema::dropIfExists('elements');
+
+        Schema::dropIfExists('processes_employees');
 
         Schema::dropIfExists('processes');
 
