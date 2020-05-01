@@ -227,7 +227,7 @@ class SystemController extends Controller
                 Mail::to($company->contact)->send(new SendAdminAccount($admin,$system,$company));
             }catch (\Exception $e){
                 $email = new Emails();
-                $email->type = "Send Account";
+                $email->type = "Send Accounts";
                 $email->to = $company->contact;
                 $email->system_id = $system->id;
                 $email->status = 2;
@@ -242,7 +242,7 @@ class SystemController extends Controller
             }
 
             $email = new Emails();
-            $email->type = "Send Account";
+            $email->type = "Send Accounts";
             $email->to = $company->contact;
             $email->system_id = $system->id;
             $email->response = "success";

@@ -70,7 +70,7 @@
                                         We have highly appreciated the attention for considering BMDH like a service to manage process of your company and we do our best to meet your tool expectations. BMDH will help to increase the productivity of your staffs and manage processes effectively.
                                 </tr><tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
                                     <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                        The following is the account for login as administration role:
+                                        The following is the account for login as user role:
                                     </td>
                                     <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 0;" valign="top">
 

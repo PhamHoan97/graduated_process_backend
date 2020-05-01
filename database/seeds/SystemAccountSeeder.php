@@ -16,7 +16,7 @@ class SystemAccountSeeder extends Seeder
         DB::table('systems')->insert(
             [
                 ['username'=>'Tran Viet Huy', 'email'=>'huytran161297@gmail.com', 'password'=>Hash::make('jessepinkman1'), 'role'=>1],
-                ['username'=>'Pham Hoan', 'email'=>'hoankhac123@gmail.com', 'password'=>Hash::make('hoankhac123'), 'role'=>1]
+                ['username'=>'Pham Hoan', 'email'=>'nhatvan023@gmail.com', 'password'=>Hash::make('phamhoan123'), 'role'=>1]
             ]
         );
     }

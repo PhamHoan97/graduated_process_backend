@@ -84,6 +84,19 @@ class CreateAllTable extends Migration
             $table->foreign('company_id')->references('id')->on('companies');
             $table->timestamps();
         });
+
+        //create email history table
+        Schema::create('user_emails', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('type');
+            $table->string('to');
+            $table->string('content')->nullable();
+            $table->integer('admin_id')->unsigned();
+            $table->integer('status')->default(1);
+            $table->text('response')->nullable();
+            $table->foreign('admin_id')->references('id')->on('admins');
+            $table->timestamps();
+        });
         //create department of companies table
         Schema::create('departments', function (Blueprint $table) {
             $table->increments('id');
@@ -98,6 +111,7 @@ class CreateAllTable extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->boolean('is_process');
             $table->integer('department_id')->unsigned();
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
             $table->timestamps();
@@ -106,6 +120,7 @@ class CreateAllTable extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('email')->unique();
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('birth')->nullable();
@@ -120,13 +135,12 @@ class CreateAllTable extends Migration
         //create account of employees table
         Schema::create('accounts', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email')->nullable()->unique();
             $table->string('username')->unique();
             $table->string('password');
-            $table->string('initial_password');
+            $table->string('initial_password')->nullable();
             $table->longText('auth_token')->nullable();
             $table->string('provider')->nullable();
-            $table->string('token');
+            $table->string('token')->nullable();
             $table->integer('employee_id')->unsigned();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
@@ -258,6 +272,8 @@ class CreateAllTable extends Migration
         Schema::dropIfExists('roles');
 
         Schema::dropIfExists('departments');
+
+        Schema::dropIfExists('user_emails');
 
         Schema::dropIfExists('admins');
 

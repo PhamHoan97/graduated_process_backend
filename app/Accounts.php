@@ -37,4 +37,5 @@ class Accounts extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
 }

@@ -127,7 +127,18 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {
-
+    // ACCOUNT EMPLOYEE
+    // get all employee no account in company
+    Route::get('system/account/employee/{idCompany}','Api\System\AccountEmployeeController@getAllEmployee');
+    Route::post('system/create/employee/account','Api\System\AccountEmployeeController@createAccountEmployee');
+    // get all account in a company
+    Route::get('system/account/list/{idCompany}','Api\System\AccountEmployeeController@getAllInformationAccount');
+    Route::post('system/account/delete','Api\System\AccountEmployeeController@deleteAccountEmployee');
+    Route::post('system/account/employee/send','Api\System\AccountEmployeeController@sendEmailAccountEmployee');
+    // MANAGE DETAIL COMPANY
+    Route::post('system/company/information','Api\System\ManageCompanyController@getDetailCompany');
+    Route::post('system/company/information/update','Api\System\ManageCompanyController@updateInformation');
 });
+
 
 
