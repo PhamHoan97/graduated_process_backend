@@ -27,9 +27,9 @@ Route::post('logout/company', 'Api\CompanyController@logoutCompany');
 
 Route::post('company/register', 'Api\CompanyController@register')->middleware('registerCompany');
 
-Route::post('login/account', 'Api\AccountController@loginAccount')->middleware('loginCompany');
+Route::post('login/employee', 'Api\AccountController@loginAccount')->middleware('loginCompany');
 
-Route::post('logout/account', 'Api\AccountController@logoutAccount');
+Route::post('logout/employee', 'Api\AccountController@logoutAccount');
 
 
 // ROUTE DASHBOARD
@@ -114,6 +114,16 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('system/organization/role/detail/{idRole}','Api\System\OrganizationController@getDetailRole');
     // get all roles in system
     Route::get('system/organization/role/{idCompany}','Api\System\OrganizationController@getAllRoles');
+    // get all employee no account in company
+    Route::get('system/account/employee/{idCompany}','Api\System\AccountEmployeeController@getAllEmployee');
+    Route::post('system/create/employee/account','Api\System\AccountEmployeeController@createAccountEmployee');
+    // get all account in a company
+    Route::get('system/account/list/{idCompany}','Api\System\AccountEmployeeController@getAllInformationAccount');
+    Route::post('system/account/delete','Api\System\AccountEmployeeController@deleteAccountEmployee');
+    Route::post('system/account/employee/send','Api\System\AccountEmployeeController@sendEmailAccountEmployee');
+    // MANAGE DETAIL COMPANY
+    Route::post('system/company/information','Api\System\ManageCompanyController@getDetailCompany');
+    Route::post('system/company/information/update','Api\System\ManageCompanyController@updateInformation');
 
     //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
     // get all employee in department
@@ -127,17 +137,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {
-    // ACCOUNT EMPLOYEE
-    // get all employee no account in company
-    Route::get('system/account/employee/{idCompany}','Api\System\AccountEmployeeController@getAllEmployee');
-    Route::post('system/create/employee/account','Api\System\AccountEmployeeController@createAccountEmployee');
-    // get all account in a company
-    Route::get('system/account/list/{idCompany}','Api\System\AccountEmployeeController@getAllInformationAccount');
-    Route::post('system/account/delete','Api\System\AccountEmployeeController@deleteAccountEmployee');
-    Route::post('system/account/employee/send','Api\System\AccountEmployeeController@sendEmailAccountEmployee');
-    // MANAGE DETAIL COMPANY
-    Route::post('system/company/information','Api\System\ManageCompanyController@getDetailCompany');
-    Route::post('system/company/information/update','Api\System\ManageCompanyController@updateInformation');
+    //get current employee information and process
+    Route::get('employee/data/{idEmployee}','Api\AccountController@getDataOfEmployee');
+    //update information of employee
+    Route::post('employee/update/information','Api\AccountController@updateInformationOfEmployee');
 });
 
 

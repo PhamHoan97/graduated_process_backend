@@ -196,7 +196,7 @@ class OrganizationController extends Controller
                 ->where('employees.id', $idEmployee)
                 ->select('employees.id as id',
                     'employees.name as name',
-                    'employees.email as email',
+//                    'employees.email as email',
                     'employees.phone as phone',
                     'employees.role_id as role_id',
                     'employees.department_id as department_id',

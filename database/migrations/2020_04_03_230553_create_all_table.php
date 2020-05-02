@@ -73,7 +73,6 @@ class CreateAllTable extends Migration
         //create admin of companies table
         Schema::create('admins', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email')->nullable()->unique();
             $table->string('username')->unique();
             $table->string('password');
             $table->string('initial_password');
@@ -124,6 +123,7 @@ class CreateAllTable extends Migration
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('birth')->nullable();
+            $table->longText('about_me')->nullable();
             $table->string('avatar')->nullable();
             $table->integer('role_id')->unsigned();
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');

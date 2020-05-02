@@ -32,7 +32,7 @@ class AccountJwtMiddleware
             }  else if ($e instanceof UserNotDefinedException ){
                 return response()->json(['error' =>1, 'message'=>'Authorization is required']);
             }  else {
-                return response()->json(['error' =>1, 'message'=>'Authorization Token not found']);
+                return response()->json(['error' => 1, 'message'=> $e->getMessage()]);
             }
         }
         return $next($request);

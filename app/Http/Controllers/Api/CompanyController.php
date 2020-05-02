@@ -85,25 +85,9 @@ class CompanyController extends Controller
     }
 
     public function loginCompany(Request $request){
-        $adminEmail = Admins::where('email', $request->account)->first();
-        $adminUserName = Admins::where('username', $request->account)->first();
-        if ($adminEmail && Hash::check($request->password, $adminEmail->password))
-        {
-            $credentials = ["email" => $request->account, "password" => $request->password];
-            $token = self::getToken($credentials);
-            $adminEmail->auth_token = $token;
-            $adminEmail->save();
-
-            $response = [
-                'success'=>true,
-                'message' => 'Login company successful',
-                'token'=> $token,
-                'id' => $adminEmail->id,
-                'company_id' => $adminEmail->company_id,
-                'isAdmin' => true
-            ];
-        } else if($adminUserName && Hash::check($request->password, $adminUserName->password)){
-            $credentials = ["username" => $request->account, "password" => $request->password];
+        $adminUserName = Admins::where('username', $request->username)->first();
+        if($adminUserName && Hash::check($request->password, $adminUserName->password)){
+            $credentials = ["username" => $request->username, "password" => $request->password];
             $token = self::getToken($credentials);
             $adminUserName->auth_token = $token;
             $adminUserName->save();
