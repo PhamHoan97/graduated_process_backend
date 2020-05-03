@@ -57,6 +57,26 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/companies', 'Api\SystemController@getListCompanies');
     Route::get('system/company/information/{idCompany}', 'Api\SystemController@getformationOfCompany');
     Route::post('system/more/admin','Api\SystemController@moreAdmin');
+    // MANAGE NOTIFICATION
+    // create new type template
+    Route::post('system/notification/type/create','Api\System\ManageNotificationController@addType');
+    // get all types template in system
+    Route::get('system/notification/type/list','Api\System\ManageNotificationController@listType');
+    // create new template with type
+    Route::post('system/notification/template/create','Api\System\ManageNotificationController@addTemplate');
+    // get all templates in system
+    Route::get('system/notification/template/list','Api\System\ManageNotificationController@listAllTemplate');
+    // get all template with type in system
+    Route::get('system/notification/template/list/{idType}','Api\System\ManageNotificationController@listTemplateType');
+    // create new notification
+    Route::post('system/notification/create','Api\System\ManageNotificationController@addNotification');
+    // get all notifications in system
+    Route::get('system/notification/list','Api\System\ManageNotificationController@getListNotifications');
+    // send notification to admin and user which directly use system
+    Route::post('system/notification/send','Api\System\ManageNotificationController@addNotificationAdminUser');
+    // statistic notification
+    Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
+
 
 });
 
@@ -122,6 +142,12 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     // MANAGE DETAIL COMPANY
     Route::post('system/company/information','Api\System\ManageCompanyController@getDetailCompany');
     Route::post('system/company/information/update','Api\System\ManageCompanyController@updateInformation');
+
+    // MANAGE NOTIFICATION
+
+    Route::post('system/notification/company/list','Api\System\ManageNotificationController@listAdminNotification');
+    Route::post('system/notification/company/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
+    Route::post('system/notification/company/create/response','Api\System\ManageNotificationController@addResponseAdmin');
 
 
 });
