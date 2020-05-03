@@ -3,15 +3,30 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use phpDocumentor\Reflection\Element;
 
 class Processes extends Model
 {
     protected $fillable = [
-        'name', 'description', 'image', 'svg', 'bpmn', 'xml', 'update_at','employee_id'
+        'name', 'description', 'image', 'svg', 'bpmn', 'xml', 'update_at','admin_id'
     ];
 
     public $table = "processes";
 
-    public $timestamps = false;
+    public function employees(){
+        return $this->belongsToMany('\App\Employees','processes_employees', 'process_id', 'employee_id');
+    }
 
+    public function elementNotes()
+    {
+        return $this->hasManyThrough('\App\ElementNotes', '\App\Elements','process_id', 'element_id');
+    }
+
+    public function elementComments(){
+        return $this->hasManyThrough('\App\ElementComments', '\App\Elements', 'process_id', 'element_id');
+    }
+
+    public function elements(){
+        return $this->hasMany('App\Elements', 'process_id', 'id');
+    }
 }

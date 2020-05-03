@@ -1,15 +1,15 @@
 <?php
 
 namespace App\Http\Middleware;
-use App\Systems;
+
+use Closure;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\UserNotDefinedException;
 use Config;
 use JWTAuth;
-use Closure;
 
-class SystemJwtMiddleware
+class AccountJwtMiddleware
 {
     /**
      * Handle an incoming request.
@@ -21,9 +21,9 @@ class SystemJwtMiddleware
     public function handle($request, Closure $next)
     {
         try {
-            Config::set( 'jwt.user', 'App\Systems' );
-            Config::set( 'auth.providers.users.model', Systems::class );
-            $system = JWTAuth::parseToken()->authenticate();
+            Config::set('jwt.user', 'App\Accounts');
+            Config::set('auth.providers.users.model', \App\Accounts::class);
+            $account = JWTAuth::parseToken()->authenticate();
         } catch (\Exception $e) {
             if ($e instanceof TokenInvalidException) {
                 return response()->json(['error' =>1, 'message'=>'Token is Invalid']);

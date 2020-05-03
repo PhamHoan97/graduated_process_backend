@@ -24,7 +24,8 @@ class DashboardController extends Controller
                 $processes = DB::table('companies')
                     ->join('departments', 'companies.id', '=', 'departments.company_id')
                     ->join('employees', 'departments.id', '=', 'employees.department_id')
-                    ->join('processes', 'employees.id', '=', 'processes.employee_id')
+                    ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
+                    ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
                     ->select('processes.id',
                         'processes.name as process_name',
@@ -37,7 +38,8 @@ class DashboardController extends Controller
                 $processes = DB::table('companies')
                     ->join('departments', 'companies.id', '=', 'departments.company_id')
                     ->join('employees', 'departments.id', '=', 'employees.department_id')
-                    ->join('processes', 'employees.id', '=', 'processes.employee_id')
+                    ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
+                    ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                     ->select('processes.id',
                         'processes.name as process_name',
                         'departments.name as department_name',
@@ -76,7 +78,8 @@ class DashboardController extends Controller
             $processes = DB::table('companies')
                 ->join('departments', 'companies.id', '=', 'departments.company_id')
                 ->join('employees', 'departments.id', '=', 'employees.department_id')
-                ->join('processes', 'employees.id', '=', 'processes.employee_id')
+                ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
+                ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                 ->where('departments.company_id', $idCompany)
                 ->orderBy('processes.id', 'ASC')
                 ->select('processes.id',
@@ -106,7 +109,8 @@ class DashboardController extends Controller
             $processes = DB::table('companies')
                 ->join('departments', 'companies.id', '=', 'departments.company_id')
                 ->join('employees', 'departments.id', '=', 'employees.department_id')
-                ->join('processes', 'employees.id', '=', 'processes.employee_id')
+                ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
+                ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                 ->where([
                     ['departments.company_id', '=', $idCompany],
                     ['departments.id', '=', $idDepartment],

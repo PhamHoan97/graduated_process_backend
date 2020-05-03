@@ -6,6 +6,7 @@ use App\Admins;
 use App\Companies;
 use App\Emails;
 use App\Mail\Reject;
+use App\Mail\ResendEmail;
 use App\Mail\SendAdminAccount;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class SystemController extends Controller
 {
@@ -109,7 +111,11 @@ class SystemController extends Controller
         if(!$request->idRegistration){
             return response()->json(['error' => true, 'message' => "idRegistration is required"]);
         }else{
-            $company = \App\Waitings::find($request->idRegistration);
+            try{
+                $company = \App\Waitings::find($request->idRegistration);
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
+            }
             return response()->json([
                 'success' => true,
                 'message' => "Get data successful",
@@ -172,7 +178,6 @@ class SystemController extends Controller
                     }
                     $admin  = new Admins();
                     $admin->username = $request->username;
-                    $admin->email = $company->contact;
                     $admin->password = Hash::make($request->password);
                     $admin->initial_password = $request->password;
                     $admin->company_id = $company->id;
@@ -227,6 +232,11 @@ class SystemController extends Controller
                 $email->system_id = $system->id;
                 $email->status = 2;
                 $email->response = $e->getMessage();
+                $email->content = json_encode([
+                    'username'=>$admin->username,
+                    'password'=> $admin->initial_password,
+                    'recipientName' => $company->ceo,
+                ]);
                 $email->save();
                 return response()->json(['error' => true, 'message' => $e->getMessage()]);
             }
@@ -236,6 +246,11 @@ class SystemController extends Controller
             $email->to = $company->contact;
             $email->system_id = $system->id;
             $email->response = "success";
+            $email->content = json_encode([
+                'username'=>$admin->username,
+                'password'=> $admin->initial_password,
+                'recipientName' => $company->ceo,
+            ]);
             $email->save();
             return response()->json(['success' => true, 'message' => 'sent account to company']);
         }
@@ -337,7 +352,6 @@ class SystemController extends Controller
                     }
                     $admin  = new Admins();
                     $admin->username = $request->username;
-                    $admin->email = $company->contact;
                     $admin->password = Hash::make($request->password);
                     $admin->initial_password = $request->password;
                     $admin->company_id = $company->id;
@@ -347,6 +361,97 @@ class SystemController extends Controller
                 return response()->json(['error' => true, 'message' => $e->getMessage()]);
             }
             return response()->json(['success' => true, 'message' => "Created account", 'admin' => $admin]);
+        }
+    }
+
+    public function getSentEmailInSystem(){
+        try{
+            $data = [];
+            $emails = Emails::all();
+            foreach ($emails as $email){
+               $system_id = $email->system_id;
+               $system = Systems::find($system_id);
+               $email->sender = ['username' => $system->username, 'email' => $system->email];
+               $data[] = $email;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => true, 'message' => $e->getMessage()]);
+        }
+        return response()->json(['success' => true, 'message' => "get emails", 'email' => $data]);
+    }
+
+    public function getEmailInformation(Request $request){
+        if(!$request->idEmail){
+            return response()->json(['error' => true, 'message' => "idEmail is required"]);
+        }else{
+            try{
+                $email = \App\Emails::find($request->idEmail);
+                $system = Systems::find($email->system_id);
+                $email->sender = ['username' => $system->username, 'email' => $system->email];
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => "Get data successful",
+                'email' => $email
+            ]);
+        }
+    }
+
+    public function resendEmail(Request $request){
+        if(!$request->idEmail){
+            return response()->json(['error' => true, 'message' => "idEmail is required"]);
+        }else if(!$request->tokenData){
+            return response()->json(['error' => true, 'message' => "tokenData is required"]);
+        }else{
+            try{
+                $system = Systems::where('auth_token',$request->tokenData)->first();
+                $email = Emails::find($request->idEmail);
+                if(!$system){
+                    return response()->json(['error' => true, 'message' => "Something was wrong with the token"]);
+                }
+                if(!$email){
+                    return response()->json(['error' => true, 'message' => "Something was wrong with old email"]);
+                }
+            }catch (\Exception $e){
+                return response()->json(['error' => true, 'message' => "Something was wrong with request data"]);
+            }
+            if($email->type === "Send Account"){
+                try{
+                    Mail::to($email->to)->send(new ResendEmail($email,$system));
+                }catch (\Exception $e){
+                    $email->system_id = $system->id;
+                    $email->status = 2;
+                    $email->response = $e->getMessage();
+                    $email->updated_at = Carbon::now();
+                    $email->update();
+                    return response()->json(['error' => true, 'message' => $e->getMessage()]);
+                }
+                $email->system_id = $system->id;
+                $email->response = "success";
+                $email->updated_at = Carbon::now();
+                $email->update();
+                return response()->json(['success' => true, 'message' => 'sent account to company']);
+            }else if($email->type === "Reject"){
+                try{
+                    Mail::to($email->to)->send(new ResendEmail($email, $system));
+                }catch (\Exception $e){
+                    $email->system_id = $system->id;
+                    $email->status = 2;
+                    $email->response = $e->getMessage();
+                    $email->updated_at = Carbon::now();
+                    $email->update();
+                    return response()->json(['error' => true, 'message' => $e->getMessage()]);
+                }
+
+                $email->system_id = $system->id;
+                $email->response = "success";
+                $email->updated_at = Carbon::now();
+                $email->update();
+
+                return response()->json(['success' => true, 'message' => 'sent reject email']);
+            }
         }
     }
 }

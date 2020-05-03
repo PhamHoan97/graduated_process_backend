@@ -46,7 +46,7 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('type');
             $table->string('to');
-            $table->string('content')->nullable();
+            $table->longText('content')->nullable();
             $table->integer('system_id')->unsigned();
             $table->integer('status')->default(1);
             $table->text('response')->nullable();
@@ -73,7 +73,6 @@ class CreateAllTable extends Migration
         //create admin of companies table
         Schema::create('admins', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email')->nullable()->unique();
             $table->string('username')->unique();
             $table->string('password');
             $table->string('initial_password');
@@ -124,6 +123,7 @@ class CreateAllTable extends Migration
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('birth')->nullable();
+            $table->longText('about_me')->nullable();
             $table->string('avatar')->nullable();
             $table->integer('role_id')->unsigned();
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
@@ -227,7 +227,17 @@ class CreateAllTable extends Migration
             $table->string('bpmn')->nullable();
             $table->longText('xml')->nullable();
             $table->dateTime('update_at');
+            $table->integer('admin_id')->unsigned();
+            $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
+            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create link table between process and employee
+        Schema::create('processes_employees', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('process_id')->unsigned();
             $table->integer('employee_id')->unsigned();
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
         });
@@ -244,9 +254,20 @@ class CreateAllTable extends Migration
         Schema::create('element_comments', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('element_id')->unsigned();
-            $table->integer('employee_id')->unsigned();
+            $table->integer('admin_id')->unsigned()->nullable();
+            $table->integer('employee_id')->unsigned()->nullable();
             $table->longText('comment');
-            $table->dateTime('update_at');
+            $table->string('update_at');
+            $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        //create notes of element table
+        Schema::create('element_notes', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('element_id')->unsigned();
+            $table->integer('admin_id')->unsigned()->nullable();
+            $table->longText('content');
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
@@ -263,7 +284,20 @@ class CreateAllTable extends Migration
         Schema::create('isos', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('year');
             $table->longText('content');
+            $table->string('name_download')->nullable();
+            $table->longText('download')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('iso_processes', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('content');
+            $table->longText('process');
+            $table->integer('iso_id')->unsigned();
+            $table->foreign('iso_id')->references('id')->on('isos');
             $table->timestamps();
         });
 
@@ -271,9 +305,9 @@ class CreateAllTable extends Migration
         Schema::create('rules', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('process_id')->unsigned();
-            $table->integer('iso_id')->unsigned();
+            $table->integer('iso_process_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
-            $table->foreign('iso_id')->references('id')->on('isos');
+            $table->foreign('iso_process_id')->references('id')->on('iso_processes');
             $table->timestamps();
         });
     }
@@ -287,13 +321,19 @@ class CreateAllTable extends Migration
     {
         Schema::dropIfExists('rules');
 
+        Schema::dropIfExists('iso_processes');
+
         Schema::dropIfExists('isos');
 
         Schema::dropIfExists('forms');
 
         Schema::dropIfExists('element_comments');
 
+        Schema::dropIfExists('element_notes');
+
         Schema::dropIfExists('elements');
+
+        Schema::dropIfExists('processes_employees');
 
         Schema::dropIfExists('processes');
 

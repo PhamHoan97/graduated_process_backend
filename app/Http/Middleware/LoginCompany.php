@@ -15,14 +15,14 @@ class LoginCompany
      */
     public function handle($request, Closure $next)
     {
-        $account = $request->account;
+        $username = $request->username;
         $password = $request->password;
 
-        if(!isset($account)){
-            return response()->json(['error' => "email or username is required"], 400);
+        if(!isset($username)){
+            return response()->json(['error' => 1, 'message' => "username is required"], 400);
         }
         if(!isset($password)){
-            return response()->json(['error' => "password is required"], 400);
+            return response()->json(['error' => 1, 'message' => "password is required"], 400);
         }
 
         return $next($request);

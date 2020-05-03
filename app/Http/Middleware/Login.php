@@ -19,10 +19,10 @@ class Login
         $password = $request->password;
 
         if(!isset($email)){
-            return response()->json(['error' => "email is required"], 400);
+            return response()->json(['error' => 1, 'message' => "email is required"], 400);
         }
         if(!isset($password)){
-            return response()->json(['error' => "password is required"], 400);
+            return response()->json(['error' => 1, 'message' => "password is required"], 400);
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return response()->json(['error' => "invalid email format"], 400);

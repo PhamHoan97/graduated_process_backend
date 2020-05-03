@@ -27,6 +27,10 @@ Route::post('logout/company', 'Api\CompanyController@logoutCompany');
 
 Route::post('company/register', 'Api\CompanyController@register')->middleware('registerCompany');
 
+Route::post('login/employee', 'Api\AccountController@loginAccount')->middleware('loginCompany');
+
+Route::post('logout/employee', 'Api\AccountController@logoutAccount');
+
 
 // ROUTE DASHBOARD
 
@@ -77,7 +81,13 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     // statistic notification
     Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
 
-
+    Route::get('system/email', 'Api\SystemController@getSentEmailInSystem');
+    Route::get('system/email/information/{idEmail}', 'Api\SystemController@getEmailInformation');
+    Route::post('system/email/resend','Api\SystemController@resendEmail');
+    Route::post('system/iso/create','Api\IsoController@createIso')->middleware('createIso');
+    Route::get('system/iso','Api\IsoController@getIsos');
+    Route::get('system/iso/download/{name}','Api\IsoController@downloadDocumentIso');
+    Route::post('system/iso/delete','Api\IsoController@deleteIso');
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
@@ -124,32 +134,39 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('system/organization/role/detail/{idRole}','Api\System\OrganizationController@getDetailRole');
     // get all roles in system
     Route::get('system/organization/role/{idCompany}','Api\System\OrganizationController@getAllRoles');
-
-
-    // ACCOUNT EMPLOYEE
-
     // get all employee no account in company
     Route::get('system/account/employee/{idCompany}','Api\System\AccountEmployeeController@getAllEmployee');
     Route::post('system/create/employee/account','Api\System\AccountEmployeeController@createAccountEmployee');
     // get all account in a company
     Route::get('system/account/list/{idCompany}','Api\System\AccountEmployeeController@getAllInformationAccount');
-
     Route::post('system/account/delete','Api\System\AccountEmployeeController@deleteAccountEmployee');
-
     Route::post('system/account/employee/send','Api\System\AccountEmployeeController@sendEmailAccountEmployee');
-
-
     // MANAGE DETAIL COMPANY
     Route::post('system/company/information','Api\System\ManageCompanyController@getDetailCompany');
     Route::post('system/company/information/update','Api\System\ManageCompanyController@updateInformation');
 
-    // MANAGE NOTIFICATION
+    // MANAGE NOTIFICATION ADMIN
 
     Route::post('system/notification/company/list','Api\System\ManageNotificationController@listAdminNotification');
     Route::post('system/notification/company/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
     Route::post('system/notification/company/create/response','Api\System\ManageNotificationController@addResponseAdmin');
 
+    //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+    // get all employee in department
+    Route::get('company/department/{idDepartment}/employee','Api\CompanyController@getAllEmployeeDepartment');
+    //save process
+    Route::post('company/process/new','Api\CompanyController@newProcessCompany')->middleware('create-or-edit-process');
+    //get all information of process
+    Route::get('company/process/information/{idProcess}','Api\CompanyController@getAllInformationOfProcess');
+    //edit process
+    Route::post('company/process/edit','Api\CompanyController@editProcessCompany')->middleware('create-or-edit-process');
+});
 
+Route::group(['middleware' => 'jwt-auth-account'], function () {
+    //get current employee information and process
+    Route::get('employee/data/{idEmployee}','Api\AccountController@getDataOfEmployee');
+    //update information of employee
+    Route::post('employee/update/information','Api\AccountController@updateInformationOfEmployee');
 });
 
 
