@@ -229,7 +229,6 @@ class CreateAllTable extends Migration
             $table->dateTime('update_at');
             $table->integer('admin_id')->unsigned();
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
-            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
         });
         //create link table between process and employee
