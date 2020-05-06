@@ -152,14 +152,16 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('system/notification/company/create/response','Api\System\ManageNotificationController@addResponseAdmin');
 
     //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
-    // get all employee in department
-    Route::get('company/department/{idDepartment}/employee','Api\CompanyController@getAllEmployeeDepartment');
+    // get all employee and role in department
+    Route::get('company/department/{idDepartment}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfDepartment');
     //save process
     Route::post('company/process/new','Api\CompanyController@newProcessCompany')->middleware('create-or-edit-process');
     //get all information of process
     Route::get('company/process/information/{idProcess}','Api\CompanyController@getAllInformationOfProcess');
     //edit process
     Route::post('company/process/edit','Api\CompanyController@editProcessCompany')->middleware('create-or-edit-process');
+    // get all employee and role in company
+    Route::get('company/{idCompany}/employee/role','Api\CompanyController@getAllCompanyAndRoleOfCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

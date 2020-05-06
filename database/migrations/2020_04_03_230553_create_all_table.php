@@ -168,20 +168,9 @@ class CreateAllTable extends Migration
             $table->integer('status');
             $table->dateTime('update_at');
             $table->integer('template_id')->unsigned();
-            $table->integer('system_id')->unsigned();
-            $table->foreign('system_id')->references('id')->on('systems')->onDelete('cascade');
-            $table->foreign('template_id')->references('id')->on('templates')->onDelete('cascade');
-            $table->timestamps();
-        });
-        //create notification send to admin
-        Schema::create('admin_notifications', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('status');
-            $table->dateTime('update_at');
-            $table->integer('notification_id')->unsigned();
-            $table->integer('admin_id')->unsigned()->nullable();
-            $table->foreign('notification_id')->references('id')->on('notifications')->onDelete('cascade');
+            $table->integer('admin_id')->unsigned();
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
+            $table->foreign('template_id')->references('id')->on('templates')->onDelete('cascade');
             $table->timestamps();
         });
         //create notification send to user
@@ -206,17 +195,6 @@ class CreateAllTable extends Migration
             $table->foreign('notification_id')->references('id')->on('user_notifications')->onDelete('cascade');
             $table->timestamps();
         });
-        //create response of admin
-        Schema::create('admin_responses', function (Blueprint $table) {
-            $table->increments('id');
-            $table->longText('content');
-            $table->dateTime('update_at');
-            $table->integer('admin_id')->unsigned()->nullable();
-            $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
-            $table->integer('notification_id')->unsigned();
-            $table->foreign('notification_id')->references('id')->on('admin_notifications')->onDelete('cascade');
-            $table->timestamps();
-        });
         //create process of employee table
         Schema::create('processes', function (Blueprint $table) {
             $table->increments('id');
@@ -226,6 +204,8 @@ class CreateAllTable extends Migration
             $table->string('svg')->nullable();
             $table->string('bpmn')->nullable();
             $table->longText('xml')->nullable();
+            $table->integer('type')->nullable();
+            $table->string('deadline')->nullable();
             $table->string('update_at');
             $table->integer('admin_id')->unsigned();
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
@@ -238,6 +218,15 @@ class CreateAllTable extends Migration
             $table->integer('employee_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create link table between process and role
+        Schema::create('processes_roles', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('process_id')->unsigned();
+            $table->integer('role_id')->unsigned();
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->timestamps();
         });
         //create element of process table
@@ -260,7 +249,6 @@ class CreateAllTable extends Migration
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
-
         //create notes of element table
         Schema::create('element_notes', function (Blueprint $table) {
             $table->increments('id');
@@ -270,43 +258,12 @@ class CreateAllTable extends Migration
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
-
         //create form of process table
         Schema::create('forms', function (Blueprint $table) {
             $table->increments('id');
             $table->string('content');
             $table->integer('process_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
-            $table->timestamps();
-        });
-        //create isos table
-        Schema::create('isos', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('year');
-            $table->longText('content');
-            $table->string('name_download')->nullable();
-            $table->longText('download')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('iso_processes', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('content');
-            $table->longText('process');
-            $table->integer('iso_id')->unsigned();
-            $table->foreign('iso_id')->references('id')->on('isos');
-            $table->timestamps();
-        });
-
-        //create rules of process table
-        Schema::create('rules', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('process_id')->unsigned();
-            $table->integer('iso_process_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
-            $table->foreign('iso_process_id')->references('id')->on('iso_processes');
             $table->timestamps();
         });
     }
@@ -318,12 +275,6 @@ class CreateAllTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rules');
-
-        Schema::dropIfExists('iso_processes');
-
-        Schema::dropIfExists('isos');
-
         Schema::dropIfExists('forms');
 
         Schema::dropIfExists('element_comments');
@@ -332,17 +283,15 @@ class CreateAllTable extends Migration
 
         Schema::dropIfExists('elements');
 
+        Schema::dropIfExists('processes_roles');
+
         Schema::dropIfExists('processes_employees');
 
         Schema::dropIfExists('processes');
 
-        Schema::dropIfExists('admin_responses');
-
         Schema::dropIfExists('user_responses');
 
         Schema::dropIfExists('user_notifications');
-
-        Schema::dropIfExists('admin_notifications');
 
         Schema::dropIfExists('notifications');
 

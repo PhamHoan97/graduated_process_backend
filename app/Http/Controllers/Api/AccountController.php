@@ -86,7 +86,8 @@ class AccountController extends Controller
         try{
             $employee = Employees::find($idEmployee);
             $employee->role;
-            $employee->processes;
+            $employee->processesEmployees;
+            $employee->processesRoles;
             $department_id = $employee['department_id'];
             $department = Departments::find($department_id);
             $company = Companies::find($department['company_id']);
