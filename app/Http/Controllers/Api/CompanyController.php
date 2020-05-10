@@ -124,13 +124,18 @@ class CompanyController extends Controller
         try{
             $employees = DB::table('departments')
                 ->join('employees', 'departments.id', '=', 'employees.department_id')
+                ->join('roles', 'employees.role_id', '=', 'roles.id')
                 ->where('departments.id', $idDepartment)
                 ->select('employees.id as id_employee',
                     'employees.name as name',
+                    'employees.email as email',
                     'employees.phone as phone',
                     'employees.address as address',
+                    'employees.birth as birth',
+                    'employees.avatar as avatar',
                     'departments.id as id_department',
-                    'departments.name as department_name')
+                    'departments.name as department_name',
+                    'roles.name as role_name')
                 ->get();
             $roles = DB::table('departments')
                 ->join('roles', 'departments.id', '=', 'roles.department_id')
@@ -344,7 +349,7 @@ class CompanyController extends Controller
         return response()->json(['success' => true, 'message' => "edited process", "process" => $process]);
     }
 
-    public function getAllCompanyAndRoleOfCompany(Request $request){
+    public function getAllEmployeeAndRoleOfCompany(Request $request){
         $idCompany = $request->idCompany;
         if(!$idCompany){
             return response()->json(['error' => true, 'message' => "idCompany is required"]);
@@ -353,14 +358,18 @@ class CompanyController extends Controller
             $employees = DB::table('companies')
                 ->join('departments', 'companies.id', '=', 'departments.company_id')
                 ->join('employees', 'departments.id', '=', 'employees.department_id')
+                ->join('roles', 'employees.role_id', '=', 'roles.id')
                 ->where('companies.id', $idCompany)
                 ->select('employees.id as id_employee',
                     'employees.name as name',
                     'employees.email as email',
                     'employees.phone as phone',
                     'employees.address as address',
+                    'employees.birth as birth',
+                    'employees.avatar as avatar',
                     'departments.id as id_department',
-                    'departments.name as department_name')
+                    'departments.name as department_name',
+                     'roles.name as role_name')
                 ->get();
 
             $roles = DB::table('companies')

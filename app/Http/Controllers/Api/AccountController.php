@@ -6,6 +6,7 @@ use App\Accounts;
 use App\Companies;
 use App\Departments;
 use App\Employees;
+use App\Processes;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Config;
+use DB;
 
 class AccountController extends Controller
 {
@@ -79,12 +81,13 @@ class AccountController extends Controller
     }
 
     public function getDataOfEmployee(Request $request){
-        $idEmployee = $request->idEmployee;
-        if(!isset($idEmployee)){
-            return response()->json(['error' => 1, 'message' => "idEmployee is required"], 400);
+        $token = $request->token;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
         }
         try{
-            $employee = Employees::find($idEmployee);
+            $account = Accounts::where('auth_token', $token)->first();
+            $employee = Employees::find($account->employee_id);
             $employee->role;
             $employee->processesEmployees;
             $employee->processesRoles;
@@ -101,6 +104,7 @@ class AccountController extends Controller
             'employee' => $employee,
             'department' => $department,
             'company' => $company,
+            'username_account' => $account->username,
         ]);
     }
 
@@ -139,5 +143,72 @@ class AccountController extends Controller
             }
             return response()->json(['success'=>true, 'message' => 'updated employee']);
         }
+    }
+
+    public function getProcessOfEmployeePaginate(Request $request){
+        $token = $request->token;
+        $page = $request->page;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        if(!isset($page)){
+            return response()->json(['error' => 1, 'message' => "page is required"], 400);
+        }
+        try{
+            $account = Accounts::where('auth_token', $token)->first();
+            $employee = Employees::find($account->employee_id);
+            $processes = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->where('employees.id',$employee->id)->orWhere('roles.id', $employee->role_id)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.created_at as created_at')
+                ->forPage($page, 6)->get();
+
+        }catch ( \Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json(['success'=>true, 'message' => 'got paginate process', 'processes' => $processes]);
+    }
+
+    public function updateAccountOfEmployee(Request $request){
+        $username = $request->username;
+        $password = $request->password;
+        $newPassword = $request->newPassword;
+        $token = $request->tokenData;
+
+        try{
+            $account = Accounts::where('auth_token', $token)->first();
+            if(!$account){
+                return response()->json(['error' => 1, 'message' => "something was wrong with token"], 201);
+            }
+            if(Hash::check($password, $account->password)){
+                $account->username = $username;
+                $account->password = Hash::make($newPassword);
+                $account->update();
+            }else{
+                return response()->json(['error' => 1, 'message' => "password is not correct", "password" => true],  201);
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
+        }
+        return response()->json(['success'=>true, 'message' => 'updated account']);
+    }
+
+    public function searchProcesses(Request $request){
+        $search = $request->search;
+        if(!$search){
+            return response()->json(['error' => 1, 'message' => "search is required"], 400);
+        }
+        try{
+            $processes = Processes::where('name',  'LIKE', '%' . $search . '%')->get();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json(['success'=>true, 'message' => 'search processes', 'processes' => $processes]);
     }
 }
