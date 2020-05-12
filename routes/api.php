@@ -31,6 +31,9 @@ Route::post('login/employee', 'Api\AccountController@loginAccount')->middleware(
 
 Route::post('logout/employee', 'Api\AccountController@logoutAccount');
 
+Route::post('employee/reset/send/password', 'Api\AccountController@resetPasswordForEmployee');
+
+Route::post('employee/reset/handle/password', 'Api\AccountController@handleResetPasswordForEmployee');
 
 // ROUTE DASHBOARD
 

@@ -5,16 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Accounts;
 use App\Companies;
 use App\Departments;
+use App\Emails;
 use App\Employees;
+use App\Mail\ResetPasswordEmployee;
 use App\Processes;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Mockery\Exception;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Config;
 use DB;
+use Illuminate\Support\Facades\Mail;
 
 class AccountController extends Controller
 {
@@ -234,5 +238,62 @@ class AccountController extends Controller
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
         }
         return response()->json(['success' => true, 'message' => "got 3 notifications", "notifications"=> $notifications], 200);
+    }
+
+    public function resetPasswordForEmployee(Request $request){
+        $emailData = $request->email;
+        if(!$emailData){
+            return response()->json(['error' => 1, 'message' => "Email is required"], 400);
+        }
+        try{
+            $employee = Employees::where('email', $emailData)->first();
+            if(!$employee){
+                return response()->json(['error' => 1, 'message' => "Something was wrong with email"], 201);
+            }
+            $account = Accounts::where('employee_id', $employee->id)->first();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+
+        try{
+            Mail::to($emailData)->send(new ResetPasswordEmployee($account));
+        }catch (\Exception $e){
+            $email = new Emails();
+            $email->type = "Reset Password Employee";
+            $email->to = $emailData;
+            $email->status = 2;
+            $email->response = $e->getMessage();
+            $email->save();
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
+        }
+
+        $email = new Emails();
+        $email->type = "Reset Password Employee";
+        $email->to = $emailData;
+        $email->response = "success";
+        $email->save();
+        return response()->json(['success' => true, 'message' => "sent email to employee"], 200);
+    }
+
+    public function handleResetPasswordForEmployee(Request $request){
+        $id = $request->id;
+        $newPassword = $request->newPassword;
+        if(!$id){
+            return response()->json(['error' => 1, 'message' => "id is required"], 400);
+        }
+        if(!$newPassword){
+            return response()->json(['error' => 1, 'message' => "newPassword is required"], 400);
+        }
+        try{
+            $account = Accounts::find($id);
+            if(!$account){
+                return response()->json(['error' => 1, 'message' => "something was wrong with id"], 201);
+            }
+            $account->password = Hash::make($newPassword);
+            $account->update();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
+        }
+        return response()->json(['success' => true, 'message' => "updated password"], 200);
     }
 }
