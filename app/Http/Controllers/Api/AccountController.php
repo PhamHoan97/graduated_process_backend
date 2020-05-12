@@ -211,4 +211,28 @@ class AccountController extends Controller
         }
         return response()->json(['success'=>true, 'message' => 'search processes', 'processes' => $processes]);
     }
+
+    public function getThreeNotification(Request $request){
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        try{
+            $account = Accounts::where('auth_token', $token)->first();
+            $employee = Employees::find($account->employee_id);
+            $notifications = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->where('employees.id',$employee->id)->orWhere('roles.id', $employee->role_id)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.created_at as created_at')->take(3)->orderBy('created_at', 'desc')
+                ->get();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json(['success' => true, 'message' => "got 3 notifications", "notifications"=> $notifications], 200);
+    }
 }

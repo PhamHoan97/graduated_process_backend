@@ -175,6 +175,8 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     Route::post('employee/update/account','Api\AccountController@updateAccountOfEmployee');
     // search Process
     Route::get('employee/search/process/{search}','Api\AccountController@searchProcesses');
+    // get 3 notifications of employee
+    Route::get('employee/three/process/notification/{token}','Api\AccountController@getThreeNotification');
 });
 
 
