@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\System;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use App\Employees;
+use App\Roles;
 class OrganizationController extends Controller
 {
     // Get idCompany when know idEmployee
@@ -32,10 +34,40 @@ class OrganizationController extends Controller
         }
     }
 
-    public function getDetailDepartment(Request $request,$idDepartment){
+    // get edit information department
+    public function getEditDepartment(Request $request,$idDepartment){
         try {
             $department = DB::table('departments')->where('id',$idDepartment)->first();
             return response()->json(['message'=>'get detail department','department'=>$department],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+
+    }
+    // get detail information department
+    public function getDetailDepartment(Request $request,$idDepartment){
+        try {
+            $department = DB::table('departments')->where('id',$idDepartment)->first();
+            $dataDetailDepartment = array(
+                'name'=>$department->name,
+                'signature'=>$department->signature,
+                'description'=>$department->description,
+            );
+            $roles =  DB::table('roles')->where('department_id',$idDepartment)->get();
+            $dataRoles =  array();
+            foreach ($roles as $role){
+                $countEmployees = DB::table('employees')->where('role_id',$role->id)->count();
+                $dataRole = array(
+                    'name'=>$role->name,
+                    'id'=>$role->id,
+                    'description'=>$role->description,
+                    'employees'=>$countEmployees
+                );
+                array_push($dataRoles,$dataRole);
+
+            }
+            $dataDetailDepartment['role'] = $dataRoles;
+            return response()->json(['message'=>'get detail department','detailDepartment'=>$dataDetailDepartment],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -46,11 +78,11 @@ class OrganizationController extends Controller
     public function addDepartment(Request $request){
         $name = $request->newNameDepartment;
         $description = $request->newDescriptionDepartment;
-        $role = $request->newRoleDepartment;
+        $signature = $request->newSignatureDepartment;
         $idCompany = $request->idCompany;
         try {
             DB::table('departments')->insert(
-                ['name' => $name, 'description' => $description,'role'=>$role,'company_id' => $idCompany]
+                ['name' => $name, 'description' => $description,'signature'=>$signature,'company_id' => $idCompany]
             );
             return response()->json(['message'=>'Add success new department'],200);
         }catch(\Exception $e) {
@@ -75,12 +107,12 @@ class OrganizationController extends Controller
     public function updateDepartment(Request $request){
         $newName = $request->editNameDepartment;
         $newDescription = $request->editDescriptionDepartment;
-        $newRole = $request->editRoleDepartment;
+        $newSignture = $request->editSignatureDepartment;
         $idDepartment = $request->idDepartment;
         try {
             DB::table('departments')
                 ->Where('id', '=', $idDepartment)
-                ->update(['name' => $newName,'description'=>$newDescription,'role'=>$newRole]);
+                ->update(['name' => $newName,'description'=>$newDescription,'signature'=>$newSignture]);
             return response()->json(['message'=>'update success department'],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
@@ -98,7 +130,9 @@ class OrganizationController extends Controller
                 ->where('companies.id', $idCompany)
                 ->select('employees.id as id_employee',
                     'employees.name as name',
+                    'employees.avatar as avatar',
                     'employees.email as email',
+                    'employees.gender as gender',
                     'employees.phone as phone',
                     'employees.address as address',
                     'roles.name as role',
@@ -126,6 +160,7 @@ class OrganizationController extends Controller
     public function addEmployee(Request $request){
         $name = $request->newNameEmployee;
         $email = $request->newEmailEmployee;
+        $gender = $request->newIsMale;
         // check email unique
         $phone = $request->newPhoneEmployee;
         $idChooseRole = $request->newRoleEmployee;
@@ -135,7 +170,14 @@ class OrganizationController extends Controller
                 return response()->json(['error'=>'Add fail new employee'],200);
             }
             DB::table('employees')->insert(
-                ['name' => $name, 'email' => $email,'phone' => $phone,'role_id'=>$idChooseRole,'department_id' => $idChooseDepartment]
+                [
+                    'name' => $name,
+                    'email' => $email,
+                    'gender' => $gender,
+                    'phone' => $phone,
+                    'role_id'=>$idChooseRole,
+                    'department_id' => $idChooseDepartment
+                ]
             );
             return response()->json(['message'=>'Add success new employee'],200);
         }catch(\Exception $e) {
@@ -170,6 +212,7 @@ class OrganizationController extends Controller
         $newName = $request->editNameEmployee;
         $newPhone = $request->editPhoneEmployee;
         $newEmail = $request->editEmailEmployee;
+        $newGender = $request->editIsMale;
         $idChooseRole= $request->idChooseRole;
         $idChooseEmployee = $request->idChooseEmployee;
         $idChooseDepartment = $request->idChooseDepartment;
@@ -179,7 +222,13 @@ class OrganizationController extends Controller
             }else{
                 DB::table('employees')
                     ->Where('id', '=', $idChooseEmployee)
-                    ->update(['name' => $newName,'email'=>$newEmail,'phone'=>$newPhone,'role_id'=>$idChooseRole,'department_id'=>$idChooseDepartment]);
+                    ->update([
+                        'name' => $newName,
+                        'email'=>$newEmail,
+                        'phone'=>$newPhone,
+                        'gender' => $newGender,
+                        'role_id'=>$idChooseRole,
+                        'department_id'=>$idChooseDepartment]);
                 return response()->json(['message'=>'update success user'],200);
             }
         }catch(\Exception $e) {
@@ -197,10 +246,11 @@ class OrganizationController extends Controller
                 ->select('employees.id as id',
                     'employees.name as name',
                     'employees.email as email',
-                    'employees.phone as phone',
                     'employees.birth as birth',
-                    'employees.address as address',
                     'employees.avatar as avatar',
+                    'employees.gender as gender',
+                    'employees.phone as phone',
+                    'employees.address as address',
                     'employees.role_id as role_id',
                     'employees.department_id as department_id',
                     'roles.name as role_name',
@@ -217,10 +267,16 @@ class OrganizationController extends Controller
     public function addRole(Request $request){
         $name = $request->newNameRole;
         $isProcess = $request->newIsProcessRole;
+        $description = $request->newDescriptionRole;
         $idChooseDepartment = $request->newDepartmentRole;
         try {
             DB::table('roles')->insert(
-                ['name' => $name,'is_process' => $isProcess,'department_id' => $idChooseDepartment]
+                [
+                    'name' => $name,
+                    'description'=>$description,
+                    'is_process' => $isProcess,
+                    'department_id' => $idChooseDepartment
+                ]
             );
             return response()->json(['message'=>'Add success new role'],200);
         }catch(\Exception $e) {
@@ -245,6 +301,7 @@ class OrganizationController extends Controller
     public function updateRole(Request $request){
         $newName = $request->editNameRole;
         $newIsProcess = $request->editIsProcessRole;
+        $newDescription = $request->editDescriptionRole;
         $idChooseRole = $request->idChooseRole;
         $idChooseDepartment = $request->idChooseDepartment;
         try {
@@ -252,6 +309,7 @@ class OrganizationController extends Controller
                 ->Where('id', '=', $idChooseRole)
                 ->update([
                     'name' => $newName,
+                    'description' => $newDescription,
                     'is_process' => $newIsProcess,
                     'department_id'=>$idChooseDepartment
                 ]);
@@ -261,15 +319,47 @@ class OrganizationController extends Controller
         }
     }
 
-    // get detail information role
-    public function getDetailRole(Request $request,$idRole){
+    // get edit information role
+    public function getEditRole(Request $request,$idRole){
         try {
-            $role = DB::table('roles')->where('id',$idRole)->first();
+            $role = DB::table('roles') ->where('id',$idRole)->first();
             return response()->json(['message'=>'get detail employee','role'=>$role],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
+    }
 
+    // get detail information role
+    public function getDetailRole(Request $request){
+        $idRole = $request->idRole;
+        $idDepartment = $request->idDepartment;
+        try {
+            $role = DB::table('roles') ->where('id',$idRole)->first();
+            $employees = DB::table('employees')
+                ->join('departments', 'departments.id', '=', 'employees.department_id')
+                ->join('roles', 'roles.id', '=', 'employees.role_id')
+                ->where('employees.role_id',$idRole)
+                ->where('employees.department_id',$idDepartment)
+                ->select('employees.id as id',
+                    'employees.name as name',
+                    'employees.email as email',
+                    'employees.gender as gender',
+                    'employees.phone as phone',
+                    'employees.avatar as avatar',
+                    'employees.role_id as role_id',
+                    'employees.department_id as department_id',
+                    'roles.name as role_name',
+                    'departments.name as department_name')
+                ->get();
+            $dataDetailRole = array(
+                'name'=>$role->name,
+                'description'=>$role->description,
+                'employees'=>$employees
+            );
+            return response()->json(['message'=>'get detail role','detailRole'=>$dataDetailRole],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
     }
 
     // get all  role of company
@@ -282,6 +372,9 @@ class OrganizationController extends Controller
                 ->select(
                     'roles.id as id',
                     'roles.name as name',
+                    'roles.description as description',
+                    'roles.is_process as is_process',
+                    'roles.department_id as department_id',
                     'companies.name as company_name',
                     'departments.name as department_name')
                 ->get();
@@ -300,9 +393,12 @@ class OrganizationController extends Controller
             $company = DB::table('companies')->where('id',$idCompany)->first();
             $organizationCompany =  array(
                 "id"=>1,
+                "email"=>$company->contact,
                 "tags"=>array(
                     'Company'
                 ),
+                "title"=>"Công ty",
+                "img" => "https://cdn.balkan.app/shared/1.jpg",
                 "name"=>$company->name
             );
             array_push($dataOrganization, $organizationCompany);
@@ -316,7 +412,8 @@ class OrganizationController extends Controller
                         "tags"=>array(
                             'Department'
                         ),
-                        "name"=>$department->name
+                        "name"=>$department->name,
+                        'title'=>"Department"
                     );
                     array_push($dataOrganization, $organizationDepartment);
                     $idDepartment = $id;
@@ -330,21 +427,26 @@ class OrganizationController extends Controller
                                 "tags"=>array(
                                     'Role'
                                 ),
-                                "name"=>$role->name
+                                "name"=>$role->name,
+                                "title"=>"Role"
                             );
                             array_push($dataOrganization, $organizationRole);
                             $idRole = $id;
                             $id++;
-                            $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','id']);
+                            $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','email','id']);
                             if($employees !==null){
                                 foreach ($employees as $keyEmployee => $employee){
+                                    $detailRole = DB::table('roles')->where('id',$role->id)->first();
                                     $organizationEmployee = array(
                                         "id"=>$id,
                                         "pid"=>$idRole,
                                         "tags"=>array(
-                                            'Staff'
+                                            'Employee'
                                         ),
-                                        "name"=>$employee->name
+                                        "name"=>$employee->name,
+                                        "title"=>$detailRole->name,
+                                        "email"=>$employee->email,
+                                        "img"=>"https://cdn.balkan.app/shared/8.jpg"
                                     );
                                     array_push($dataOrganization, $organizationEmployee);
                                     $id++;
@@ -365,6 +467,66 @@ class OrganizationController extends Controller
         try {
             $roles = \App\Departments::where('id', '=', $idDepartment)->first()->roles;
             return response()->json(['message'=>'Get success all roles in department','roleDepartment'=>$roles],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // search employee in company
+    public function searchEmployeeCompany(Request $request){
+        $textNameSearch = $request->textNameSearch;
+        $textEmailSearch = $request->textEmailSearch;
+        $idDepartmentSearch = $request->idDepartmentSearch;
+        $idCompany = $request->idCompany;
+        try {
+            $employees = Employees::query()
+                ->join('roles', 'employees.role_id', '=', 'roles.id')
+                ->join('departments', 'employees.department_id', '=', 'departments.id')
+                ->join('companies', 'companies.id', '=', 'departments.company_id')
+                ->where('companies.id',$idCompany)
+                ->name($textNameSearch)
+                ->email($textEmailSearch)
+                ->department($idDepartmentSearch)
+                ->select('employees.id as id_employee',
+                    'employees.name as name',
+                    'employees.avatar as avatar',
+                    'employees.email as email',
+                    'employees.gender as gender',
+                    'employees.phone as phone',
+                    'employees.address as address',
+                    'roles.name as role',
+                    'roles.id as id_role',
+                    'departments.id as id_department',
+                    'departments.name as department_name')
+                ->get();
+            return response()->json(['message'=>'Get success all roles in department','employees'=>$employees],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // search employee in company
+    public function searchRoleCompany(Request $request){
+        $textNameSearch = $request->textNameSearch;
+        $idDepartmentSearch = $request->idDepartmentSearch;
+        $idCompany = $request->idCompany;
+        try {
+            $roles = Roles::query()
+                ->join('departments', 'roles.department_id', '=', 'departments.id')
+                ->join('companies', 'companies.id', '=', 'departments.company_id')
+                ->where('companies.id',$idCompany)
+                ->name($textNameSearch)
+                ->department($idDepartmentSearch)
+                ->select(
+                    'roles.id as id',
+                    'roles.name as name',
+                    'roles.description as description',
+                    'roles.is_process as is_process',
+                    'roles.department_id as department_id',
+                    'companies.name as company_name',
+                    'departments.name as department_name')
+                ->get();
+            return response()->json(['message'=>'Get success all roles in company','roles'=>$roles],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }

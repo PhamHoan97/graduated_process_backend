@@ -102,6 +102,7 @@ class CreateAllTable extends Migration
             $table->string('name');
             $table->text('description');
             $table->string('role')->nullable();
+            $table->string('signature')->nullable();
             $table->integer('company_id')->unsigned();
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->timestamps();
@@ -110,6 +111,7 @@ class CreateAllTable extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('description');
             $table->boolean('is_process');
             $table->integer('department_id')->unsigned();
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
@@ -123,6 +125,7 @@ class CreateAllTable extends Migration
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('birth')->nullable();
+            $table->boolean('gender')->nullable();
             $table->longText('about_me')->nullable();
             $table->string('avatar')->nullable();
             $table->integer('role_id')->unsigned();
@@ -148,7 +151,10 @@ class CreateAllTable extends Migration
         //create type notification  table
         Schema::create('types', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('admin_id')->unsigned();
+            $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
             $table->string('name');
+            $table->string('description');
             $table->timestamps();
         });
         //create template notification table
@@ -161,16 +167,27 @@ class CreateAllTable extends Migration
             $table->timestamps();
         });
         //create notification by system
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('forms', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('description');
-            $table->integer('status');
             $table->dateTime('update_at');
             $table->integer('template_id')->unsigned();
             $table->integer('admin_id')->unsigned();
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
             $table->foreign('template_id')->references('id')->on('templates')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create notification by system
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('description');
+            $table->string('file')->nullable();
+            $table->integer('status');
+            $table->dateTime('update_at');
+            $table->integer('form_id')->unsigned();
+            $table->foreign('form_id')->references('id')->on('forms')->onDelete('cascade');
             $table->timestamps();
         });
         //create notification send to user
@@ -258,14 +275,7 @@ class CreateAllTable extends Migration
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
-        //create form of process table
-        Schema::create('forms', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('content');
-            $table->integer('process_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
-            $table->timestamps();
-        });
+
     }
 
     /**
@@ -275,8 +285,6 @@ class CreateAllTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('forms');
-
         Schema::dropIfExists('element_comments');
 
         Schema::dropIfExists('element_notes');
@@ -294,6 +302,8 @@ class CreateAllTable extends Migration
         Schema::dropIfExists('user_notifications');
 
         Schema::dropIfExists('notifications');
+
+        Schema::dropIfExists('forms');
 
         Schema::dropIfExists('templates');
 

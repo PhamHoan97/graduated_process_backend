@@ -64,25 +64,6 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/companies', 'Api\SystemController@getListCompanies');
     Route::get('system/company/information/{idCompany}', 'Api\SystemController@getformationOfCompany');
     Route::post('system/more/admin','Api\SystemController@moreAdmin');
-    // MANAGE NOTIFICATION
-    // create new type template
-    Route::post('system/notification/type/create','Api\System\ManageNotificationController@addType');
-    // get all types template in system
-    Route::get('system/notification/type/list','Api\System\ManageNotificationController@listType');
-    // create new template with type
-    Route::post('system/notification/template/create','Api\System\ManageNotificationController@addTemplate');
-    // get all templates in system
-    Route::get('system/notification/template/list','Api\System\ManageNotificationController@listAllTemplate');
-    // get all template with type in system
-    Route::get('system/notification/template/list/{idType}','Api\System\ManageNotificationController@listTemplateType');
-    // create new notification
-    Route::post('system/notification/create','Api\System\ManageNotificationController@addNotification');
-    // get all notifications in system
-    Route::get('system/notification/list','Api\System\ManageNotificationController@getListNotifications');
-    // send notification to admin and user which directly use system
-    Route::post('system/notification/send','Api\System\ManageNotificationController@addNotificationAdminUser');
-    // statistic notification
-    Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
 
     Route::get('system/email', 'Api\SystemController@getSentEmailInSystem');
     Route::get('system/email/information/{idEmail}', 'Api\SystemController@getEmailInformation');
@@ -105,8 +86,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('system/organization/{idEmployee}','Api\System\OrganizationController@getIdCompanyByIdUser');
     // add new company
     Route::post('system/organization/department/new','Api\System\OrganizationController@addDepartment');
-    // get detail information department
+    // get detail information in a  department
     Route::get('system/organization/department/detail/{idDepartment}','Api\System\OrganizationController@getDetailDepartment');
+    // get edit information department
+    Route::get('system/organization/department/edit/{idDepartment}','Api\System\OrganizationController@getEditDepartment');
     // delete department
     Route::post('system/organization/department/delete','Api\System\OrganizationController@deleteDepartment');
     // get all department in a company
@@ -133,8 +116,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('system/organization/role/update','Api\System\OrganizationController@updateRole');
     // delete role
     Route::post('system/organization/role/delete','Api\System\OrganizationController@deleteRole');
+    // get edit information role
+    Route::get('system/organization/role/edit/{idRole}','Api\System\OrganizationController@getEditRole');
     // get detail information role
-    Route::get('system/organization/role/detail/{idRole}','Api\System\OrganizationController@getDetailRole');
+    Route::post('system/organization/department/role/detail','Api\System\OrganizationController@getDetailRole');
     // get all roles in system
     Route::get('system/organization/role/{idCompany}','Api\System\OrganizationController@getAllRoles');
     // get all employee no account in company
@@ -148,11 +133,42 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('system/company/information','Api\System\ManageCompanyController@getDetailCompany');
     Route::post('system/company/information/update','Api\System\ManageCompanyController@updateInformation');
 
+    // search role in company
+    Route::post('system/organization/company/role/search','Api\System\OrganizationController@searchRoleCompany');
+
+    // search employee in company
+    Route::post('system/organization/company/employee/search','Api\System\OrganizationController@searchEmployeeCompany');
+
     // MANAGE NOTIFICATION ADMIN
 
     Route::post('system/notification/company/list','Api\System\ManageNotificationController@listAdminNotification');
     Route::post('system/notification/company/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
     Route::post('system/notification/company/create/response','Api\System\ManageNotificationController@addResponseAdmin');
+
+    // MANAGE NOTIFICATION
+    // create new type template
+    Route::post('system/notification/type/create','Api\System\ManageNotificationController@addType');
+    // get all types form in company
+    Route::get('system/notification/form/list/{idAdmin}','Api\System\ManageNotificationController@listForm');
+    // get all types template in company
+    Route::get('system/notification/type/list/{idAdmin}','Api\System\ManageNotificationController@listType');
+    // create new template with type
+    Route::post('system/notification/template/create','Api\System\ManageNotificationController@addTemplate');
+    // get all templates in system
+    Route::get('system/notification/template/list','Api\System\ManageNotificationController@listAllTemplate');
+    // get all template with type in system
+    Route::get('system/notification/template/list/{idType}','Api\System\ManageNotificationController@listTemplateType');
+    // create new form
+    Route::post('system/notification/form/create','Api\System\ManageNotificationController@addForm');
+    // create new notification
+    Route::post('system/notification/create','Api\System\ManageNotificationController@addNotification');
+    // get all notifications in company
+    Route::post('system/notification/list/','Api\System\ManageNotificationController@getListNotifications');
+    // send notification to admin and user which directly use system
+    Route::post('system/notification/send','Api\System\ManageNotificationController@addNotificationUser');
+    // statistic notification
+    Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
+
 
     //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
     // get all employee and role in department
