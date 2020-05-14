@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $textSearch = $request->textSearch;
         try {
             if($textSearch !== 'all'){
-                $processes = DB::table('companies')
+                $processes1 = DB::table('companies')
                     ->join('departments', 'companies.id', '=', 'departments.company_id')
                     ->join('employees', 'departments.id', '=', 'employees.department_id')
                     ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
@@ -34,8 +34,21 @@ class DashboardController extends Controller
                         'processes.description',
                         'processes.update_at')
                     ->get();
+                $processes2 = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('roles', 'departments.id', '=', 'roles.department_id')
+                    ->join('processes_roles', 'roles.id', '=', 'processes_roles.role_id')
+                    ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
+                    ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->select('processes.id',
+                        'processes.name as process_name',
+                        'departments.name as department_name',
+                        'companies.name as company_name',
+                        'processes.description',
+                        'processes.update_at')
+                    ->get();
             }else{
-                $processes = DB::table('companies')
+                $processes1 = DB::table('companies')
                     ->join('departments', 'companies.id', '=', 'departments.company_id')
                     ->join('employees', 'departments.id', '=', 'employees.department_id')
                     ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
@@ -45,11 +58,23 @@ class DashboardController extends Controller
                         'departments.name as department_name',
                         'companies.name as company_name',
                         'processes.description',
-                        'processes.update_at')
+                        'processes.update_at')->distinct()
+                    ->get();
+                $processes2 = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('roles', 'departments.id', '=', 'roles.department_id')
+                    ->join('processes_roles', 'roles.id', '=', 'processes_roles.role_id')
+                    ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
+                    ->select('processes.id',
+                        'processes.name as process_name',
+                        'departments.name as department_name',
+                        'companies.name as company_name',
+                        'processes.description',
+                        'processes.update_at')->distinct()
                     ->get();
             }
 
-            return response()->json(['message'=>'Get success all process','companies'=>$processes],200);
+            return response()->json(['message'=>'Get success all process','companies'=>$processes1],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }

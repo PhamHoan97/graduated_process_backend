@@ -12,7 +12,7 @@ class Emails extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'type', 'to', 'content', 'time', 'system_id'
+        'id', 'type', 'to', 'content', 'system_id', 'response', 'status'
     ];
 
     public $table = "emails";

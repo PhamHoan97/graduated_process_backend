@@ -42,7 +42,7 @@ class SystemController extends Controller
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Password or email is invalid',
+                    'message' => 'Email or password is invalid',
                 ]);
             }
         } catch (JWTException $e) {

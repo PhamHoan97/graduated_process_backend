@@ -47,7 +47,7 @@ class CreateAllTable extends Migration
             $table->string('type');
             $table->string('to');
             $table->longText('content')->nullable();
-            $table->integer('system_id')->unsigned();
+            $table->integer('system_id')->unsigned()->nullable();
             $table->integer('status')->default(1);
             $table->text('response')->nullable();
             $table->foreign('system_id')->references('id')->on('systems');
@@ -221,7 +221,9 @@ class CreateAllTable extends Migration
             $table->string('svg')->nullable();
             $table->string('bpmn')->nullable();
             $table->longText('xml')->nullable();
-            $table->dateTime('update_at');
+            $table->integer('type')->nullable();
+            $table->string('deadline')->nullable();
+            $table->string('update_at');
             $table->integer('admin_id')->unsigned();
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
             $table->timestamps();
@@ -233,6 +235,15 @@ class CreateAllTable extends Migration
             $table->integer('employee_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create link table between process and role
+        Schema::create('processes_roles', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('process_id')->unsigned();
+            $table->integer('role_id')->unsigned();
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->timestamps();
         });
         //create element of process table
@@ -255,7 +266,6 @@ class CreateAllTable extends Migration
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
-
         //create notes of element table
         Schema::create('element_notes', function (Blueprint $table) {
             $table->increments('id');
@@ -263,36 +273,6 @@ class CreateAllTable extends Migration
             $table->integer('admin_id')->unsigned()->nullable();
             $table->longText('content');
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
-            $table->timestamps();
-        });
-        //create isos table
-        Schema::create('isos', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('year');
-            $table->longText('content');
-            $table->string('name_download')->nullable();
-            $table->longText('download')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('iso_processes', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('content');
-            $table->longText('process');
-            $table->integer('iso_id')->unsigned();
-            $table->foreign('iso_id')->references('id')->on('isos');
-            $table->timestamps();
-        });
-
-        //create rules of process table
-        Schema::create('rules', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('process_id')->unsigned();
-            $table->integer('iso_process_id')->unsigned();
-            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
-            $table->foreign('iso_process_id')->references('id')->on('iso_processes');
             $table->timestamps();
         });
     }
@@ -304,17 +284,14 @@ class CreateAllTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rules');
-
-        Schema::dropIfExists('iso_processes');
-
-        Schema::dropIfExists('isos');
 
         Schema::dropIfExists('element_comments');
 
         Schema::dropIfExists('element_notes');
 
         Schema::dropIfExists('elements');
+
+        Schema::dropIfExists('processes_roles');
 
         Schema::dropIfExists('processes_employees');
 

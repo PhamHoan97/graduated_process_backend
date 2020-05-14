@@ -13,7 +13,7 @@ class Employees extends Model
 
     public $timestamps = false;
 
-    public function processes(){
+    public function processesEmployees(){
         return $this->belongsToMany('\App\Processes','processes_employees', 'employee_id', 'process_id');
     }
 
@@ -67,5 +67,8 @@ class Employees extends Model
             $query->where('employees.department_id', $idDepartment);
         }
         return $query;
+    }
+    public function processesRoles(){
+        return $this->belongsToMany('\App\Processes','processes_roles', 'role_id', 'process_id');
     }
 }

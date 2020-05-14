@@ -31,6 +31,9 @@ Route::post('login/employee', 'Api\AccountController@loginAccount')->middleware(
 
 Route::post('logout/employee', 'Api\AccountController@logoutAccount');
 
+Route::post('employee/reset/send/password', 'Api\AccountController@resetPasswordForEmployee');
+
+Route::post('employee/reset/handle/password', 'Api\AccountController@handleResetPasswordForEmployee');
 
 // ROUTE DASHBOARD
 
@@ -168,21 +171,31 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
 
 
     //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
-    // get all employee in department
-    Route::get('company/department/{idDepartment}/employee','Api\CompanyController@getAllEmployeeDepartment');
+    // get all employee and role in department
+    Route::get('company/department/{idDepartment}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfDepartment');
     //save process
     Route::post('company/process/new','Api\CompanyController@newProcessCompany')->middleware('create-or-edit-process');
     //get all information of process
     Route::get('company/process/information/{idProcess}','Api\CompanyController@getAllInformationOfProcess');
     //edit process
     Route::post('company/process/edit','Api\CompanyController@editProcessCompany')->middleware('create-or-edit-process');
+    // get all employee and role in company
+    Route::get('company/{idCompany}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {
     //get current employee information and process
-    Route::get('employee/data/{idEmployee}','Api\AccountController@getDataOfEmployee');
+    Route::get('employee/data/{token}','Api\AccountController@getDataOfEmployee');
     //update information of employee
     Route::post('employee/update/information','Api\AccountController@updateInformationOfEmployee');
+    // get process of company paginate
+    Route::get('employee/process/{token}/{page}','Api\AccountController@getProcessOfEmployeePaginate');
+    //update account of employee
+    Route::post('employee/update/account','Api\AccountController@updateAccountOfEmployee');
+    // search Process
+    Route::get('employee/search/process/{search}','Api\AccountController@searchProcesses');
+    // get 3 notifications of employee
+    Route::get('employee/three/process/notification/{token}','Api\AccountController@getThreeNotification');
 });
 
 
