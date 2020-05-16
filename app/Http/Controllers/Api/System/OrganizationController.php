@@ -160,26 +160,52 @@ class OrganizationController extends Controller
     public function addEmployee(Request $request){
         $name = $request->newNameEmployee;
         $email = $request->newEmailEmployee;
-        $gender = $request->newIsMale;
+        $gender = $request->newGender;
         // check email unique
         $phone = $request->newPhoneEmployee;
         $idChooseRole = $request->newRoleEmployee;
         $idChooseDepartment = $request->newDepartmentEmployee;
+        $avatar = $request->get('newAvatarEmployee');
         try {
             if($this->checkAddInputEmail($email)){
                 return response()->json(['error'=>'Add fail new employee'],200);
             }
-            DB::table('employees')->insert(
-                [
-                    'name' => $name,
-                    'email' => $email,
-                    'gender' => $gender,
-                    'phone' => $phone,
-                    'role_id'=>$idChooseRole,
-                    'department_id' => $idChooseDepartment
-                ]
-            );
-            return response()->json(['message'=>'Add success new employee'],200);
+            if($avatar === null){
+                try {
+                    DB::table('employees')->insert(
+                        [
+                            'name' => $name,
+                            'email' => $email,
+                            'gender' => $gender,
+                            'phone' => $phone,
+                            'role_id'=>$idChooseRole,
+                            'department_id' => $idChooseDepartment
+                        ]
+                    );
+                    return response()->json(['message' => 'add success employee'], 200);
+                } catch (\Exception $e) {
+                    return response()->json(["error" => $e->getMessage()], 400);
+                }
+            }else {
+                $nameImage = time() . '.' . explode('/', explode(':', substr($avatar, 0, strpos($avatar, ';')))[1])[1];
+                try {
+                    DB::table('employees')->insert(
+                        [
+                            'name' => $name,
+                            'email' => $email,
+                            'gender' => $gender,
+                            'phone' => $phone,
+                            'role_id'=>$idChooseRole,
+                            'department_id' => $idChooseDepartment,
+                            'avatar' => '/avatar/employee/' . $nameImage
+                        ]
+                    );
+                    \Image::make($request->get('newAvatarEmployee'))->save(public_path('avatar/employee/') . $nameImage);
+                    return response()->json(['message' => 'add success employee'], 200);
+                } catch (\Exception $e) {
+                    return response()->json(["error" => $e->getMessage()], 400);
+                }
+            }
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -212,24 +238,50 @@ class OrganizationController extends Controller
         $newName = $request->editNameEmployee;
         $newPhone = $request->editPhoneEmployee;
         $newEmail = $request->editEmailEmployee;
-        $newGender = $request->editIsMale;
+        $newGender = $request->editGender;
         $idChooseRole= $request->idChooseRole;
         $idChooseEmployee = $request->idChooseEmployee;
         $idChooseDepartment = $request->idChooseDepartment;
+        $newAvatar = $request->get('editAvatarEmployee');
         try {
             if($this->checkEditInputEmail($newEmail,$idChooseEmployee)){
                 return response()->json(['error'=>'update fail user'],200);
             }else{
-                DB::table('employees')
-                    ->Where('id', '=', $idChooseEmployee)
-                    ->update([
-                        'name' => $newName,
-                        'email'=>$newEmail,
-                        'phone'=>$newPhone,
-                        'gender' => $newGender,
-                        'role_id'=>$idChooseRole,
-                        'department_id'=>$idChooseDepartment]);
-                return response()->json(['message'=>'update success user'],200);
+                if($newAvatar === null){
+                    try {
+                        DB::table('employees')
+                            ->Where('id', '=', $idChooseEmployee)
+                            ->update([
+                                'name' => $newName,
+                                'email'=>$newEmail,
+                                'phone'=>$newPhone,
+                                'gender' => $newGender,
+                                'role_id'=>$idChooseRole,
+                                'department_id'=>$idChooseDepartment]);
+                        return response()->json(['message' => 'edit success employee'], 200);
+                    } catch (\Exception $e) {
+                        return response()->json(["error" => $e->getMessage()], 400);
+                    }
+                }else {
+                    $nameImage = time() . '.' . explode('/', explode(':', substr($newAvatar, 0, strpos($newAvatar, ';')))[1])[1];
+                    try {
+                        DB::table('employees')
+                            ->Where('id', '=', $idChooseEmployee)
+                            ->update([
+                                'name' => $newName,
+                                'email'=>$newEmail,
+                                'phone'=>$newPhone,
+                                'gender' => $newGender,
+                                'role_id'=>$idChooseRole,
+                                'department_id'=>$idChooseDepartment,
+                                'avatar' => '/avatar/employee/' . $nameImage
+                            ]);
+                        \Image::make($request->get('editAvatarEmployee'))->save(public_path('avatar/employee/') . $nameImage);
+                        return response()->json(['message' => 'add success employee'], 200);
+                    } catch (\Exception $e) {
+                        return response()->json(["error" => $e->getMessage()], 400);
+                    }
+                }
             }
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
@@ -247,6 +299,7 @@ class OrganizationController extends Controller
                     'employees.name as name',
                     'employees.email as email',
                     'employees.phone as phone',
+                    'employees.gender as gender',
                     'employees.birth as birth',
                     'employees.address as address',
                     'employees.avatar as avatar',
