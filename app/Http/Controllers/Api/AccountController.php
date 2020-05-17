@@ -216,7 +216,7 @@ class AccountController extends Controller
         return response()->json(['success'=>true, 'message' => 'search processes', 'processes' => $processes]);
     }
 
-    public function getThreeNotification(Request $request){
+    public function getFiveNotification(Request $request){
         $token = $request->token;
         if(!$token){
             return response()->json(['error' => 1, 'message' => "token is required"], 400);
@@ -232,7 +232,7 @@ class AccountController extends Controller
                 ->where('employees.id',$employee->id)->orWhere('roles.id', $employee->role_id)
                 ->select('processes.id as id',
                     'processes.name as name',
-                    'processes.created_at as created_at')->take(3)->orderBy('created_at', 'desc')
+                    'processes.created_at as created_at')->take(5)->orderBy('created_at', 'desc')
                 ->get();
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);

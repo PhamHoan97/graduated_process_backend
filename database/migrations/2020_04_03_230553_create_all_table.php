@@ -125,7 +125,7 @@ class CreateAllTable extends Migration
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('birth')->nullable();
-            $table->boolean('gender')->nullable();
+            $table->string('gender')->nullable();
             $table->longText('about_me')->nullable();
             $table->string('avatar')->nullable();
             $table->integer('role_id')->unsigned();

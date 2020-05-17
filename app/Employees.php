@@ -37,7 +37,7 @@ class Employees extends Model
     public function scopeName($query, $nameSearch)
     {
         if (!empty($nameSearch)) {
-            $query->where('employees.name', 'LIKE', '%' . $nameSearch . '%');
+            $query->where('employees.name', 'LIKE', "%{$nameSearch}%");
         }
 
         return $query;
@@ -54,7 +54,7 @@ class Employees extends Model
     public function scopeEmail($query, $searchEmail)
     {
         if (!empty($searchEmail)) {
-            $query->where('employees.email', $searchEmail);
+            $query->where('employees.email','LIKE', "%{$searchEmail}%");
         }
 
         return $query;
@@ -73,5 +73,6 @@ class Employees extends Model
             $query->where('employees.department_id', $idDepartment);
         }
         return $query;
+
     }
 }

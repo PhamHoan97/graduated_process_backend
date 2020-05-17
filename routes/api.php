@@ -195,7 +195,7 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     // search Process
     Route::get('employee/search/process/{search}','Api\AccountController@searchProcesses');
     // get 3 notifications of employee
-    Route::get('employee/three/process/notification/{token}','Api\AccountController@getThreeNotification');
+    Route::get('employee/five/process/notification/{token}','Api\AccountController@getFiveNotification');
 });
 
 
