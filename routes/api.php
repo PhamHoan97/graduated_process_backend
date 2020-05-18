@@ -72,6 +72,34 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/iso','Api\IsoController@getIsos');
     Route::get('system/iso/download/{name}','Api\IsoController@downloadDocumentIso');
     Route::post('system/iso/delete','Api\IsoController@deleteIso');
+
+    // MANAGE NOTIFICATION
+    // create new type template
+    Route::post('system/notification/type/create','Api\System\ManageNotificationController@addType');
+    // get all types form in system
+    Route::get('system/notification/form/list','Api\System\ManageNotificationController@listForm');
+    // get all types template in system
+    Route::get('system/notification/type/list','Api\System\ManageNotificationController@listType');
+    // create new template with type
+    Route::post('system/notification/template/create','Api\System\ManageNotificationController@addTemplate');
+    // get all templates in system
+    Route::get('system/notification/template/list','Api\System\ManageNotificationController@listAllTemplate');
+    // get all template with type in system
+    Route::get('system/notification/template/list/{idType}','Api\System\ManageNotificationController@listTemplateType');
+    // create new form
+    Route::post('system/notification/form/create','Api\System\ManageNotificationController@addForm');
+    // create new notification
+    Route::post('system/notification/create','Api\System\ManageNotificationController@addNotification');
+    // get all notifications in system
+    Route::get('system/notification/list','Api\System\ManageNotificationController@getListNotifications');
+    // send notification to admin and user which directly use system
+    Route::post('system/notification/send','Api\System\ManageNotificationController@sendNotificationAdminUser');
+    // statistic notification
+    Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
+    // get list all notifications which company created
+    Route::get('company/notification/create/list/{idCompany}','Api\System\ManageNotificationController@getListCreateNotifications');
+    // company create notification
+    Route::post('company/notification/create','Api\System\ManageNotificationController@addNotificationCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
@@ -145,29 +173,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('system/notification/company/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
     Route::post('system/notification/company/create/response','Api\System\ManageNotificationController@addResponseAdmin');
 
-    // MANAGE NOTIFICATION
-    // create new type template
-    Route::post('system/notification/type/create','Api\System\ManageNotificationController@addType');
-    // get all types form in company
-    Route::get('system/notification/form/list/{idAdmin}','Api\System\ManageNotificationController@listForm');
-    // get all types template in company
-    Route::get('system/notification/type/list/{idAdmin}','Api\System\ManageNotificationController@listType');
-    // create new template with type
-    Route::post('system/notification/template/create','Api\System\ManageNotificationController@addTemplate');
-    // get all templates in system
-    Route::get('system/notification/template/list','Api\System\ManageNotificationController@listAllTemplate');
-    // get all template with type in system
-    Route::get('system/notification/template/list/{idType}','Api\System\ManageNotificationController@listTemplateType');
-    // create new form
-    Route::post('system/notification/form/create','Api\System\ManageNotificationController@addForm');
-    // create new notification
-    Route::post('system/notification/create','Api\System\ManageNotificationController@addNotification');
-    // get all notifications in company
-    Route::post('system/notification/list/','Api\System\ManageNotificationController@getListNotifications');
-    // send notification to admin and user which directly use system
-    Route::post('system/notification/send','Api\System\ManageNotificationController@addNotificationUser');
-    // statistic notification
-    Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
+
 
 
     //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
@@ -196,6 +202,12 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     Route::get('employee/search/process/{search}','Api\AccountController@searchProcesses');
     // get 3 notifications of employee
     Route::get('employee/three/process/notification/{token}','Api\AccountController@getThreeNotification');
+
+    // MANAGE NOTIFICATION EMPLOYEE
+
+//    Route::post('employee/notification/list','Api\System\ManageNotificationController@listAdminNotification');
+//    Route::post('employee/notification/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
+//    Route::post('employee/notification/create/response','Api\System\ManageNotificationController@addResponseAdmin');
 });
 
 

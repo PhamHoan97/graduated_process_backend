@@ -148,11 +148,34 @@ class CreateAllTable extends Migration
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
         });
+        //create notification by company
+        Schema::create('company_notifications', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('description');
+            $table->string('file')->nullable();
+            $table->integer('status');
+            $table->dateTime('update_at');
+            $table->integer('company_id')->unsigned();
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create notification company send to user
+        Schema::create('company_user_notifications', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('status');
+            $table->dateTime('update_at');
+            $table->integer('notification_id')->unsigned();
+            $table->integer('account_id')->unsigned()->nullable();
+            $table->foreign('account_id')->references('id')->on('accounts')->onDelete('cascade');
+            $table->foreign('notification_id')->references('id')->on('company_notifications')->onDelete('cascade');
+            $table->timestamps();
+        });
         //create type notification  table
         Schema::create('types', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('admin_id')->unsigned();
-            $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
+            $table->integer('system_id')->unsigned();
+            $table->foreign('system_id')->references('id')->on('systems')->onDelete('cascade');
             $table->string('name');
             $table->string('description');
             $table->timestamps();
@@ -173,13 +196,14 @@ class CreateAllTable extends Migration
             $table->string('description');
             $table->dateTime('update_at');
             $table->integer('template_id')->unsigned();
-            $table->integer('admin_id')->unsigned();
-            $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
+            $table->integer('system_id')->unsigned();
+            $table->foreign('system_id')->references('id')->on('systems')->onDelete('cascade');
             $table->foreign('template_id')->references('id')->on('templates')->onDelete('cascade');
             $table->timestamps();
         });
+
         //create notification by system
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('system_notifications', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('description');
@@ -190,15 +214,37 @@ class CreateAllTable extends Migration
             $table->foreign('form_id')->references('id')->on('forms')->onDelete('cascade');
             $table->timestamps();
         });
-        //create notification send to user
-        Schema::create('user_notifications', function (Blueprint $table) {
+        //create notification send to admin
+        Schema::create('admin_notifications', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('status');
+            $table->dateTime('update_at');
+            $table->integer('notification_id')->unsigned();
+            $table->integer('admin_id')->unsigned()->nullable();
+            $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
+            $table->foreign('notification_id')->references('id')->on('system_notifications')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create response of admin
+        Schema::create('admin_responses', function (Blueprint $table) {
+            $table->increments('id');
+            $table->longText('content');
+            $table->dateTime('update_at');
+            $table->integer('admin_id')->unsigned()->nullable();
+            $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
+            $table->integer('notification_id')->unsigned();
+            $table->foreign('notification_id')->references('id')->on('admin_notifications')->onDelete('cascade');
+            $table->timestamps();
+        });
+        //create notification system send to user
+        Schema::create('system_user_notifications', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('status');
             $table->dateTime('update_at');
             $table->integer('notification_id')->unsigned();
             $table->integer('account_id')->unsigned()->nullable();
             $table->foreign('account_id')->references('id')->on('accounts')->onDelete('cascade');
-            $table->foreign('notification_id')->references('id')->on('notifications')->onDelete('cascade');
+            $table->foreign('notification_id')->references('id')->on('system_notifications')->onDelete('cascade');
             $table->timestamps();
         });
         //create response of user
@@ -209,7 +255,7 @@ class CreateAllTable extends Migration
             $table->integer('account_id')->unsigned()->nullable();
             $table->foreign('account_id')->references('id')->on('accounts')->onDelete('cascade');
             $table->integer('notification_id')->unsigned();
-            $table->foreign('notification_id')->references('id')->on('user_notifications')->onDelete('cascade');
+            $table->foreign('notification_id')->references('id')->on('system_user_notifications')->onDelete('cascade');
             $table->timestamps();
         });
         //create process of employee table
@@ -299,15 +345,23 @@ class CreateAllTable extends Migration
 
         Schema::dropIfExists('user_responses');
 
-        Schema::dropIfExists('user_notifications');
+        Schema::dropIfExists('system_user_notifications');
 
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('admin_responses');
+
+        Schema::dropIfExists('admin_notifications');
+
+        Schema::dropIfExists('system_notifications');
 
         Schema::dropIfExists('forms');
 
         Schema::dropIfExists('templates');
 
         Schema::dropIfExists('types');
+
+        Schema::dropIfExists('company_user_notifications');
+
+        Schema::dropIfExists('company_notifications');
 
         Schema::dropIfExists('accounts');
 
