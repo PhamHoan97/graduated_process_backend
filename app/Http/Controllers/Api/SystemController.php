@@ -454,4 +454,18 @@ class SystemController extends Controller
             }
         }
     }
+
+    public function getSystemAccountInformation(Request $request){
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "token is required"]);
+        }
+        try{
+            $system = Systems::where('auth_token', $token)->first();
+            $data = ['name' => $system->username, 'email' => $system->email];
+        }catch (\Exception $e){
+            return response()->json(['error' => true, 'message' => $e->getMessage()]);
+        }
+        return response()->json(['success' => true, 'message' => 'got system account information', 'system' => $data]);
+    }
 }
