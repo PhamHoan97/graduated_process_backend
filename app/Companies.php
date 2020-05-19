@@ -20,4 +20,8 @@ class Companies extends Model
     public function departments(){
         return $this->hasMany('App\Departments', 'company_id');
     }
+
+    public function employees(){
+        return $this->hasManyThrough('App\Employees', 'App\Departments','company_id', 'department_id');
+    }
 }

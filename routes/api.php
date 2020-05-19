@@ -64,47 +64,16 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/companies', 'Api\SystemController@getListCompanies');
     Route::get('system/company/information/{idCompany}', 'Api\SystemController@getformationOfCompany');
     Route::post('system/more/admin','Api\SystemController@moreAdmin');
-
     Route::get('system/email', 'Api\SystemController@getSentEmailInSystem');
     Route::get('system/email/information/{idEmail}', 'Api\SystemController@getEmailInformation');
     Route::post('system/email/resend','Api\SystemController@resendEmail');
-    Route::post('system/iso/create','Api\IsoController@createIso')->middleware('createIso');
-    Route::get('system/iso','Api\IsoController@getIsos');
-    Route::get('system/iso/download/{name}','Api\IsoController@downloadDocumentIso');
-    Route::post('system/iso/delete','Api\IsoController@deleteIso');
 
-    // MANAGE NOTIFICATION
-    // create new type template
-    Route::post('system/notification/type/create','Api\System\ManageNotificationController@addType');
-    // get all types form in system
-    Route::get('system/notification/form/list','Api\System\ManageNotificationController@listForm');
-    // get all types template in system
-    Route::get('system/notification/type/list','Api\System\ManageNotificationController@listType');
-    // create new template with type
-    Route::post('system/notification/template/create','Api\System\ManageNotificationController@addTemplate');
-    // get all templates in system
-    Route::get('system/notification/template/list','Api\System\ManageNotificationController@listAllTemplate');
-    // get all template with type in system
-    Route::get('system/notification/template/list/{idType}','Api\System\ManageNotificationController@listTemplateType');
-    // create new form
-    Route::post('system/notification/form/create','Api\System\ManageNotificationController@addForm');
-    // create new notification
-    Route::post('system/notification/create','Api\System\ManageNotificationController@addNotification');
-    // get all notifications in system
-    Route::get('system/notification/list','Api\System\ManageNotificationController@getListNotifications');
-    // send notification to admin and user which directly use system
-    Route::post('system/notification/send','Api\System\ManageNotificationController@sendNotificationAdminUser');
-    // statistic notification
-    Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
-    // get list all notifications which company created
-    Route::get('company/notification/create/list/{idCompany}','Api\System\ManageNotificationController@getListCreateNotifications');
-    // company create notification
-    Route::post('company/notification/create','Api\System\ManageNotificationController@addNotificationCompany');
+    Route::get('system/account/{token}', 'Api\SystemController@getSystemAccountInformation');
+
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
-    // all routes of system role to protected resources are registered here
-
+    // all routes of company role to protected resources are registered here
     // ROUTE ORGANIZATION
     // Get all json data organization
     Route::post('system/organization/chart','Api\System\OrganizationController@getJsonOrganization');
@@ -187,6 +156,14 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/process/edit','Api\CompanyController@editProcessCompany')->middleware('create-or-edit-process');
     // get all employee and role in company
     Route::get('company/{idCompany}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfCompany');
+    // get all processes in company
+    Route::get('company/processes/{token}','Api\CompanyController@getAllProcessesOfCompany');
+    // get all employees in company
+    Route::get('company/employees/{token}','Api\CompanyController@getAllEmployeesOfCompany');
+    // get all processes of a department in company
+    Route::get('company/processes/department/{idDepartment}','Api\CompanyController@getAllProcessesOfADepartmentOfCompany');
+    // get all processes of a employee in company
+    Route::get('company/processes/employee/{idEmployee}','Api\CompanyController@getAllProcessesOfAEmployeeOfCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {
@@ -201,6 +178,7 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     // search Process
     Route::get('employee/search/process/{search}','Api\AccountController@searchProcesses');
     // get 3 notifications of employee
+
     Route::get('employee/three/process/notification/{token}','Api\AccountController@getThreeNotification');
 
     // MANAGE NOTIFICATION EMPLOYEE
@@ -210,6 +188,9 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     Route::post('employee/notification/response','Api\System\ManageNotificationController@getInformationTemplateNotificationSystemEmployee');
     Route::post('employee/notification/create/response','Api\System\ManageNotificationController@addResponseEmployee');
     Route::get('employee/notification/detail/{idNotificationFromCompany}','Api\System\ManageNotificationController@getDetailNotificationFromCompany');
+
+
+    Route::get('employee/five/process/notification/{token}','Api\AccountController@getFiveNotification');
 
 });
 

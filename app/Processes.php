@@ -8,7 +8,7 @@ use phpDocumentor\Reflection\Element;
 class Processes extends Model
 {
     protected $fillable = [
-        'name', 'description', 'image', 'svg', 'bpmn', 'xml', 'type', 'deadline', 'update_at','admin_id'
+        'name', 'description', 'image', 'svg', 'bpmn', 'xml', 'type', 'deadline', 'update_at','admin_id', 'document'
     ];
 
     public $table = "processes";

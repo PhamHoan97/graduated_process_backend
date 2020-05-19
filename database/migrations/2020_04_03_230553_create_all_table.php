@@ -269,6 +269,7 @@ class CreateAllTable extends Migration
             $table->longText('xml')->nullable();
             $table->integer('type')->nullable();
             $table->string('deadline')->nullable();
+            $table->text('document')->nullable();
             $table->string('update_at');
             $table->integer('admin_id')->unsigned();
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
@@ -321,6 +322,7 @@ class CreateAllTable extends Migration
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
+
     }
 
     /**
@@ -330,7 +332,6 @@ class CreateAllTable extends Migration
      */
     public function down()
     {
-
         Schema::dropIfExists('element_comments');
 
         Schema::dropIfExists('element_notes');

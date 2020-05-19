@@ -21,7 +21,13 @@ class Employees extends Model
         return $this->belongsTo('App\Roles', 'role_id', 'id');
     }
 
+    public function processesRoles()
+    {
+        return $this->belongsToMany('\App\Processes', 'processes_roles', 'role_id', 'process_id');
+    }
+
     /**
+     *
      * Scope a query to only include users of a given type.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -67,8 +73,6 @@ class Employees extends Model
             $query->where('employees.department_id', $idDepartment);
         }
         return $query;
-    }
-    public function processesRoles(){
-        return $this->belongsToMany('\App\Processes','processes_roles', 'role_id', 'process_id');
+
     }
 }

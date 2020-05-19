@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Admins;
+use App\Companies;
 use App\ElementComments;
 use App\ElementNotes;
 use App\Elements;
+use App\Employees;
 use App\Processes;
 use App\ProcessesEmployees;
 use App\ProcessesRoles;
@@ -253,7 +255,7 @@ class CompanyController extends Controller
             }
             return response()->json(
                 [
-                    'success' => true, 'message' => "saved process",
+                    'success' => true, 'message' => "got process",
                     "process" => $process
                 ]);
         }
@@ -382,9 +384,156 @@ class CompanyController extends Controller
                     'departments.id as id_department',
                     'departments.name as department_name')
                 ->get();
-            return response()->json(['message'=>'Get all users and roles in company ','employees'=>$employees, 'roles' => $roles],200);
+            return response()->json(['message'=>'Got all users and roles in company ','employees'=>$employees, 'roles' => $roles],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
     }
+
+    public function getAllProcessesOfCompany(Request $request){
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "token is required"]);
+        }
+        try{
+            $admin = Admins::where('auth_token', $token)->first();
+            $company_id = $admin->company_id;
+            $processes1 = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+                ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $processes2 = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
+                ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+         }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(
+            [
+                'message'=>'got all processes of company',
+                'processes1' => $processes1,
+                'processes2' => $processes2
+            ],200);
+    }
+
+    public function getAllEmployeesOfCompany(Request $request){
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "token is required"]);
+        }
+        try{
+            $admin = Admins::where('auth_token', $token)->first();
+            $company_id = $admin->company_id;
+            $company = Companies::find($company_id);
+        }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(['message'=>'Got all employees in company ','employees'=> $company->employees],200);
+    }
+
+    public function getAllProcessesOfADepartmentOfCompany(Request $request){
+        $idDepartment = $request->idDepartment;
+        if(!$idDepartment){
+            return response()->json(['error' => true, 'message' => "idDepartment is required"]);
+        }
+        try{
+            $processes1 = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
+                ->where('departments.id',$idDepartment)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+
+            $processes2 = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+                ->where('departments.id',$idDepartment)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+        }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(
+            [
+                'message'=>'got all processes of a department of company',
+                'processes1' => $processes1,
+                'processes2' => $processes2,
+            ],200);
+    }
+
+    public function getAllProcessesOfAEmployeeOfCompany(Request $request){
+        $idEmployee = $request->idEmployee ;
+        if(!$idEmployee){
+            return response()->json(['error' => true, 'message' => "idEmployee is required"]);
+        }
+        try{
+            $employee = Employees::find($idEmployee);
+            $processes1 = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
+                ->where('employees.id',$idEmployee)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+
+            $processes2 = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->where('employees.id',$idEmployee)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+
+        }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(
+            [
+                'message'=>'got all processes of a department of company',
+                'processes1' => $processes1,
+                'processes2' => $processes2,
+                'employee' => $employee
+            ],200);
+    }
+
 }
