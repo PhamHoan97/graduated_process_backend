@@ -172,8 +172,8 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('system/notification/company/list','Api\System\ManageNotificationController@listAdminNotification');
     Route::post('system/notification/company/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
     Route::post('system/notification/company/create/response','Api\System\ManageNotificationController@addResponseAdmin');
-
-
+    Route::get('company/notification/account/list/{idCompany}','Api\System\ManageNotificationController@getAllAccountEmployee');
+    Route::post('company/notification/account/send','Api\System\ManageNotificationController@sendNotificationEmployee');
 
 
     //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
@@ -205,9 +205,12 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
 
     // MANAGE NOTIFICATION EMPLOYEE
 
-//    Route::post('employee/notification/list','Api\System\ManageNotificationController@listAdminNotification');
-//    Route::post('employee/notification/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
-//    Route::post('employee/notification/create/response','Api\System\ManageNotificationController@addResponseAdmin');
+    Route::post('employee/notification/list/system','Api\System\ManageNotificationController@listEmployeeNotificationSystem');
+    Route::post('employee/notification/list/company','Api\System\ManageNotificationController@listEmployeeNotificationCompany');
+    Route::post('employee/notification/response','Api\System\ManageNotificationController@getInformationTemplateNotificationSystemEmployee');
+    Route::post('employee/notification/create/response','Api\System\ManageNotificationController@addResponseEmployee');
+    Route::get('employee/notification/detail/{idNotificationFromCompany}','Api\System\ManageNotificationController@getDetailNotificationFromCompany');
+
 });
 
 
