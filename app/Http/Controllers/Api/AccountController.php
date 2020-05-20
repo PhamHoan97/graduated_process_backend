@@ -66,7 +66,7 @@ class AccountController extends Controller
                 'success'=>true,
                 'message' => 'Login account successful',
                 'token'=> $token,
-                'id' => $username->id,
+                'account_id' => $username->id,
                 'employee_id' => $username->employee_id,
                 'isEmployee' => true
             ];
