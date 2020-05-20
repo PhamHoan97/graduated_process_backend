@@ -8,8 +8,10 @@ use App\ElementComments;
 use App\ElementNotes;
 use App\Elements;
 use App\Employees;
+use App\Fields;
 use App\Processes;
 use App\ProcessesEmployees;
+use App\ProcessesFields;
 use App\ProcessesRoles;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -534,6 +536,29 @@ class CompanyController extends Controller
                 'processes2' => $processes2,
                 'employee' => $employee
             ],200);
+    }
+
+    public function getAllFields(Request $request){
+        try{
+            $fields = Fields::all();
+        }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(['message'=>'Got all fields','fields'=> $fields],200);
+    }
+
+    public function getAllProcessesTemplate(Request $request){
+        try{
+            $data = [];
+            $processes = ProcessesFields::all();
+            foreach ($processes as $process){
+                $process->field;
+                $data []= $process;
+            }
+        }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(['message'=>'Got all processes template','processes'=> $data],200);
     }
 
 }

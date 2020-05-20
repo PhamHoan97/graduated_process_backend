@@ -73,6 +73,9 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::post('system/template/new','Api\FieldController@newTemplate');
     Route::get('system/field/template/{idProcess}','Api\FieldController@getProcessTemplateOfField');
     Route::post('system/template/edit','Api\FieldController@editTemplate');
+    Route::get('system/template/field/{idField}','Api\FieldController@getAllTemplateOfField');
+    Route::post('/system/template/delete','Api\FieldController@deleteTemplate');
+    Route::post('system/field/update','Api\FieldController@updateField');
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
@@ -167,6 +170,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/processes/department/{idDepartment}','Api\CompanyController@getAllProcessesOfADepartmentOfCompany');
     // get all processes of a employee in company
     Route::get('company/processes/employee/{idEmployee}','Api\CompanyController@getAllProcessesOfAEmployeeOfCompany');
+    // get all fields in company
+    Route::get('company/field','Api\CompanyController@getAllFields');
+    // get all processes of template in company
+    Route::get('company/template/processes','Api\CompanyController@getAllProcessesTemplate');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

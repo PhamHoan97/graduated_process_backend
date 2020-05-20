@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Admins;
 use App\Companies;
+use App\Departments;
 use App\Emails;
 use App\Mail\Reject;
 use App\Mail\ResendEmail;
 use App\Mail\SendAdminAccount;
+use App\Processes;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -310,13 +312,22 @@ class SystemController extends Controller
     public function getListCompanies(Request $request){
         try{
             $companies = Companies::where('active',1)->get();
+            $numberDepartments = Departments::all()->count();
+            $numberCompanies = Companies::where('active',1)->count();
+            $numberProcesses = Processes::all()->count();
+            $statistic = [
+                'departments' => $numberDepartments,
+                'companies' => $numberCompanies,
+                'processes' => $numberProcesses,
+            ];
         }catch (ModelNotFoundException $exception){
             return response()->json(['error' => true, 'message' => $exception->getMessage()]);
         }
         return response()->json([
             'success' => true,
-            'message' => "Get data successful",
-            'companies' => $companies
+            'message' => "Got data successful",
+            'companies' => $companies,
+            'statistic' => $statistic
         ]);
     }
 

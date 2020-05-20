@@ -16,4 +16,8 @@ class ProcessesFields extends Model
     ];
 
     public $table = "processes_fields";
+
+    public function field(){
+        return $this->belongsTo('App\Fields', 'field_id', 'id');
+    }
 }

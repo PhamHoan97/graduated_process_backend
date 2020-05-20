@@ -120,4 +120,71 @@ class FieldController extends Controller
         }
         return response()->json(['success' => true, 'message' => "edited process template", "process" => $template]);
     }
+
+    public function getAllTemplateOfField(Request $request){
+        $idField = $request->idField;
+        if(!$idField){
+            return response()->json(['error' => true, 'message' => "idField is required"]);
+        }
+        try{
+            $field = Fields::find($idField);
+            $templates = ProcessesFields::where('field_id', $idField)->get();
+        }catch (\Exception $e){
+            return response()->json(['error' => true, 'message' => $e->getMessage()],400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "edited process template",
+            'processes' => $templates,
+            'field' => $field,
+        ]);
+    }
+
+    public function deleteTemplate(Request $request){
+        $idProcess = $request->idProcess;
+        $idField = $request->idField;
+        if(!$idProcess){
+            return response()->json(['error' => true, 'message' => "idProcess is required"]);
+        }
+        if(!$idField){
+            return response()->json(['error' => true, 'message' => "idField is required"]);
+        }
+        try{
+            $template = ProcessesFields::find($idProcess)->delete();
+            $templates = ProcessesFields::where('field_id', $idField)->get();
+        }catch (\Exception $e){
+            return response()->json(['error' => true, 'message' => $e->getMessage()],400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "deleted process template",
+            'processes' => $templates,
+        ]);
+    }
+
+    public function updateField(Request $request){
+        $id = $request->id;
+        $name = $request->name;
+        $description = $request->description;
+        if(!$id){
+            return response()->json(['error' => true, 'message' => "id is required"]);
+        }
+        if(!$name){
+            return response()->json(['error' => true, 'message' => "name is required"]);
+        }
+        if(!$description){
+            return response()->json(['error' => true, 'message' => "description is required"]);
+        }
+        try{
+            $field = Fields::find($id);
+            $field->name = $name;
+            $field->description = $description;
+            $field->update();
+
+            $fields = Fields::all();
+        }catch (\Exception $e){
+            return response()->json(['error' => true, 'message' => $e->getMessage()],400);
+        }
+        return response()->json(['success' => true, 'message' => "updated fields" , "fields"=> $fields]);
+    }
 }
