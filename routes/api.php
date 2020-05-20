@@ -68,6 +68,11 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/email/information/{idEmail}', 'Api\SystemController@getEmailInformation');
     Route::post('system/email/resend','Api\SystemController@resendEmail');
     Route::get('system/account/{token}', 'Api\SystemController@getSystemAccountInformation');
+    Route::post('system/field/new','Api\FieldController@newField');
+    Route::get('system/field','Api\FieldController@getAllFields');
+    Route::post('system/template/new','Api\FieldController@newTemplate');
+    Route::get('system/field/template/{idProcess}','Api\FieldController@getProcessTemplateOfField');
+    Route::post('system/template/edit','Api\FieldController@editTemplate');
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {

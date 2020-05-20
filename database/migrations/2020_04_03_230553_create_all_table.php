@@ -276,6 +276,23 @@ class CreateAllTable extends Migration
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
+        //create fields table
+        Schema::create('fields', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+        //create processes of fields table
+        Schema::create('processes_fields', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->longText('xml');
+            $table->text('description')->nullable();
+            $table->text('field_id')->unsigned();
+            $table->foreign('field_id')->references('id')->on('fields')->onDelete('cascade');
+            $table->timestamps();
+        });
 
     }
 
@@ -286,6 +303,10 @@ class CreateAllTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('processes_fields');
+
+        Schema::dropIfExists('fields');
+
         Schema::dropIfExists('element_comments');
 
         Schema::dropIfExists('element_notes');
