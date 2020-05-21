@@ -54,6 +54,17 @@ class ManageNotificationController extends Controller
         }
     }
 
+    // get list form
+    public function deleteForm(Request $request){
+        try {
+            $idForm = $request->idForm;
+            DB::table('forms')->where('id',$idForm)->delete();
+            return response()->json(['message'=>'Delete form success '],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
     // get list templates
     public function listAllTemplate(Request $request){
         try {
@@ -195,6 +206,17 @@ class ManageNotificationController extends Controller
         }
     }
 
+    // get list notification
+    public function deleteNotification(Request $request){
+        try {
+            $idNotificationSystem = $request->idNotificationSystem;
+            DB::table('system_notifications')->where('id',$idNotificationSystem)->delete();
+            return response()->json(['message'=>'delete success notification'],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
     // Create notification user or admin
     public function sendNotificationAdminUser(Request $request){
         try {
@@ -250,14 +272,16 @@ class ManageNotificationController extends Controller
             $idNotification = $request->idNotification;
             $notification = DB::table('system_notifications')->where('id',$idNotification)->first();
             $notificationUser = DB::table('system_user_notifications')->where('notification_id',$idNotification)->count();
-            $responseUser = DB::table('system_user_notifications')
-                ->where('status',1)
-                ->where('notification_id',$idNotification)
+            $responseUser = DB::table('user_responses')
+                ->join('system_user_notifications', 'user_responses.notification_id', '=', 'system_user_notifications.id')
+                ->join('system_notifications', 'system_notifications.id', '=', 'system_user_notifications.notification_id')
+                ->where('system_notifications.id',$idNotification)
                 ->count();
             $notificationAdmin = DB::table('admin_notifications')->where('notification_id',$idNotification)->count();
-            $responseAdmin = DB::table('admin_notifications')
-                ->where('status',1)
-                ->where('notification_id',$idNotification)
+            $responseAdmin = DB::table('admin_responses')
+                ->join('admin_notifications', 'admin_notifications.id', '=', 'admin_responses.notification_id')
+                ->join('system_notifications', 'system_notifications.id', '=', 'admin_notifications.notification_id')
+                ->where('system_notifications.id',$idNotification)
                 ->count();
             $data = [
                 'notificationName'=>$notification->name,
@@ -312,7 +336,7 @@ class ManageNotificationController extends Controller
                 'id'=>$notificationAdmin->id,
                 'date'=>$notificationAdmin->date,
                 'name'=>$notificationAdmin->name,
-                'file'=>$notificationAdmin->name,
+                'file'=>$notificationAdmin->file,
                 'description'=>$notificationAdmin->description,
                 'name_form'=>$notificationAdmin->name_form,
                 'description_form'=>$notificationAdmin->description_form,
@@ -332,7 +356,12 @@ class ManageNotificationController extends Controller
             $idNotificationAdmin = $request->idNotificationAdmin;
             $content = \GuzzleHttp\json_encode($request->contentResponse);
             DB::table('admin_responses')->insert(
-                ['content' => $content,'update_at'=>$date,'admin_id'=>$idAdmin,'notification_id'=>$idNotificationAdmin]
+                [
+                    'content' => $content,
+                    'update_at'=>$date,
+                    'admin_id'=>$idAdmin,
+                    'notification_id'=>$idNotificationAdmin
+                ]
             );
             // update status in admin_notifications
             try {
@@ -547,7 +576,7 @@ class ManageNotificationController extends Controller
                 'id'=>$notificationEmployee->id,
                 'date'=>$notificationEmployee->date,
                 'name'=>$notificationEmployee->name,
-                'file'=>$notificationEmployee->name,
+                'file'=>$notificationEmployee->file,
                 'description'=>$notificationEmployee->description,
                 'name_form'=>$notificationEmployee->name_form,
                 'description_form'=>$notificationEmployee->description_form,
@@ -564,20 +593,20 @@ class ManageNotificationController extends Controller
         try {
             $date = date('Y-m-d H:i:s');
             $idAccount = $request->idAccount;
-            $idNotificationSystemEmployee = $request->idNotificationSystemEmployee;
+            $idNotificationEmployee = $request->idNotificationEmployee;
             $content = \GuzzleHttp\json_encode($request->contentResponse);
             DB::table('user_responses')->insert(
                 [
                     'content' => $content,
                     'update_at'=>$date,
                     'account_id'=>$idAccount,
-                    'notification_id'=>$idNotificationSystemEmployee
+                    'notification_id'=>$idNotificationEmployee
                 ]
             );
             // update status in admin_notifications
             try {
                 DB::table('system_user_notifications')
-                    ->Where('id', '=', $idNotificationSystemEmployee)
+                    ->where('id', '=', $idNotificationEmployee)
                     ->update(['status' => 1]);
             }catch (\Exception $e) {
                 return response()->json(["error" => $e->getMessage()],400);
@@ -607,4 +636,97 @@ class ManageNotificationController extends Controller
             return response()->json(["error" => $e->getMessage()],400);
         }
     }
+
+    // get detail notification employee from company
+    public function updateStatusNotificationFormCompany (Request $request){
+        try {
+            $idNotificationFromCompany = $request->idNotificationFromCompany;
+            try {
+                DB::table('company_user_notifications')
+                    ->Where('id', '=', $idNotificationFromCompany)
+                    ->update([
+                        'status' => 1,
+                    ]);
+                return response()->json(['message'=>'update success status notification from company'],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // get detail notification employee from company
+    public function updateStatusNotificationFormSystem (Request $request){
+        try {
+            $idNotificationFromSystem = $request->idNotificationFromSystem;
+            try {
+                DB::table('system_user_notifications')
+                    ->where('id', '=', $idNotificationFromSystem)
+                    ->update([
+                        'status' => 1,
+                    ]);
+                return response()->json(['message'=>'update success status notification from system'],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // Get information response in notification system
+    public function getInformationResponses (Request $request,$idNotificationFromSystem){
+        $result = array();
+        try {
+            $responseCompanies = DB::table('admin_responses')
+                ->join('admin_notifications', 'admin_notifications.id', '=', 'admin_responses.notification_id')
+                ->join('system_notifications', 'system_notifications.id', '=', 'admin_notifications.notification_id')
+                ->join('admins', 'admins.id', '=', 'admin_notifications.admin_id')
+                ->where('system_notifications.id', '=', $idNotificationFromSystem)
+                ->select('admin_responses.content as content','admins.username as username','admin_responses.update_at as update_at')
+                ->get();
+            foreach ($responseCompanies as $responseCompany){
+                $dataCompanyResponses = json_decode($responseCompany->content);
+                $dataCompanyResponses->{"Admin"} = $responseCompany->username;
+                $dataCompanyResponses->{"Employee"} = 'Không';
+                $dataCompanyResponses->{"Day"} = $responseCompany->update_at;
+                $result[]=$dataCompanyResponses;
+            }
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+
+        try {
+            $responseEmployees = DB::table('user_responses')
+                ->join('system_user_notifications', 'system_user_notifications.id', '=', 'user_responses.notification_id')
+                ->join('system_notifications', 'system_notifications.id', '=', 'system_user_notifications.notification_id')
+                ->join('accounts', 'accounts.id', '=', 'system_user_notifications.account_id')
+                ->where('system_notifications.id', '=', $idNotificationFromSystem)
+                ->select('user_responses.content','accounts.username as username','user_responses.update_at as update_at')
+                ->get();
+            foreach ($responseEmployees as $responseEmployee){
+                $dataEmployeeResponses = json_decode($responseEmployee->content);
+                $dataEmployeeResponses->{"Admin"} = 'Không';
+                $dataEmployeeResponses->{"Employee"} = $responseEmployee->username;
+                $dataEmployeeResponses->{"Day"} = $responseEmployee->update_at;
+                $result[]=$dataEmployeeResponses;
+            }
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(['message'=>'get success all response of system notification','responseNotificationSystem'=>$result],200);
+    }
+
+    // delete notification created by company
+    public function deleteNotificationCreate(Request $request){
+        $idNotificateCreate = $request->idNotificateCreate;
+        try {
+            DB::table('company_notifications')->where('id',$idNotificateCreate)->delete();
+            return response()->json(['message'=>'Delete notification created by company '],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
 }

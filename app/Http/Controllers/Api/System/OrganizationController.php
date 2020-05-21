@@ -442,7 +442,13 @@ class OrganizationController extends Controller
         try {
             $idCompany = $request->idCompany;
             $dataOrganization = [];
+            $url = "http://localhost:8000";
             $company = DB::table('companies')->where('id',$idCompany)->first();
+            if($company->avatar !== null && $company->avatar !== ""){
+                $avatarCompany = $url.$company->avatar;
+            }else{
+                $avatarCompany = $url."/organization/company.png";
+            }
             $organizationCompany =  array(
                 "id"=>1,
                 "email"=>$company->contact,
@@ -450,7 +456,7 @@ class OrganizationController extends Controller
                     'Company'
                 ),
                 "title"=>"Công ty",
-                "img" => "https://cdn.balkan.app/shared/1.jpg",
+                "img" => $avatarCompany,
                 "name"=>$company->name
             );
             array_push($dataOrganization, $organizationCompany);
@@ -465,7 +471,7 @@ class OrganizationController extends Controller
                             'Department'
                         ),
                         "name"=>$department->name,
-                        'title'=>"Department"
+                        'title'=>"Department",
                     );
                     array_push($dataOrganization, $organizationDepartment);
                     $idDepartment = $id;
@@ -485,10 +491,19 @@ class OrganizationController extends Controller
                             array_push($dataOrganization, $organizationRole);
                             $idRole = $id;
                             $id++;
-                            $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','email','id']);
+                            $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','email','id','avatar','gender']);
                             if($employees !==null){
                                 foreach ($employees as $keyEmployee => $employee){
                                     $detailRole = DB::table('roles')->where('id',$role->id)->first();
+                                    if($employee->avatar !== null && $employee->avatar !==""){
+                                        $avatarEmployee = $url."/".$employee->avatar;
+                                    }else{
+                                        if($employee->gender === 'Nam'){
+                                            $avatarEmployee = $url."/organization/avatar-man.png";
+                                        }else{
+                                            $avatarEmployee = $url."/organization/avatar-female.png";
+                                        }
+                                    }
                                     $organizationEmployee = array(
                                         "id"=>$id,
                                         "pid"=>$idRole,
@@ -498,7 +513,7 @@ class OrganizationController extends Controller
                                         "name"=>$employee->name,
                                         "title"=>$detailRole->name,
                                         "email"=>$employee->email,
-                                        "img"=>"https://cdn.balkan.app/shared/8.jpg"
+                                        "img"=>$avatarEmployee
                                     );
                                     array_push($dataOrganization, $organizationEmployee);
                                     $id++;
