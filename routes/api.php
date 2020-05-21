@@ -174,6 +174,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/field','Api\CompanyController@getAllFields');
     // get all processes of template in company
     Route::get('company/template/processes','Api\CompanyController@getAllProcessesTemplate');
+    // get all processes of template with field in company
+    Route::get('company/template/processes/field/{idField}','Api\CompanyController@getAllProcessesTemplateOfField');
+    // get process of template with id in company
+    Route::get('company/template/process/{idProcess}','Api\CompanyController@getProcessTempalateWithId');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

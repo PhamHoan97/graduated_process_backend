@@ -561,4 +561,34 @@ class CompanyController extends Controller
         return response()->json(['message'=>'Got all processes template','processes'=> $data],200);
     }
 
+    public function getAllProcessesTemplateOfField(Request $request){
+        $idField = $request->idField;
+        if(!$idField){
+            return response()->json(['error' => true, 'message' => "idField is required"]);
+        }
+        try{
+            $processes = ProcessesFields::where('field_id',$idField)->get();
+            $data = [];
+            foreach ($processes as $process){
+                $process->field;
+                $data []= $process;
+            }
+        }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(['message'=>'Got all processes template of field','processes'=> $data],200);
+    }
+
+    public function getProcessTempalateWithId(Request $request){
+        $idProcess = $request->idProcess;
+        if(!$idProcess){
+            return response()->json(['error' => true, 'message' => "idProcess is required"]);
+        }
+        try{
+            $process = ProcessesFields::find($idProcess);
+        }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(['message'=>'Got process template with id','process'=> $process],200);
+    }
 }
