@@ -76,13 +76,13 @@ class CompanyController extends Controller
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Password or account is invalid',
+                    'message' => 'Tài khoản hoặc mật khẩu không đúng',
                 ]);
             }
         } catch (JWTException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Token creation failed',
+                'message' => 'Tạo token bị lỗi',
             ]);
         }
 
@@ -99,14 +99,14 @@ class CompanyController extends Controller
 
             $response = [
                 'success'=>true,
-                'message' => 'Login company successful',
+                'message' => 'Đăng nhập thành công',
                 'token'=> $token,
                 'id' => $adminUserName->id,
                 'company_id' => $adminUserName->company_id,
                 'isAdmin' => true
             ];
         }else{
-            $response = ['error'=>true, 'message'=>'Record doesnt exists'];
+            $response = ['error'=>true, 'message'=>'Tài khoản này không tồn tại'];
             return response()->json($response, 400);
         }
 
@@ -117,7 +117,7 @@ class CompanyController extends Controller
     {
         $this->guard()->logout();
 
-        return response()->json(['success'=>true,'message' => 'Logged out']);
+        return response()->json(['success'=>true,'message' => 'Đăng xuất thành công']);
     }
 
     public function getAllEmployeeAndRoleOfDepartment(Request $request){
@@ -165,7 +165,7 @@ class CompanyController extends Controller
         try{
             $admin = Admins::where('auth_token',$tọken)->first();
             if(!$admin){
-                return response()->json(['error' => true, 'message' => "Something was wrong with the token"]);
+                return response()->json(['error' => true, 'message' => "Xảy ra lỗi với token"]);
             }
             //create process
             $process = new Processes();
@@ -237,7 +237,7 @@ class CompanyController extends Controller
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' =>$e->getMessage()]);
         }
-        return response()->json(['success' => true, 'message' => "saved process", "process" => $process]);
+        return response()->json(['success' => true, 'message' => "Lưu quy trình thành công", "process" => $process]);
     }
 
     public function getAllInformationOfProcess(Request $request){
@@ -272,15 +272,15 @@ class CompanyController extends Controller
         try{
             $admin = Admins::where('auth_token',$tọken)->first();
             if(!$admin){
-                return response()->json(['error' => true, 'message' => "Something was wrong with the token"]);
+                return response()->json(['error' => true, 'message' => "Xảy ra lỗi với token"]);
             }
             $processId = $information->id;
             if(!$processId){
-                return response()->json(['error' => true, 'message' => "Something was wrong with process id"]);
+                return response()->json(['error' => true, 'message' => "Xảy ra lỗi với id của quy trình"]);
             }
             $process = Processes::find($processId);
             if(!$process){
-                return response()->json(['error' => true, 'message' => "Something was wrong with process"]);
+                return response()->json(['error' => true, 'message' => "Xảy ra lỗi với quy trình"]);
             }
             //update process
             $process->name = $information->name;
@@ -350,7 +350,7 @@ class CompanyController extends Controller
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' =>$e->getMessage()]);
         }
-        return response()->json(['success' => true, 'message' => "edited process", "process" => $process]);
+        return response()->json(['success' => true, 'message' => "Sửa quy trình thành công", "process" => $process]);
     }
 
     public function getAllEmployeeAndRoleOfCompany(Request $request){

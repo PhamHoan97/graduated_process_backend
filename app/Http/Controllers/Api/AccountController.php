@@ -41,13 +41,13 @@ class AccountController extends Controller
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Password or account is invalid',
+                    'message' => 'Tài khoản hoặc mật khẩu không đúng',
                 ]);
             }
         } catch (JWTException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Token creation failed',
+                'message' => 'Tạo token lỗi',
             ]);
         }
 
@@ -64,14 +64,14 @@ class AccountController extends Controller
 
             $response = [
                 'success'=>true,
-                'message' => 'Login account successful',
+                'message' => 'Đăng nhập thành công',
                 'token'=> $token,
                 'account_id' => $username->id,
                 'employee_id' => $username->employee_id,
                 'isEmployee' => true
             ];
         }else{
-            $response = ['error'=>true, 'message'=>'Record doesnt exists'];
+            $response = ['error'=>true, 'message'=>'Tài khoản không tồn tại'];
         }
 
         return response()->json($response, 201);
@@ -81,7 +81,7 @@ class AccountController extends Controller
     {
         $this->guard()->logout();
 
-        return response()->json(['success'=>true,'message' => 'Logged out']);
+        return response()->json(['success'=>true,'message' => 'Đăng xuất thành công']);
     }
 
     public function getDataOfEmployee(Request $request){
@@ -188,19 +188,19 @@ class AccountController extends Controller
         try{
             $account = Accounts::where('auth_token', $token)->first();
             if(!$account){
-                return response()->json(['error' => 1, 'message' => "something was wrong with token"], 201);
+                return response()->json(['error' => 1, 'message' => "xảy ra lỗi với token"], 201);
             }
             if(Hash::check($password, $account->password)){
                 $account->username = $username;
                 $account->password = Hash::make($newPassword);
                 $account->update();
             }else{
-                return response()->json(['error' => 1, 'message' => "password is not correct", "password" => true],  201);
+                return response()->json(['error' => 1, 'message' => "Không đúng mật khẩu", "password" => true],  201);
             }
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
         }
-        return response()->json(['success'=>true, 'message' => 'updated account']);
+        return response()->json(['success'=>true, 'message' => 'Cập nhật tài khoản thành công']);
     }
 
     public function searchProcesses(Request $request){
@@ -248,7 +248,7 @@ class AccountController extends Controller
         try{
             $employee = Employees::where('email', $emailData)->first();
             if(!$employee){
-                return response()->json(['error' => 1, 'message' => "Something was wrong with email"], 201);
+                return response()->json(['error' => 1, 'message' => "Email này không hợp lệ"], 201);
             }
             $account = Accounts::where('employee_id', $employee->id)->first();
         }catch (\Exception $e){
@@ -272,7 +272,7 @@ class AccountController extends Controller
         $email->to = $emailData;
         $email->response = "success";
         $email->save();
-        return response()->json(['success' => true, 'message' => "sent email to employee"], 200);
+        return response()->json(['success' => true, 'message' => "Hệ thống đã gửi email cho email của bạn"], 200);
     }
 
     public function handleResetPasswordForEmployee(Request $request){
@@ -287,13 +287,13 @@ class AccountController extends Controller
         try{
             $account = Accounts::find($id);
             if(!$account){
-                return response()->json(['error' => 1, 'message' => "something was wrong with id"], 201);
+                return response()->json(['error' => 1, 'message' => "xảy ra lỗi với id"], 201);
             }
             $account->password = Hash::make($newPassword);
             $account->update();
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
         }
-        return response()->json(['success' => true, 'message' => "updated password"], 200);
+        return response()->json(['success' => true, 'message' => "cập nhật mật khẩu thành công"], 200);
     }
 }

@@ -44,13 +44,13 @@ class SystemController extends Controller
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'error' => true,
-                    'message' => 'Email or password is invalid',
+                    'message' => 'Tài khoản hoặc mật khẩu không đúng',
                 ]);
             }
         } catch (JWTException $e) {
             return response()->json([
                 'error' => true,
-                'message' => 'Token creation failed',
+                'message' => 'Tạo token lỗi',
             ]);
         }
 
@@ -69,13 +69,13 @@ class SystemController extends Controller
 
                 $response = [
                     'success' => true,
-                    'message' => 'Login system successful',
+                    'message' => 'Đăng nhập thành công',
                     'token' => $token,
                     'id' => $system->id,
                     'isSystem' => true
                 ];
             } else {
-                $response = ['error' => true, 'message' => 'Record doesn\'t exists'];
+                $response = ['error' => true, 'message' => 'Tài khoản không tồn tại'];
             }
         }catch (\Exception $e){
             $response = ['error' => true, 'message' => $e->getMessage()];
@@ -93,7 +93,7 @@ class SystemController extends Controller
     {
         $this->guard()->logout();
 
-        return response()->json(['success'=>true,'message' => 'Logged out']);
+        return response()->json(['success'=>true,'message' => 'Đăng xuất thành công']);
     }
 
     public function getRegistrationListOfCompanies(){
@@ -163,20 +163,20 @@ class SystemController extends Controller
 
     public function createAdmin(Request $request){
         if(!$request->username){
-            return response()->json(['error' => true, 'message' => "username is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến username"]);
         }else if(!$request->password){
-            return response()->json(['error' => true, 'message' => "password is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến password"]);
         }else if(!$request->idRegistration){
-            return response()->json(['error' => true, 'message' => "idRegistration is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến idRegistration"]);
         }else{
             try{
                 $checkUsername = Admins::where('username', $request->username)->first();
                 if($checkUsername){
-                    return response()->json(['error' => true, 'errorUsername' => 1, 'message' => 'username must be unique']);
+                    return response()->json(['error' => true, 'errorUsername' => 1, 'message' => 'username đã được sử dụng']);
                 }else{
                     $company = Companies::where('registration_id',$request->idRegistration)->first();
                     if(!$company){
-                        return response()->json(['error' => true, 'message' => "something was wrong with idRegistration"]);
+                        return response()->json(['error' => true, 'message' => "Xảy ra lỗi với idRegistration"]);
                     }
                     $admin  = new Admins();
                     $admin->username = $request->username;
@@ -188,7 +188,7 @@ class SystemController extends Controller
             }catch (\Exception $e){
                 return response()->json(['error' => true, 'message' => $e->getMessage()]);
             }
-            return response()->json(['success' => true, 'message' => "Created account", 'admin' => $admin]);
+            return response()->json(['success' => true, 'message' => "Tạo tài khoản thành công", 'admin' => $admin]);
         }
     }
 
@@ -207,22 +207,22 @@ class SystemController extends Controller
 
     public function sendEmailAdminAccount(Request $request){
         if(!$request->idAdmin){
-            return response()->json(['error' => true, 'message' => "idAdmin is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến idAdmin"]);
         }else if(!$request->tokenData){
-            return response()->json(['error' => true, 'message' => "tokenData is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến tokenData"]);
         }else{
             try{
                 $system = Systems::where('auth_token',$request->tokenData)->first();
                 $admin = Admins::find($request->idAdmin);
                 if(!$system){
-                    return response()->json(['error' => true, 'message' => "Something was wrong with the token"]);
+                    return response()->json(['error' => true, 'message' => "Xảy ra lỗi với token"]);
                 }
                 if(!$admin){
-                    return response()->json(['error' => true, 'message' => "Something was wrong with the admin account"]);
+                    return response()->json(['error' => true, 'message' => "Xảy ra lỗi với tài khoản công ty"]);
                 }
                 $company = Companies::find($admin->company_id);
             }catch (\Exception $e){
-                return response()->json(['error' => true, 'message' => "Something was wrong with request data"]);
+                return response()->json(['error' => true, 'message' => $e->getMessage()]);
             }
 
             try{
@@ -254,7 +254,7 @@ class SystemController extends Controller
                 'recipientName' => $company->ceo,
             ]);
             $email->save();
-            return response()->json(['success' => true, 'message' => 'sent account to company']);
+            return response()->json(['success' => true, 'message' => 'Đã gửi tài khoản cho email liên hệ']);
         }
     }
 
@@ -346,20 +346,20 @@ class SystemController extends Controller
 
     public function moreAdmin(Request $request){
         if(!$request->username){
-            return response()->json(['error' => true, 'message' => "username is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến username"]);
         }else if(!$request->password){
-            return response()->json(['error' => true, 'message' => "password is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến password"]);
         }else if(!$request->idCompany){
-            return response()->json(['error' => true, 'message' => "idCompany is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến idCompany"]);
         }else{
             try{
                 $checkUsername = Admins::where('username', $request->username)->first();
                 if($checkUsername){
-                    return response()->json(['error' => true, 'errorUsername' => 1, 'message' => 'username must be unique']);
+                    return response()->json(['error' => true, 'errorUsername' => 1, 'message' => 'username đã được sử dụng']);
                 }else{
                     $company = Companies::find($request->idCompany);
                     if(!$company){
-                        return response()->json(['error' => true, 'message' => "something was wrong with idCompany"]);
+                        return response()->json(['error' => true, 'message' => "xảy ra lỗi với idCompany"]);
                     }
                     $admin  = new Admins();
                     $admin->username = $request->username;
@@ -371,7 +371,7 @@ class SystemController extends Controller
             }catch (\Exception $e){
                 return response()->json(['error' => true, 'message' => $e->getMessage()]);
             }
-            return response()->json(['success' => true, 'message' => "Created account", 'admin' => $admin]);
+            return response()->json(['success' => true, 'message' => "Tạo tài khoản cho công ty thành công", 'admin' => $admin]);
         }
     }
 

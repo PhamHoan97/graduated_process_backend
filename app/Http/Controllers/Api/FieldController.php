@@ -24,20 +24,21 @@ class FieldController extends Controller
         $name = $request->name;
         $description = $request->description;
         if(!$name){
-            return response()->json(['error' => true, 'message' => "name is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến name"]);
         }
         if(!$description){
-            return response()->json(['error' => true, 'message' => "description is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến description"]);
         }
         try{
             $field = new Fields();
             $field->name = $name;
             $field->description = $description;
             $field->save();
+            $fields = ProcessesFields::all();
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' => $e->getMessage()],400);
         }
-        return response()->json(['success' => true, 'message' => "saved fields"]);
+        return response()->json(['success' => true, 'message' => "Lưu lĩnh vực thành công", "fields" => $fields]);
     }
 
     public function getAllFields(Request $request){
@@ -55,16 +56,16 @@ class FieldController extends Controller
         $xml = $request->xml;
         $field_id = $request->field_id;
         if(!$name){
-            return response()->json(['error' => true, 'message' => "name is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến name"]);
         }
         if(!$description){
-            return response()->json(['error' => true, 'message' => "description is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến description"]);
         }
         if(!$xml){
-            return response()->json(['error' => true, 'message' => "xml is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến xml"]);
         }
         if(!$field_id){
-            return response()->json(['error' => true, 'message' => "field_id is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến field_id"]);
         }
         try{
             $template = new ProcessesFields();
@@ -76,7 +77,7 @@ class FieldController extends Controller
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' => $e->getMessage()],400);
         }
-        return response()->json(['success' => true, 'message' => "saved process template", "process" => $template]);
+        return response()->json(['success' => true, 'message' => "Lưu mẫu quy trình thành công", "process" => $template]);
     }
 
     public function getProcessTemplateOfField(Request $request){
@@ -167,13 +168,13 @@ class FieldController extends Controller
         $name = $request->name;
         $description = $request->description;
         if(!$id){
-            return response()->json(['error' => true, 'message' => "id is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến id"]);
         }
         if(!$name){
-            return response()->json(['error' => true, 'message' => "name is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến name"]);
         }
         if(!$description){
-            return response()->json(['error' => true, 'message' => "description is required"]);
+            return response()->json(['error' => true, 'message' => "Yêu cầu biến description"]);
         }
         try{
             $field = Fields::find($id);
@@ -185,6 +186,6 @@ class FieldController extends Controller
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' => $e->getMessage()],400);
         }
-        return response()->json(['success' => true, 'message' => "updated fields" , "fields"=> $fields]);
+        return response()->json(['success' => true, 'message' => "Cập nhật lĩnh vực thành công" , "fields"=> $fields]);
     }
 }
