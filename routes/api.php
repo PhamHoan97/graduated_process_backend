@@ -76,80 +76,114 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/template/field/{idField}','Api\FieldController@getAllTemplateOfField');
     Route::post('/system/template/delete','Api\FieldController@deleteTemplate');
     Route::post('system/field/update','Api\FieldController@updateField');
+
+    // MANAGE NOTIFICATION SYSTEM
+    // create new type template
+    Route::post('system/notification/type/create','Api\System\ManageNotificationController@addType');
+    // get all types form in system
+    Route::get('system/notification/form/list','Api\System\ManageNotificationController@listForm');
+    // delete form in system
+    Route::post('system/notification/form/delete','Api\System\ManageNotificationController@deleteForm');
+    // delete notification in system
+    Route::post('system/notification/delete','Api\System\ManageNotificationController@deleteNotification');
+    // get all types template in system
+    Route::get('system/notification/type/list','Api\System\ManageNotificationController@listType');
+    // create new template with type
+    Route::post('system/notification/template/create','Api\System\ManageNotificationController@addTemplate');
+    // get all templates in system
+    Route::get('system/notification/template/list','Api\System\ManageNotificationController@listAllTemplate');
+    // get all template with type in system
+    Route::get('system/notification/template/list/{idType}','Api\System\ManageNotificationController@listTemplateType');
+    // create new form
+    Route::post('system/notification/form/create','Api\System\ManageNotificationController@addForm');
+    // create new notification
+    Route::post('system/notification/create','Api\System\ManageNotificationController@addNotification');
+    // get all notifications in system
+    Route::get('system/notification/list','Api\System\ManageNotificationController@getListNotifications');
+    // send notification to admin and user which directly use system
+    Route::post('system/notification/send','Api\System\ManageNotificationController@sendNotificationAdminUser');
+    // statistic notification
+    Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
+    // get all response of notification which send from system
+    Route::get('system/notification/response/{idNotificationFromSystem}','Api\System\ManageNotificationController@getInformationResponses');
+
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
     // all routes of company role to protected resources are registered here
     // ROUTE ORGANIZATION
     // Get all json data organization
-    Route::post('system/organization/chart','Api\System\OrganizationController@getJsonOrganization');
+    Route::post('company/organization/chart','Api\System\OrganizationController@getJsonOrganization');
     // get all employee in 1 company
-    Route::get('system/organization/company/{idCompany}/employee','Api\System\OrganizationController@getAllEmployeeCompany');
+    Route::get('company/organization/employee/{idCompany}','Api\System\OrganizationController@getAllEmployeeCompany');
     // get id company when know id employee
     Route::get('system/organization/{idEmployee}','Api\System\OrganizationController@getIdCompanyByIdUser');
     // add new company
-    Route::post('system/organization/department/new','Api\System\OrganizationController@addDepartment');
+    Route::post('company/organization/department/new','Api\System\OrganizationController@addDepartment');
     // get detail information in a  department
-    Route::get('system/organization/department/detail/{idDepartment}','Api\System\OrganizationController@getDetailDepartment');
+    Route::get('company/organization/department/detail/{idDepartment}','Api\System\OrganizationController@getDetailDepartment');
     // get edit information department
-    Route::get('system/organization/department/edit/{idDepartment}','Api\System\OrganizationController@getEditDepartment');
+    Route::get('company/organization/department/edit/{idDepartment}','Api\System\OrganizationController@getEditDepartment');
     // delete department
-    Route::post('system/organization/department/delete','Api\System\OrganizationController@deleteDepartment');
+    Route::post('company/organization/department/delete','Api\System\OrganizationController@deleteDepartment');
     // get all department in a company
-    Route::get('system/organization/department/{idCompany}','Api\System\OrganizationController@getAllDepartmentCompany');
+    Route::get('company/organization/department/{idCompany}','Api\System\OrganizationController@getAllDepartmentCompany');
     // update department
-    Route::patch('system/organization/department/update','Api\System\OrganizationController@updateDepartment');
+    Route::patch('company/organization/department/update','Api\System\OrganizationController@updateDepartment');
 
     // new employee
-    Route::post('system/organization/employee/new','Api\System\OrganizationController@addEmployee');
+    Route::post('company/organization/employee/new','Api\System\OrganizationController@addEmployee');
 
     // update employee
-    Route::post('system/organization/employee/update','Api\System\OrganizationController@updateEmployee');
+    Route::post('company/organization/employee/update','Api\System\OrganizationController@updateEmployee');
     // delete employee
-    Route::post('system/organization/employee/delete','Api\System\OrganizationController@deleteEmployee');
+    Route::post('company/organization/employee/delete','Api\System\OrganizationController@deleteEmployee');
     // get detail information employee
-    Route::get('system/organization/employee/detail/{idEmployee}','Api\System\OrganizationController@getDetailEmployee');
+    Route::get('company/organization/employee/detail/{idEmployee}','Api\System\OrganizationController@getDetailEmployee');
     // get all role of department
-    Route::get('system/organization/role/department/{idDepartment}','Api\System\OrganizationController@getRolesDepartment');
+    Route::get('company/organization/role/department/{idDepartment}','Api\System\OrganizationController@getRolesDepartment');
 
     // new role
-    Route::post('system/organization/role/new','Api\System\OrganizationController@addRole');
+    Route::post('company/organization/role/new','Api\System\OrganizationController@addRole');
 
     // update role
-    Route::post('system/organization/role/update','Api\System\OrganizationController@updateRole');
+    Route::post('company/organization/role/update','Api\System\OrganizationController@updateRole');
     // delete role
-    Route::post('system/organization/role/delete','Api\System\OrganizationController@deleteRole');
+    Route::post('company/organization/role/delete','Api\System\OrganizationController@deleteRole');
     // get edit information role
-    Route::get('system/organization/role/edit/{idRole}','Api\System\OrganizationController@getEditRole');
+    Route::get('company/organization/role/edit/{idRole}','Api\System\OrganizationController@getEditRole');
     // get detail information role
-    Route::post('system/organization/department/role/detail','Api\System\OrganizationController@getDetailRole');
+    Route::post('company/organization/department/role/detail','Api\System\OrganizationController@getDetailRole');
     // get all roles in system
-    Route::get('system/organization/role/{idCompany}','Api\System\OrganizationController@getAllRoles');
+    Route::get('company/organization/role/{idCompany}','Api\System\OrganizationController@getAllRoles');
     // get all employee no account in company
-    Route::get('system/account/employee/{idCompany}','Api\System\AccountEmployeeController@getAllEmployee');
-    Route::post('system/create/employee/account','Api\System\AccountEmployeeController@createAccountEmployee');
+    Route::get('company/account/employee/{idCompany}','Api\System\AccountEmployeeController@getAllEmployee');
+    Route::post('company/create/employee/account','Api\System\AccountEmployeeController@createAccountEmployee');
     // get all account in a company
-    Route::get('system/account/list/{idCompany}','Api\System\AccountEmployeeController@getAllInformationAccount');
-    Route::post('system/account/delete','Api\System\AccountEmployeeController@deleteAccountEmployee');
-    Route::post('system/account/employee/send','Api\System\AccountEmployeeController@sendEmailAccountEmployee');
+    Route::get('company/account/list/{idCompany}','Api\System\AccountEmployeeController@getAllInformationAccount');
+    Route::post('company/account/delete','Api\System\AccountEmployeeController@deleteAccountEmployee');
+    Route::post('company/account/employee/send','Api\System\AccountEmployeeController@sendEmailAccountEmployee');
     // MANAGE DETAIL COMPANY
-    Route::post('system/company/information','Api\System\ManageCompanyController@getDetailCompany');
-    Route::post('system/company/information/update','Api\System\ManageCompanyController@updateInformation');
+    Route::post('company/information','Api\System\ManageCompanyController@getDetailCompany');
+    Route::post('company/organization/statistics','Api\System\ManageCompanyController@getStatisticOrganization');
+    Route::post('company/information/update','Api\System\ManageCompanyController@updateInformation');
 
     // search role in company
-    Route::post('system/organization/company/role/search','Api\System\OrganizationController@searchRoleCompany');
+    Route::post('company/organization/role/search','Api\System\OrganizationController@searchRoleCompany');
 
     // search employee in company
-    Route::post('system/organization/company/employee/search','Api\System\OrganizationController@searchEmployeeCompany');
+    Route::post('company/organization/employee/search','Api\System\OrganizationController@searchEmployeeCompany');
 
     // MANAGE NOTIFICATION ADMIN
 
-    Route::post('system/notification/company/list','Api\System\ManageNotificationController@listAdminNotification');
-    Route::post('system/notification/company/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
-    Route::post('system/notification/company/create/response','Api\System\ManageNotificationController@addResponseAdmin');
+    Route::post('company/notification/list','Api\System\ManageNotificationController@listAdminNotification');
+    Route::post('company/notification/response','Api\System\ManageNotificationController@getInformationTemplateNotification');
+    Route::post('company/notification/create/response','Api\System\ManageNotificationController@addResponseAdmin');
     Route::get('company/notification/account/list/{idCompany}','Api\System\ManageNotificationController@getAllAccountEmployee');
     Route::post('company/notification/account/send','Api\System\ManageNotificationController@sendNotificationEmployee');
-
+    Route::get('company/notification/create/list/{idCompany}','Api\System\ManageNotificationController@getListCreateNotifications');
+    Route::post('company/notification/create','Api\System\ManageNotificationController@addNotificationCompany');
+    Route::post('company/notification/create/delete','Api\System\ManageNotificationController@deleteNotificationCreate');
 
     //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
     // get all employee and role in department
@@ -200,6 +234,8 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     Route::post('employee/notification/response','Api\System\ManageNotificationController@getInformationTemplateNotificationSystemEmployee');
     Route::post('employee/notification/create/response','Api\System\ManageNotificationController@addResponseEmployee');
     Route::get('employee/notification/detail/{idNotificationFromCompany}','Api\System\ManageNotificationController@getDetailNotificationFromCompany');
+    Route::post('employee/notification/company/status/update','Api\System\ManageNotificationController@updateStatusNotificationFormCompany');
+    Route::post('employee/notification/system/status/update','Api\System\ManageNotificationController@updateStatusNotificationFormSystem');
 
 });
 
