@@ -196,7 +196,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     //edit process
     Route::post('company/process/edit','Api\CompanyController@editProcessCompany')->middleware('create-or-edit-process');
     // get all employee and role in company
-    Route::get('company/{idCompany}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfCompany');
+    Route::get('company/{token}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfCompany');
     // get all processes in company
     Route::get('company/processes/{token}','Api\CompanyController@getAllProcessesOfCompany');
     // get all employees in company

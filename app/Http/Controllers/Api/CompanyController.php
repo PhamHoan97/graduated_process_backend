@@ -354,11 +354,13 @@ class CompanyController extends Controller
     }
 
     public function getAllEmployeeAndRoleOfCompany(Request $request){
-        $idCompany = $request->idCompany;
-        if(!$idCompany){
-            return response()->json(['error' => true, 'message' => "idCompany is required"]);
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "token is required"]);
         }
         try {
+            $admin = Admins::where('auth_token', $token)->first();
+            $idCompany = $admin->company_id;
             $employees = DB::table('companies')
                 ->join('departments', 'companies.id', '=', 'departments.company_id')
                 ->join('employees', 'departments.id', '=', 'employees.department_id')
