@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Api\System;
+namespace App\Http\Controllers\Api\Company;
 
+use App\Admins;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -9,6 +10,14 @@ use App\Employees;
 use App\Roles;
 class OrganizationController extends Controller
 {
+    // get idCompany when know token
+    public function getIdCompanyByToken($token){
+        $admin = Admins::where('auth_token',$token)->first();
+        if(!$admin){
+            return false;
+        }
+        return $admin->company_id;
+    }
     // Get idCompany when know idEmployee
     public function getIdCompanyByIdUser(Request $request,$idEmployee){
         try {
@@ -25,12 +34,17 @@ class OrganizationController extends Controller
     }
 
     // Get All department in the company
-    public function getAllDepartmentCompany(Request $request,$idCompany){
-        try {
-            $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments;
-            return response()->json(['message'=>'Get success detail company by id','departmentCompany'=>$departments],200);
-        }catch(\Exception $e) {
-            return response()->json(["error" => $e->getMessage()],400);
+    public function getAllDepartmentCompany(Request $request,$token){
+        $idCompany = $this->getIdCompanyByToken($token);
+        if(!$idCompany){
+            return response()->json(["error" => 'Error get id company with token '],400);
+        }else{
+            try {
+                $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments;
+                return response()->json(['message'=>'Get success detail company by id','departmentCompany'=>$departments],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
         }
     }
 
@@ -79,14 +93,19 @@ class OrganizationController extends Controller
         $name = $request->newNameDepartment;
         $description = $request->newDescriptionDepartment;
         $signature = $request->newSignatureDepartment;
-        $idCompany = $request->idCompany;
-        try {
-            DB::table('departments')->insert(
-                ['name' => $name, 'description' => $description,'signature'=>$signature,'company_id' => $idCompany]
-            );
-            return response()->json(['message'=>'Add success new department'],200);
-        }catch(\Exception $e) {
-            return response()->json(["error" => $e->getMessage()],400);
+        $token = $request->token;
+        $idCompany = $this->getIdCompanyByToken($token);
+        if(!$idCompany){
+            return response()->json(["error" => 'Error get id company with token'],400);
+        }else{
+            try {
+                DB::table('departments')->insert(
+                    ['name' => $name, 'description' => $description,'signature'=>$signature,'company_id' => $idCompany]
+                );
+                return response()->json(['message'=>'Add success new department'],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
         }
     }
 
@@ -121,28 +140,33 @@ class OrganizationController extends Controller
     }
 
     // Get All User in the company
-    public function getAllEmployeeCompany(Request $request,$idCompany){
-        try {
-            $employees = DB::table('companies')
-                ->join('departments', 'companies.id', '=', 'departments.company_id')
-                ->join('employees', 'departments.id', '=', 'employees.department_id')
-                ->join('roles', 'employees.role_id', '=', 'roles.id')
-                ->where('companies.id', $idCompany)
-                ->select('employees.id as id_employee',
-                    'employees.name as name',
-                    'employees.avatar as avatar',
-                    'employees.email as email',
-                    'employees.gender as gender',
-                    'employees.phone as phone',
-                    'employees.address as address',
-                    'roles.name as role',
-                    'roles.id as id_role',
-                    'departments.id as id_department',
-                    'departments.name as department_name')
-                ->get();
-            return response()->json(['message'=>'Get all users in company ','employees'=>$employees],200);
-        }catch(\Exception $e) {
-            return response()->json(["error" => $e->getMessage()],400);
+    public function getAllEmployeeCompany(Request $request,$token){
+        $idCompany = $this->getIdCompanyByToken($token);
+        if(!$idCompany){
+            return response()->json(["error" => 'Error get id company with token '],400);
+        }else{
+            try {
+                $employees = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('employees', 'departments.id', '=', 'employees.department_id')
+                    ->join('roles', 'employees.role_id', '=', 'roles.id')
+                    ->where('companies.id', $idCompany)
+                    ->select('employees.id as id_employee',
+                        'employees.name as name',
+                        'employees.avatar as avatar',
+                        'employees.email as email',
+                        'employees.gender as gender',
+                        'employees.phone as phone',
+                        'employees.address as address',
+                        'roles.name as role',
+                        'roles.id as id_role',
+                        'departments.id as id_department',
+                        'departments.name as department_name')
+                    ->get();
+                return response()->json(['message'=>'Get all users in company ','employees'=>$employees],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
         }
     }
 
@@ -415,115 +439,128 @@ class OrganizationController extends Controller
     }
 
     // get all  role of company
-    public function getAllRoles(Request $request,$idCompany){
-        try {
-            $roles = DB::table('roles')
-                ->join('departments', 'departments.id', '=', 'roles.department_id')
-                ->join('companies', 'companies.id', '=', 'departments.company_id')
-                ->where('companies.id',$idCompany)
-                ->select(
-                    'roles.id as id',
-                    'roles.name as name',
-                    'roles.description as description',
-                    'roles.is_process as is_process',
-                    'roles.department_id as department_id',
-                    'companies.name as company_name',
-                    'departments.name as department_name')
-                ->get();
-            return response()->json(['message'=>'get detail employee','roles'=>$roles],200);
-        }catch(\Exception $e) {
-            return response()->json(["error" => $e->getMessage()],400);
+    public function getAllRoles(Request $request,$token){
+        $idCompany = $this->getIdCompanyByToken($token);
+        if(!$idCompany){
+            return response()->json(["error" => 'Error get id company with token'],400);
+        }else{
+            try {
+                $roles = DB::table('roles')
+                    ->join('departments', 'departments.id', '=', 'roles.department_id')
+                    ->join('companies', 'companies.id', '=', 'departments.company_id')
+                    ->where('companies.id',$idCompany)
+                    ->select(
+                        'roles.id as id',
+                        'roles.name as name',
+                        'roles.description as description',
+                        'roles.is_process as is_process',
+                        'roles.department_id as department_id',
+                        'companies.name as company_name',
+                        'departments.name as department_name')
+                    ->get();
+                return response()->json(['message'=>'get detail employee','roles'=>$roles],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
         }
-
     }
 
     // Get JSON which support to display chart organization
     public function getJsonOrganization(Request $request){
         try {
-            $idCompany = $request->idCompany;
-            $dataOrganization = [];
-            $url = "http://localhost:8000";
-            $company = DB::table('companies')->where('id',$idCompany)->first();
-            if($company->avatar !== null && $company->avatar !== ""){
-                $avatarCompany = $url.$company->avatar;
+            $token = $request->token;
+            $idCompany = $this->getIdCompanyByToken($token);
+            if(!$idCompany){
+                return response()->json(['error'=>'Error get idCompany with token'],400);
             }else{
-                $avatarCompany = $url."/organization/company.png";
-            }
-            $organizationCompany =  array(
-                "id"=>1,
-                "email"=>$company->contact,
-                "tags"=>array(
-                    'Company'
-                ),
-                "title"=>"Công ty",
-                "img" => $avatarCompany,
-                "name"=>$company->name
-            );
-            array_push($dataOrganization, $organizationCompany);
-            $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments()->get(['name','id']);
-            $id = 2;
-            if($departments !==null){
-                foreach($departments as $keyDepartment=>$department) {
-                    $organizationDepartment =  array(
-                        "id"=>$id,
-                        "pid"=>1,
+                try {
+                    $dataOrganization = [];
+                    $url = "http://localhost:8000";
+                    $company = DB::table('companies')->where('id',$idCompany)->first();
+                    if($company->avatar !== null && $company->avatar !== ""){
+                        $avatarCompany = $url.$company->avatar;
+                    }else{
+                        $avatarCompany = $url."/organization/company.png";
+                    }
+                    $organizationCompany =  array(
+                        "id"=>1,
+                        "email"=>$company->contact,
                         "tags"=>array(
-                            'Department'
+                            'Company'
                         ),
-                        "name"=>$department->name,
-                        'title'=>"Department",
+                        "title"=>"Công ty",
+                        "img" => $avatarCompany,
+                        "name"=>$company->name
                     );
-                    array_push($dataOrganization, $organizationDepartment);
-                    $idDepartment = $id;
-                    $id++;
-                    $roles = \App\Departments::where('id', '=', $department->id)->first()->roles()->get(['name','id']);
-                    if($roles !==null){
-                        foreach ($roles as $keyRole =>$role){
-                            $organizationRole = array(
+                    array_push($dataOrganization, $organizationCompany);
+                    $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments()->get(['name','id']);
+                    $id = 2;
+                    if($departments !==null){
+                        foreach($departments as $keyDepartment=>$department) {
+                            $organizationDepartment =  array(
                                 "id"=>$id,
-                                "pid"=>$idDepartment,
+                                "pid"=>1,
                                 "tags"=>array(
-                                    'Role'
+                                    'Department'
                                 ),
-                                "name"=>$role->name,
-                                "title"=>"Role"
+                                "name"=>$department->name,
+                                'title'=>"Department",
                             );
-                            array_push($dataOrganization, $organizationRole);
-                            $idRole = $id;
+                            array_push($dataOrganization, $organizationDepartment);
+                            $idDepartment = $id;
                             $id++;
-                            $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','email','id','avatar','gender']);
-                            if($employees !==null){
-                                foreach ($employees as $keyEmployee => $employee){
-                                    $detailRole = DB::table('roles')->where('id',$role->id)->first();
-                                    if($employee->avatar !== null && $employee->avatar !==""){
-                                        $avatarEmployee = $url."/".$employee->avatar;
-                                    }else{
-                                        if($employee->gender === 'Nam'){
-                                            $avatarEmployee = $url."/organization/avatar-man.png";
-                                        }else{
-                                            $avatarEmployee = $url."/organization/avatar-female.png";
+                            $roles = \App\Departments::where('id', '=', $department->id)->first()->roles()->get(['name','id']);
+                            if($roles !==null){
+                                foreach ($roles as $keyRole =>$role){
+                                    $organizationRole = array(
+                                        "id"=>$id,
+                                        "pid"=>$idDepartment,
+                                        "tags"=>array(
+                                            'Role'
+                                        ),
+                                        "name"=>$role->name,
+                                        "title"=>"Role"
+                                    );
+                                    array_push($dataOrganization, $organizationRole);
+                                    $idRole = $id;
+                                    $id++;
+                                    $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','email','id','avatar','gender']);
+                                    if($employees !==null){
+                                        foreach ($employees as $keyEmployee => $employee){
+                                            $detailRole = DB::table('roles')->where('id',$role->id)->first();
+                                            if($employee->avatar !== null && $employee->avatar !==""){
+                                                $avatarEmployee = $url."/".$employee->avatar;
+                                            }else{
+                                                if($employee->gender === 'Nam'){
+                                                    $avatarEmployee = $url."/organization/avatar-man.png";
+                                                }else{
+                                                    $avatarEmployee = $url."/organization/avatar-female.png";
+                                                }
+                                            }
+                                            $organizationEmployee = array(
+                                                "id"=>$id,
+                                                "pid"=>$idRole,
+                                                "tags"=>array(
+                                                    'Employee'
+                                                ),
+                                                "name"=>$employee->name,
+                                                "title"=>$detailRole->name,
+                                                "email"=>$employee->email,
+                                                "img"=>$avatarEmployee
+                                            );
+                                            array_push($dataOrganization, $organizationEmployee);
+                                            $id++;
                                         }
                                     }
-                                    $organizationEmployee = array(
-                                        "id"=>$id,
-                                        "pid"=>$idRole,
-                                        "tags"=>array(
-                                            'Employee'
-                                        ),
-                                        "name"=>$employee->name,
-                                        "title"=>$detailRole->name,
-                                        "email"=>$employee->email,
-                                        "img"=>$avatarEmployee
-                                    );
-                                    array_push($dataOrganization, $organizationEmployee);
-                                    $id++;
                                 }
                             }
                         }
                     }
+                    return response()->json(['message'=>'Get success all data json organization','dataOrganization'=>$dataOrganization],200);
+                }catch(\Exception $e) {
+                    return response()->json(["error" => $e->getMessage()],400);
                 }
             }
-            return response()->json(['message'=>'Get success all data json organization','dataOrganization'=>$dataOrganization],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }

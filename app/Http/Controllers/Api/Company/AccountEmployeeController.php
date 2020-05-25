@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\System;
+namespace App\Http\Controllers\Api\Company;
 
 use App\UserEmails;
 use App\Accounts;
@@ -16,23 +16,36 @@ use Illuminate\Support\Facades\Validator;
 
 class AccountEmployeeController extends Controller
 {
-    public function getAllEmployee(Request $request,$idCompany){
-        try {
-            $idEmployeeAccount = DB::table('accounts')->pluck('employee_id')->toArray();
-            $employees =  DB::table('companies')
-                ->join('departments', 'companies.id', '=', 'departments.company_id')
-                ->join('employees', 'departments.id', '=', 'employees.department_id')
-                ->where('companies.id',$idCompany)
-                ->whereNotIn('employees.id',$idEmployeeAccount)
-                ->select('employees.id as id',
-                    'employees.email as email',
-                    'employees.name as name',
-                    'departments.name as department_name'
-                )
-                ->get();
-            return response()->json(['message'=>'get success all employee no account ','employees'=>$employees],200);
-        }catch(\Exception $e) {
-            return response()->json(["error" => $e->getMessage()],400);
+    // get idCompany when know token
+    public function getIdCompanyByToken($token){
+        $admin = Admins::where('auth_token',$token)->first();
+        if(!$admin){
+            return false;
+        }
+        return $admin->company_id;
+    }
+    public function getAllEmployee(Request $request,$token){
+        $idCompany = $this->getIdCompanyByToken($token);
+        if(!$idCompany){
+            return response()->json(['error'=>'Error get id company with token',],400);
+        }else{
+            try {
+                $idEmployeeAccount = DB::table('accounts')->pluck('employee_id')->toArray();
+                $employees =  DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('employees', 'departments.id', '=', 'employees.department_id')
+                    ->where('companies.id',$idCompany)
+                    ->whereNotIn('employees.id',$idEmployeeAccount)
+                    ->select('employees.id as id',
+                        'employees.email as email',
+                        'employees.name as name',
+                        'departments.name as department_name'
+                    )
+                    ->get();
+                return response()->json(['message'=>'get success all employee no account ','employees'=>$employees],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
         }
     }
 
@@ -67,25 +80,30 @@ class AccountEmployeeController extends Controller
             return response()->json(["error" => $e->getMessage()],400);
         }
     }
-    public function getAllInformationAccount(Request $request,$idCompany){
-        try {
-            $accounts =  DB::table('companies')
-                ->join('departments', 'companies.id', '=', 'departments.company_id')
-                ->join('employees', 'departments.id', '=', 'employees.department_id')
-                ->join('accounts', 'employees.id', '=', 'accounts.employee_id')
-                ->where('companies.id',$idCompany)
-                ->select('accounts.id as id',
-                    'employees.email as email',
-                    'employees.id as employee_id',
-                    'accounts.username as username',
-                    'accounts.initial_password as initial_password',
-                    'employees.name as name',
-                    'departments.name as department_name'
-                )
-                ->get();
-            return response()->json(['message'=>'get success all accounts in company ','accounts'=>$accounts],200);
-        }catch(\Exception $e) {
-            return response()->json(["error" => $e->getMessage()],400);
+    public function getAllInformationAccount(Request $request,$token){
+        $idCompany = $this->getIdCompanyByToken($token);
+        if(!$idCompany){
+            return response()->json(["error" => 'Error get id company with token'],400);
+        }else{
+            try {
+                $accounts =  DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('employees', 'departments.id', '=', 'employees.department_id')
+                    ->join('accounts', 'employees.id', '=', 'accounts.employee_id')
+                    ->where('companies.id',$idCompany)
+                    ->select('accounts.id as id',
+                        'employees.email as email',
+                        'employees.id as employee_id',
+                        'accounts.username as username',
+                        'accounts.initial_password as initial_password',
+                        'employees.name as name',
+                        'departments.name as department_name'
+                    )
+                    ->get();
+                return response()->json(['message'=>'get success all accounts in company ','accounts'=>$accounts],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
         }
     }
 
