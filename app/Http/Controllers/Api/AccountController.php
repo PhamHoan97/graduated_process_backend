@@ -139,7 +139,7 @@ class AccountController extends Controller
                     $link = "avatar/employee/";
                     $file->move($link,$photo_name.".".$type);
                     $url = $link.$photo_name.".".$type;
-                    $employee->avatar = $url;
+                    $employee->avatar = "/".$url;
                 }
                 $employee->update();
             }catch ( \Exception $e){
