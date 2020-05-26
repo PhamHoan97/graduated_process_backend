@@ -593,4 +593,54 @@ class CompanyController extends Controller
         }
         return response()->json(['message'=>'Got process template with id','process'=> $process],200);
     }
+
+    public function removeProcessCompany(Request $request){
+        $idProcess = $request->idProcess;
+        $token = $request->token;
+        if(!$idProcess){
+            return response()->json(['error' => true, 'message' => "idProcess is required"]);
+        }
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "token is required"]);
+        }
+        try{
+            $deleteProcess = Processes::find($idProcess)->delete();
+            $admin = Admins::where('auth_token', $token)->first();
+            $company_id = $admin->company_id;
+            $processes1 = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+                ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $processes2 = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
+                ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+        }catch (\Exception $e){
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+        return response()->json(
+            [
+                'message'=>'Xóa quy trình thành công',
+                'processes1' => $processes1,
+                'processes2' => $processes2
+            ],200);
+    }
 }
