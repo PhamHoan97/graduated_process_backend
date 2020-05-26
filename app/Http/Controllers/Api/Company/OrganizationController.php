@@ -529,7 +529,7 @@ class OrganizationController extends Controller
                                         foreach ($employees as $keyEmployee => $employee){
                                             $detailRole = DB::table('roles')->where('id',$role->id)->first();
                                             if($employee->avatar !== null && $employee->avatar !==""){
-                                                $avatarEmployee = $url."/".$employee->avatar;
+                                                $avatarEmployee = $url.$employee->avatar;
                                             }else{
                                                 if($employee->gender === 'Nam'){
                                                     $avatarEmployee = $url."/organization/avatar-man.png";
@@ -581,31 +581,36 @@ class OrganizationController extends Controller
         $textNameSearch = $request->textNameSearch;
         $textEmailSearch = $request->textEmailSearch;
         $idDepartmentSearch = $request->idDepartmentSearch;
-        $idCompany = $request->idCompany;
-        try {
-            $employees = Employees::query()
-                ->join('roles', 'employees.role_id', '=', 'roles.id')
-                ->join('departments', 'employees.department_id', '=', 'departments.id')
-                ->join('companies', 'companies.id', '=', 'departments.company_id')
-                ->where('companies.id',$idCompany)
-                ->name($textNameSearch)
-                ->email($textEmailSearch)
-                ->department($idDepartmentSearch)
-                ->select('employees.id as id_employee',
-                    'employees.name as name',
-                    'employees.avatar as avatar',
-                    'employees.email as email',
-                    'employees.gender as gender',
-                    'employees.phone as phone',
-                    'employees.address as address',
-                    'roles.name as role',
-                    'roles.id as id_role',
-                    'departments.id as id_department',
-                    'departments.name as department_name')
-                ->get();
-            return response()->json(['message'=>'Get success all roles in department','employees'=>$employees],200);
-        }catch(\Exception $e) {
-            return response()->json(["error" => $e->getMessage()],400);
+        $token = $request->token;
+        $idCompany = $this->getIdCompanyByToken($token);
+        if(!$idCompany){
+            return response()->json(["error" => 'Error get id company with token'],400);
+        }else{
+            try {
+                $employees = Employees::query()
+                    ->join('roles', 'employees.role_id', '=', 'roles.id')
+                    ->join('departments', 'employees.department_id', '=', 'departments.id')
+                    ->join('companies', 'companies.id', '=', 'departments.company_id')
+                    ->where('companies.id',$idCompany)
+                    ->name($textNameSearch)
+                    ->email($textEmailSearch)
+                    ->department($idDepartmentSearch)
+                    ->select('employees.id as id_employee',
+                        'employees.name as name',
+                        'employees.avatar as avatar',
+                        'employees.email as email',
+                        'employees.gender as gender',
+                        'employees.phone as phone',
+                        'employees.address as address',
+                        'roles.name as role',
+                        'roles.id as id_role',
+                        'departments.id as id_department',
+                        'departments.name as department_name')
+                    ->get();
+                return response()->json(['message'=>'Get success all roles in department','employees'=>$employees],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
         }
     }
 
@@ -613,26 +618,31 @@ class OrganizationController extends Controller
     public function searchRoleCompany(Request $request){
         $textNameSearch = $request->textNameSearch;
         $idDepartmentSearch = $request->idDepartmentSearch;
-        $idCompany = $request->idCompany;
-        try {
-            $roles = Roles::query()
-                ->join('departments', 'roles.department_id', '=', 'departments.id')
-                ->join('companies', 'companies.id', '=', 'departments.company_id')
-                ->where('companies.id',$idCompany)
-                ->name($textNameSearch)
-                ->department($idDepartmentSearch)
-                ->select(
-                    'roles.id as id',
-                    'roles.name as name',
-                    'roles.description as description',
-                    'roles.is_process as is_process',
-                    'roles.department_id as department_id',
-                    'companies.name as company_name',
-                    'departments.name as department_name')
-                ->get();
-            return response()->json(['message'=>'Get success all roles in company','roles'=>$roles],200);
-        }catch(\Exception $e) {
-            return response()->json(["error" => $e->getMessage()],400);
+        $token = $request->token;
+        $idCompany = $this->getIdCompanyByToken($token);
+        if(!$idCompany){
+            return response()->json(["error" => 'Error get id company with token'],400);
+        }else{
+            try {
+                $roles = Roles::query()
+                    ->join('departments', 'roles.department_id', '=', 'departments.id')
+                    ->join('companies', 'companies.id', '=', 'departments.company_id')
+                    ->where('companies.id',$idCompany)
+                    ->name($textNameSearch)
+                    ->department($idDepartmentSearch)
+                    ->select(
+                        'roles.id as id',
+                        'roles.name as name',
+                        'roles.description as description',
+                        'roles.is_process as is_process',
+                        'roles.department_id as department_id',
+                        'companies.name as company_name',
+                        'departments.name as department_name')
+                    ->get();
+                return response()->json(['message'=>'Get success all roles in company','roles'=>$roles],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
         }
     }
 
