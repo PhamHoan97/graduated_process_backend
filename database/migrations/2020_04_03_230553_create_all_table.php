@@ -335,7 +335,7 @@ class CreateAllTable extends Migration
             $table->string('name');
             $table->longText('xml');
             $table->text('description')->nullable();
-            $table->text('field_id')->unsigned();
+            $table->integer('field_id')->unsigned();
             $table->foreign('field_id')->references('id')->on('fields')->onDelete('cascade');
             $table->timestamps();
         });

@@ -51,7 +51,6 @@ class ManageNotificationController extends Controller
             return response()->json(["error" => 'Error get id account with token'],400);
         }else{
             try {
-                $idAccount = $request->idAccount;
                 $notificationFromCompany = DB::table('company_user_notifications')
                     ->join('company_notifications', 'company_notifications.id', '=', 'company_user_notifications.notification_id')
                     ->where('company_user_notifications.account_id',$idAccount)
