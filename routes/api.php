@@ -154,6 +154,9 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/organization/role/search','Api\Company\OrganizationController@searchRoleCompany');
     // search employee in company
     Route::post('company/organization/employee/search','Api\Company\OrganizationController@searchEmployeeCompany');
+    //remove process in company
+    Route::post('company/process/remove','Api\CompanyController@removeProcessCompany');
+
 
     // API MANAGE ACCOUNT EMPLOYEE IN A COMPANY
 

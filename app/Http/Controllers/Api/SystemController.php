@@ -379,11 +379,15 @@ class SystemController extends Controller
         try{
             $data = [];
             $emails = Emails::all();
-            foreach ($emails as $email){
-               $system_id = $email->system_id;
-               $system = Systems::find($system_id);
-               $email->sender = ['username' => $system->username, 'email' => $system->email];
-               $data[] = $email;
+            if($emails){
+                foreach ($emails as $email){
+                    $system_id = $email->system_id;
+                    if($system_id){
+                        $system = Systems::find($system_id);
+                        $email->sender = ['username' => $system->username, 'email' => $system->email];
+                    }
+                    $data[] = $email;
+                }
             }
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' => $e->getMessage()]);
@@ -397,8 +401,10 @@ class SystemController extends Controller
         }else{
             try{
                 $email = \App\Emails::find($request->idEmail);
-                $system = Systems::find($email->system_id);
-                $email->sender = ['username' => $system->username, 'email' => $system->email];
+                if($email->system_id){
+                    $system = Systems::find($email->system_id);
+                    $email->sender = ['username' => $system->username, 'email' => $system->email];
+                }
             }catch (\Exception $e){
                 return response()->json(['error' => true, 'message' => $e->getMessage()]);
             }
