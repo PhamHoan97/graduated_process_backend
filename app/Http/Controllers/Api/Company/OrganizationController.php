@@ -475,7 +475,7 @@ class OrganizationController extends Controller
             }else{
                 try {
                     $dataOrganization = [];
-                    $url = "http://localhost:8000";
+                    $url = "https://pms.khanhlq.com/";
                     $company = DB::table('companies')->where('id',$idCompany)->first();
                     if($company->avatar !== null && $company->avatar !== ""){
                         $avatarCompany = $url.$company->avatar;
@@ -490,7 +490,7 @@ class OrganizationController extends Controller
                         ),
                         "title"=>"Công ty",
                         "img" => $avatarCompany,
-                        "name"=>$company->name
+                        "name"=>$company->signature
                     );
                     array_push($dataOrganization, $organizationCompany);
                     $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments()->get(['name','id']);
