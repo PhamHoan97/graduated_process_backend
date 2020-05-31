@@ -107,10 +107,10 @@ class CompanyController extends Controller
             ];
         }else{
             $response = ['error'=>true, 'message'=>'Tài khoản này không tồn tại'];
-            return response()->json($response, 400);
+            return response()->json($response, 201);
         }
 
-        return response()->json($response, 201);
+        return response()->json($response, 200);
     }
 
     public function logoutCompany()
@@ -225,7 +225,7 @@ class CompanyController extends Controller
                         foreach ($value->comments as $index){
                             $comment =  new ElementComments();
                             $comment->element_id = $element->id;
-                            $comment->admin_id = $index->admin_id;
+                            $comment->admin_id = $admin->id;
                             $comment->comment = $index->content;
                             $comment->update_at = $index->time;
                             $comment->save();
@@ -249,9 +249,18 @@ class CompanyController extends Controller
                 $process = Processes::find($idProcess);
                 $process->employees;
                 $process->elementNotes;
-                $process->elementComments;
+                $comments = $process->elementComments;
                 $process->elements;
                 $process->roles;
+                $newComments = [];
+                foreach ($comments as $comment){
+                    if($comment->employee_id){
+                        $employee = Employees::find($comment->employee_id);
+                        $comment->employee_name = $employee->name;
+                    }
+                    $newComments[] = $comment;
+                }
+                $process->element_comments = $newComments;
             }catch (\Exception $e){
                 return response()->json(['error' => true, 'message' =>$e->getMessage()]);
             }
@@ -297,7 +306,6 @@ class CompanyController extends Controller
             $deleteAssignsEmployee = ProcessesRoles::where('process_id', $processId)->delete();
             //remove old elements
             $deletedElements = Elements::where('process_id', $processId)->delete();
-            //remove iso
             //update processes_employees
             if($information->type === 1){
                 $assign = $information->assign;
@@ -337,16 +345,18 @@ class CompanyController extends Controller
                         foreach ($value->comments as $index){
                             $comment =  new ElementComments();
                             $comment->element_id = $element->id;
-                            $comment->admin_id = $index->admin_id;
                             $comment->comment = $index->content;
                             $comment->update_at = $index->time;
+                            if(isset($index->employee_id)){
+                                $comment->employee_id = $index->employee_id;
+                            }else{
+                                $comment->admin_id = $admin->id;
+                            }
                             $comment->save();
                         }
                     }
                 }
             }
-            //update iso
-
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' =>$e->getMessage()]);
         }

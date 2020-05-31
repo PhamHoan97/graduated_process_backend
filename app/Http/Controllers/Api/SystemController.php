@@ -59,7 +59,6 @@ class SystemController extends Controller
 
     public function loginSystem(Request $request){
         try {
-
             $system = Systems::where('email', $request->email)->get()->first();
             if ($system && Hash::check($request->password, $system->password)) {
                 $credentials = $request->only('email', 'password');
@@ -76,12 +75,14 @@ class SystemController extends Controller
                 ];
             } else {
                 $response = ['error' => true, 'message' => 'Tài khoản không tồn tại'];
+                return response()->json($response, 201);
             }
         }catch (\Exception $e){
             $response = ['error' => true, 'message' => $e->getMessage()];
+            return response()->json($response, 400);
         }
 
-        return response()->json($response, 201);
+        return response()->json($response, 200);
     }
 
     /**

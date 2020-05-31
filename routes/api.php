@@ -231,6 +231,12 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     Route::get('employee/search/process/{search}','Api\AccountController@searchProcesses');
     //get 5 notification about system
     Route::get('employee/five/process/notification/{token}','Api\AccountController@getFiveNotification');
+    //add comment in process
+    Route::post('employee/add/comment/','Api\AccountController@addCommentForProcess');
+    //delete comment in process
+    Route::post('employee/delete/comment/','Api\AccountController@deleteCommentInProcess');
+    //get current employee information
+    Route::get('employee/information/{token}','Api\AccountController@getInformationOfEmployee');
     // MANAGE NOTIFICATION EMPLOYEE
 
     Route::post('employee/notification/list/system','Api\Employee\ManageNotificationController@listEmployeeNotificationSystem');
