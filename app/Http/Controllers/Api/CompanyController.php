@@ -653,4 +653,25 @@ class CompanyController extends Controller
                 'processes2' => $processes2
             ],200);
     }
+
+    public function checkTokenOfCompany (Request $request){
+        $token = $request->token;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        try{
+            $isAdminLoggedIn = false;
+            $admin = Admins::where('auth_token', $token);
+            if($admin){
+                $isAdminLoggedIn = true;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Kiểm tra token thành công",
+            "adminLoggedIn" => $isAdminLoggedIn],
+            200);
+    }
 }

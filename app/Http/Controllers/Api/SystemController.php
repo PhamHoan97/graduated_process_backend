@@ -486,4 +486,25 @@ class SystemController extends Controller
         }
         return response()->json(['success' => true, 'message' => 'got system account information', 'system' => $data]);
     }
+
+    public function checkTokenOfSystem(Request $request){
+        $token = $request->token;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        try{
+            $isSystemLoggedIn = false;
+            $system = Systems::where('auth_token', $token);
+            if($system){
+                $isSystemLoggedIn = true;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Kiểm tra token thành công",
+            "systemLoggedIn" => $isSystemLoggedIn],
+            200);
+    }
 }

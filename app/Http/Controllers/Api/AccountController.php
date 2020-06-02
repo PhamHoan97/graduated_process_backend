@@ -377,4 +377,25 @@ class AccountController extends Controller
         }
         return response()->json(['success' => true, 'message' => "Lấy thông tin nhân viên thành công", "employee" => $employee], 200);
     }
+
+    public function checkTokenOfEmployee(Request $request){
+        $token = $request->token;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        try{
+            $isEmployeeLoggedIn = false;
+            $account = Accounts::where('auth_token', $token);
+            if($account){
+                $isEmployeeLoggedIn = true;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Kiểm tra token thành công",
+            "employeeLoggedIn" => $isEmployeeLoggedIn],
+            200);
+    }
 }
