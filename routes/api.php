@@ -64,7 +64,7 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     // get all company in system
     Route::get('system/dashboard/company','Api\System\DashboardController@getAllCompanies');
     // get all process in system with value search
-    Route::post('system/dashboard/process/','Api\System\DashboardController@getAllProcessSearch');
+    Route::post('system/dashboard/process','Api\System\DashboardController@getAllProcessSearch');
     // get detail a process
     Route::get('system/dashboard/process/{idProcess}','Api\System\DashboardController@getDetailProcessById');
     // get detail information in a company
@@ -236,9 +236,9 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     //get 5 notification about system
     Route::get('employee/five/process/notification/{token}','Api\AccountController@getFiveNotification');
     //add comment in process
-    Route::post('employee/add/comment/','Api\AccountController@addCommentForProcess');
+    Route::post('employee/add/comment','Api\AccountController@addCommentForProcess');
     //delete comment in process
-    Route::post('employee/delete/comment/','Api\AccountController@deleteCommentInProcess');
+    Route::post('employee/delete/comment','Api\AccountController@deleteCommentInProcess');
     //get current employee information
     Route::get('employee/information/{token}','Api\AccountController@getInformationOfEmployee');
     //check token of employee
