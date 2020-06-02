@@ -90,7 +90,6 @@ class ManageNotificationController extends Controller
         }else{
             try {
                 $date = date('Y-m-d H:i:s');
-                $idAdmin = $request->idAdmin;
                 $idNotificationAdmin = $request->idNotificationAdmin;
                 $content = \GuzzleHttp\json_encode($request->contentResponse);
                 DB::table('admin_responses')->insert(
