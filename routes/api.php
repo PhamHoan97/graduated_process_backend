@@ -59,8 +59,7 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/template/field/{idField}','Api\FieldController@getAllTemplateOfField');
     Route::post('/system/template/delete','Api\FieldController@deleteTemplate');
     Route::post('system/field/update','Api\FieldController@updateField');
-
-    // MANAGE DASHBOARD SYSTEM
+//MANAGE DASHBOARD SYSTEM
     // get all company in system
     Route::get('system/dashboard/company','Api\System\DashboardController@getAllCompanies');
     // get all process in system with value search
@@ -77,8 +76,7 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/dashboard/process/department/{idDepartment}/company/{idCompany}','Api\System\DashboardController@getAllProcessDepartment');
     //check token of system
     Route::get('system/check/token/{token}','Api\SystemController@checkTokenOfSystem');
-
-    // MANAGE NOTIFICATION SYSTEM
+// MANAGE NOTIFICATION SYSTEM
     // create new type template
     Route::post('system/notification/type/create','Api\System\ManageNotificationController@addType');
     // get all types form in system
@@ -107,11 +105,10 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
     // get all response of notification which send from system
     Route::get('system/notification/response/{idNotificationFromSystem}','Api\System\ManageNotificationController@getInformationResponses');
-
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
-    // API MANAGE ORGANIZATIONS IN A COMPANY
+// API MANAGE ORGANIZATIONS IN A COMPANY
     // Get all json data organization
     Route::post('company/organization/chart','Api\Company\OrganizationController@getJsonOrganization');
     // get all employee in 1 company
@@ -158,10 +155,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/organization/employee/search','Api\Company\OrganizationController@searchEmployeeCompany');
     //remove process in company
     Route::post('company/process/remove','Api\CompanyController@removeProcessCompany');
-
-
-    // API MANAGE ACCOUNT EMPLOYEE IN A COMPANY
-
+// API MANAGE ACCOUNT EMPLOYEE IN A COMPANY
     // get all employee no account in company
     Route::get('company/account/employee/{token}','Api\Company\AccountEmployeeController@getAllEmployee');
     // create account employee
@@ -172,16 +166,12 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/account/delete','Api\Company\AccountEmployeeController@deleteAccountEmployee');
     // send email account employee
     Route::post('company/account/employee/send','Api\Company\AccountEmployeeController@sendEmailAccountEmployee');
-
-    // MANAGE DETAIL COMPANY
+// MANAGE DETAIL COMPANY
     // get detail information company
     Route::post('company/information','Api\Company\ManageCompanyController@getDetailCompany');
     Route::post('company/organization/statistics','Api\Company\ManageCompanyController@getStatisticOrganization');
     Route::post('company/information/update','Api\Company\ManageCompanyController@updateInformation');
-
-
-    // MANAGE ALL NOTIFICATIONS IN A COMPANY
-
+// MANAGE ALL NOTIFICATIONS IN A COMPANY
     Route::post('company/notification/list','Api\Company\ManageNotificationController@listAdminNotification');
     Route::post('company/notification/response','Api\Company\ManageNotificationController@getInformationTemplateNotification');
     Route::post('company/notification/create/response','Api\Company\ManageNotificationController@addResponseAdmin');
@@ -191,7 +181,6 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/notification/create','Api\Company\ManageNotificationController@addNotificationCompany');
     Route::post('company/notification/create/delete','Api\Company\ManageNotificationController@deleteNotificationCreate');
 
-    //huyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
     // get all employee and role in department
     Route::get('company/department/{idDepartment}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfDepartment');
     //save process
@@ -243,8 +232,7 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     Route::get('employee/information/{token}','Api\AccountController@getInformationOfEmployee');
     //check token of employee
     Route::get('employee/check/token/{token}','Api\AccountController@checkTokenOfEmployee');
-    // MANAGE NOTIFICATION EMPLOYEE
-
+// MANAGE NOTIFICATION EMPLOYEE
     Route::post('employee/notification/list/system','Api\Employee\ManageNotificationController@listEmployeeNotificationSystem');
     Route::post('employee/notification/list/company','Api\Employee\ManageNotificationController@listEmployeeNotificationCompany');
     Route::post('employee/notification/response','Api\Employee\ManageNotificationController@getInformationTemplateNotificationSystemEmployee');
