@@ -75,6 +75,8 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/dashboard/department/company/{idCompany}','Api\System\DashboardController@getAllDepartmentCompany');
     // get all process in a department
     Route::get('system/dashboard/process/department/{idDepartment}/company/{idCompany}','Api\System\DashboardController@getAllProcessDepartment');
+    //check token of system
+    Route::get('system/check/token/{token}','Api\SystemController@checkTokenOfSystem');
 
     // MANAGE NOTIFICATION SYSTEM
     // create new type template
@@ -216,6 +218,8 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/template/processes/field/{idField}','Api\CompanyController@getAllProcessesTemplateOfField');
     // get process of template with id in company
     Route::get('company/template/process/{idProcess}','Api\CompanyController@getProcessTempalateWithId');
+    //check token of company
+    Route::get('company/check/token/{token}','Api\CompanyController@checkTokenOfCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {
@@ -231,6 +235,14 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     Route::get('employee/search/process/{search}','Api\AccountController@searchProcesses');
     //get 5 notification about system
     Route::get('employee/five/process/notification/{token}','Api\AccountController@getFiveNotification');
+    //add comment in process
+    Route::post('employee/add/comment/','Api\AccountController@addCommentForProcess');
+    //delete comment in process
+    Route::post('employee/delete/comment/','Api\AccountController@deleteCommentInProcess');
+    //get current employee information
+    Route::get('employee/information/{token}','Api\AccountController@getInformationOfEmployee');
+    //check token of employee
+    Route::get('employee/check/token/{token}','Api\AccountController@checkTokenOfEmployee');
     // MANAGE NOTIFICATION EMPLOYEE
 
     Route::post('employee/notification/list/system','Api\Employee\ManageNotificationController@listEmployeeNotificationSystem');

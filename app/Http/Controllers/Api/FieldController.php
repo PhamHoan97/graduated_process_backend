@@ -34,7 +34,7 @@ class FieldController extends Controller
             $field->name = $name;
             $field->description = $description;
             $field->save();
-            $fields = ProcessesFields::all();
+            $fields = Fields::all();
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' => $e->getMessage()],400);
         }

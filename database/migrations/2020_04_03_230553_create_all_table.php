@@ -184,7 +184,7 @@ class CreateAllTable extends Migration
         Schema::create('templates', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->json('content');
+            $table->longtext('content');
             $table->integer('type_id')->unsigned();
             $table->foreign('type_id')->references('id')->on('types')->onDelete('cascade');
             $table->timestamps();

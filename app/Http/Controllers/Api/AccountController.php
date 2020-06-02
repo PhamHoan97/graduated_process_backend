@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Accounts;
 use App\Companies;
 use App\Departments;
+use App\ElementComments;
+use App\Elements;
 use App\Emails;
 use App\Employees;
 use App\Mail\ResetPasswordEmployee;
@@ -72,9 +74,10 @@ class AccountController extends Controller
             ];
         }else{
             $response = ['error'=>true, 'message'=>'Tài khoản không tồn tại'];
+            return response()->json($response, 201);
         }
 
-        return response()->json($response, 201);
+        return response()->json($response, 200);
     }
 
     public function logoutAccount()
@@ -295,5 +298,104 @@ class AccountController extends Controller
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
         }
         return response()->json(['success' => true, 'message' => "cập nhật mật khẩu thành công"], 200);
+    }
+
+    public function addCommentForProcess(Request $request){
+        $idProcess= $request->idProcess;
+        $content = $request->comment;
+        $time = $request->time;
+        $element_name = $request->element_name;
+        $token = $request->token;
+        $type = $request->typeElement;
+        if(!$idProcess){
+            return response()->json(['error' => 1, 'message' => "idProcess is required"], 400);
+        }
+        if(!$content){
+            return response()->json(['error' => 1, 'message' => "content is required"], 400);
+        }
+        if(!$time){
+            return response()->json(['error' => 1, 'message' => "time is required"], 400);
+        }
+        if(!$element_name){
+            return response()->json(['error' => 1, 'message' => "element_name is required"], 400);
+        }
+        if(!$token){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        if(!$type){
+            return response()->json(['error' => 1, 'message' => "type is required"], 400);
+        }
+        try{
+            $element = Elements::where('process_id', $idProcess)->where('element', $element_name)->first();
+            $account = Accounts::where('auth_token', $token)->first();
+            if(!$element){
+                $element = new Elements();
+                $element->element = $element_name;
+                $element->type = $type;
+                $element->process_id = $idProcess;
+                $element->save();
+            }
+            if(!$account){
+                return response()->json(['error' => 1, 'message' => "Xẩy ra lỗi với token"]);
+            }
+            $comment = new ElementComments();
+            $comment->element_id = $element->id;
+            $comment->employee_id = $account->employee_id;
+            $comment->comment = $content;
+            $comment->update_at = $time;
+            $comment->save();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
+        }
+        return response()->json(['success' => true, 'message' => "Thêm mới bình luận thành công", "comment" => $comment], 200);
+    }
+
+    public function deleteCommentInProcess(Request $request){
+        $id = $request->idComment;
+        if(!$id){
+            return response()->json(['error' => 1, 'message' => "id is required"], 400);
+        }
+        try{
+            $comment = ElementComments::find($id);
+            $comment->delete();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
+        }
+        return response()->json(['success' => true, 'message' => "Xóa bình luận thành công", "comment" => $comment], 200);
+    }
+
+    public function getInformationOfEmployee(Request $request){
+        $token = $request->token;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        try{
+            $account = Accounts::where('auth_token', $token)->first();
+            $employee = Employees::find($account->employee_id);
+        }catch ( \Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json(['success' => true, 'message' => "Lấy thông tin nhân viên thành công", "employee" => $employee], 200);
+    }
+
+    public function checkTokenOfEmployee(Request $request){
+        $token = $request->token;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        try{
+            $isEmployeeLoggedIn = false;
+            $account = Accounts::where('auth_token', $token);
+            if($account){
+                $isEmployeeLoggedIn = true;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Kiểm tra token thành công",
+            "employeeLoggedIn" => $isEmployeeLoggedIn],
+            200);
     }
 }

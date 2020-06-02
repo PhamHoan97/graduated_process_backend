@@ -59,7 +59,6 @@ class SystemController extends Controller
 
     public function loginSystem(Request $request){
         try {
-
             $system = Systems::where('email', $request->email)->get()->first();
             if ($system && Hash::check($request->password, $system->password)) {
                 $credentials = $request->only('email', 'password');
@@ -76,12 +75,14 @@ class SystemController extends Controller
                 ];
             } else {
                 $response = ['error' => true, 'message' => 'Tài khoản không tồn tại'];
+                return response()->json($response, 201);
             }
         }catch (\Exception $e){
             $response = ['error' => true, 'message' => $e->getMessage()];
+            return response()->json($response, 400);
         }
 
-        return response()->json($response, 201);
+        return response()->json($response, 200);
     }
 
     /**
@@ -484,5 +485,26 @@ class SystemController extends Controller
             return response()->json(['error' => true, 'message' => $e->getMessage()]);
         }
         return response()->json(['success' => true, 'message' => 'got system account information', 'system' => $data]);
+    }
+
+    public function checkTokenOfSystem(Request $request){
+        $token = $request->token;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        try{
+            $isSystemLoggedIn = false;
+            $system = Systems::where('auth_token', $token);
+            if($system){
+                $isSystemLoggedIn = true;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Kiểm tra token thành công",
+            "systemLoggedIn" => $isSystemLoggedIn],
+            200);
     }
 }
