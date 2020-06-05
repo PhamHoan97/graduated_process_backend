@@ -92,9 +92,13 @@ class CompanyController extends Controller
     public function loginCompany(Request $request){
         $adminUserName = Admins::where('username', $request->username)->first();
         if($adminUserName && Hash::check($request->password, $adminUserName->password)){
+            if($adminUserName->online === 2){
+                return response()->json(['error' => true, 'message' => 'Tài khoản đang được sử dụng'], 201);
+            }
             $credentials = ["username" => $request->username, "password" => $request->password];
             $token = self::getToken($credentials);
             $adminUserName->auth_token = $token;
+            $adminUserName->online = 2;
             $adminUserName->save();
 
             $response = [
@@ -113,8 +117,19 @@ class CompanyController extends Controller
         return response()->json($response, 200);
     }
 
-    public function logoutCompany()
+    public function logoutCompany(Request $request)
     {
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => 'Xảy ra lỗi với token'], 201);
+        }
+        try{
+            $admin = Admins::where('auth_token', $token)->first();
+            $admin->online = 1;
+            $admin->update();
+        }catch (\Exception $e){
+            return response()->json(['error' => true, 'message' => $e->getMessage()]);
+        }
         $this->guard()->logout();
 
         return response()->json(['success'=>true,'message' => 'Đăng xuất thành công']);

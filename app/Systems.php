@@ -15,7 +15,7 @@ class Systems extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'username', 'email', 'password', 'auth_token', 'provider', 'token', 'role'
+        'username', 'email', 'password', 'auth_token', 'provider', 'token', 'role', 'online'
     ];
 
     /**

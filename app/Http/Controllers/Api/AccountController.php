@@ -59,9 +59,13 @@ class AccountController extends Controller
     public function loginAccount(Request $request){
         $username = Accounts::where('username', $request->username)->first();
         if($username && Hash::check($request->password, $username->password)){
+            if($username->online === 2){
+                return response()->json(['error' => true, 'message' => 'Tài khoản đang được sử dụng'], 201);
+            }
             $credentials = ["username" => $request->username, "password" => $request->password];
             $token = self::getToken($credentials);
             $username->auth_token = $token;
+            $username->online = 2;
             $username->save();
 
             $response = [
@@ -80,8 +84,19 @@ class AccountController extends Controller
         return response()->json($response, 200);
     }
 
-    public function logoutAccount()
+    public function logoutAccount(Request $request)
     {
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => 'Xảy ra lỗi với token'], 201);
+        }
+        try{
+            $account = Accounts::where('auth_token', $token)->first();
+            $account->online = 1;
+            $account->update();
+        }catch (\Exception $e){
+            return response()->json(['error' => true, 'message' => $e->getMessage()]);
+        }
         $this->guard()->logout();
 
         return response()->json(['success'=>true,'message' => 'Đăng xuất thành công']);

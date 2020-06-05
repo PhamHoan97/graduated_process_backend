@@ -61,9 +61,13 @@ class SystemController extends Controller
         try {
             $system = Systems::where('email', $request->email)->get()->first();
             if ($system && Hash::check($request->password, $system->password)) {
+                if($system->online === 2){
+                    return response()->json(['error' => true, 'message' => 'Tài khoản đang được sử dụng'], 201);
+                }
                 $credentials = $request->only('email', 'password');
                 $token = self::getToken($credentials);
                 $system->auth_token = $token;
+                $system->online = 2;
                 $system->save();
 
                 $response = [
@@ -90,8 +94,19 @@ class SystemController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logoutSystem()
+    public function logoutSystem(Request $request)
     {
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => 'Xảy ra lỗi với token'], 201);
+        }
+        try{
+            $system = Systems::where('auth_token', $token)->first();
+            $system->online = 1;
+            $system->update();
+        }catch (\Exception $e){
+            return response()->json(['error' => true, 'message' => $e->getMessage()]);
+        }
         $this->guard()->logout();
 
         return response()->json(['success'=>true,'message' => 'Đăng xuất thành công']);

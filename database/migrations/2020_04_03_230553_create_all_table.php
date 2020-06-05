@@ -38,6 +38,7 @@ class CreateAllTable extends Migration
             $table->string('token')->nullable();
             $table->string('provider')->nullable();
             $table->string('role');
+            $table->integer('online')->default(1);
             $table->timestamps();
         });
 
@@ -80,6 +81,7 @@ class CreateAllTable extends Migration
             $table->string('provider')->nullable();
             $table->string('token')->nullable();
             $table->integer('company_id')->unsigned();
+            $table->integer('online')->default(1);
             $table->foreign('company_id')->references('id')->on('companies');
             $table->timestamps();
         });
@@ -144,6 +146,7 @@ class CreateAllTable extends Migration
             $table->longText('auth_token')->nullable();
             $table->string('provider')->nullable();
             $table->string('token')->nullable();
+            $table->integer('online')->default(1);
             $table->integer('employee_id')->unsigned();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->timestamps();
