@@ -349,9 +349,9 @@ class ManageNotificationController extends Controller
                 ->get();
             foreach ($responseCompanies as $responseCompany){
                 $dataCompanyResponses = json_decode($responseCompany->content);
-                $dataCompanyResponses->{"Admin"} = $responseCompany->username;
-                $dataCompanyResponses->{"Employee"} = 'Không';
-                $dataCompanyResponses->{"Day"} = $responseCompany->update_at;
+                $dataCompanyResponses->{"Tài khoản công ty"} = $responseCompany->username;
+                $dataCompanyResponses->{"Tài khoản nhân viên"} = 'Không';
+                $dataCompanyResponses->{"Ngày Gửi"} = $responseCompany->update_at;
                 $result[]=$dataCompanyResponses;
             }
         }catch(\Exception $e) {
@@ -368,9 +368,9 @@ class ManageNotificationController extends Controller
                 ->get();
             foreach ($responseEmployees as $responseEmployee){
                 $dataEmployeeResponses = json_decode($responseEmployee->content);
-                $dataEmployeeResponses->{"Admin"} = 'Không';
-                $dataEmployeeResponses->{"Employee"} = $responseEmployee->username;
-                $dataEmployeeResponses->{"Day"} = $responseEmployee->update_at;
+                $dataEmployeeResponses->{"Tài khoản công ty"} = 'Không';
+                $dataEmployeeResponses->{"Tài khoản nhân viên"} = $responseEmployee->username;
+                $dataEmployeeResponses->{"Ngày Gửi"} = $responseEmployee->update_at;
                 $result[]=$dataEmployeeResponses;
             }
         }catch(\Exception $e) {

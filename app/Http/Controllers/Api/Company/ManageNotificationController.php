@@ -63,7 +63,7 @@ class ManageNotificationController extends Controller
                     'system_notifications.description as description',
                     'system_notifications.file as file',
                     'forms.description as description_form',
-                    'forms.description as name_form',
+                    'forms.name as name_form',
                     'templates.content as template_content')
                 ->first();
             $data[]= array(
