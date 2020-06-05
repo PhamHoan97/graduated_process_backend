@@ -2,25 +2,24 @@
 
 namespace App\Mail;
 
-use App\Accounts;
+use App\Admins;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ResetPasswordEmployee extends Mailable
+class ResetPasswordCompany extends Mailable
 {
     use Queueable, SerializesModels;
-
-    public $account;
+    public $admin;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Accounts $account)
+    public function __construct(Admins $admin)
     {
-        $this->account = $account;
+        $this->admin = $admin;
     }
 
     /**
@@ -30,8 +29,8 @@ class ResetPasswordEmployee extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.forget_password_employee')->with([
-            'link' => 'https://processmanagement1102.herokuapp.com/employee/form/reset/password/'. $this->account->id,
+        return $this->view('emails.forget_password_company')->with([
+            'link' => 'https://processmanagement1102.herokuapp.com/company/form/reset/password/'. $this->admin->id,
         ]);
     }
 }

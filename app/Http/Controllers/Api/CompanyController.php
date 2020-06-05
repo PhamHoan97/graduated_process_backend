@@ -7,6 +7,7 @@ use App\Companies;
 use App\ElementComments;
 use App\ElementNotes;
 use App\Elements;
+use App\Emails;
 use App\Employees;
 use App\Fields;
 use App\Processes;
@@ -17,10 +18,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Config;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Auth;
+use App\Mail\ResetPasswordCompany;
 
 
 class CompanyController extends Controller
@@ -688,5 +691,103 @@ class CompanyController extends Controller
             'message' => "Kiểm tra token thành công",
             "adminLoggedIn" => $isAdminLoggedIn],
             200);
+    }
+
+    public function getAccountOfCompanyInformation(Request $request){
+        $token = $request->token;
+        if(!isset($token)){
+            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+        }
+        try{
+            $admin = Admins::where('auth_token', $token)->first();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Lấy thông tin thành công",
+            'username' => $admin->username
+            ], 200);
+    }
+
+    public function updateAccountOfCompany(Request $request){
+        $username = $request->username;
+        $password = $request->password;
+        $newPassword = $request->newPassword;
+        $token = $request->tokenData;
+
+        try{
+            $admin = Admins::where('auth_token', $token)->first();
+            if(!$admin){
+                return response()->json(['error' => 1, 'message' => "xảy ra lỗi với token"], 201);
+            }
+            if(Hash::check($password, $admin->password)){
+                $admin->username = $username;
+                $admin->password = Hash::make($newPassword);
+                $admin->update();
+            }else{
+                return response()->json(['error' => 1, 'message' => "Không đúng mật khẩu", "password" => true],  201);
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
+        }
+        return response()->json(['success'=>true, 'message' => 'Cập nhật tài khoản thành công', 'username' => $username]);
+    }
+
+    public function resetPasswordForCompany(Request $request){
+        $emailData = $request->email;
+        if(!$emailData){
+            return response()->json(['error' => 1, 'message' => "Email is required"], 400);
+        }
+        try{
+            $company = Companies::where('contact', $emailData)->first();
+            if(!$company){
+                return response()->json(['error' => 1, 'message' => "Email này không hợp lệ"], 201);
+            }
+            $admin = Admins::where('company_id', $company->id)->first();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+
+        try{
+            Mail::to($emailData)->send(new ResetPasswordCompany($admin));
+        }catch (\Exception $e){
+            $email = new Emails();
+            $email->type = "Reset Password Admin";
+            $email->to = $emailData;
+            $email->status = 2;
+            $email->response = $e->getMessage();
+            $email->save();
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
+        }
+
+        $email = new Emails();
+        $email->type = "Reset Password Admin";
+        $email->to = $emailData;
+        $email->response = "success";
+        $email->save();
+        return response()->json(['success' => true, 'message' => "Hệ thống đã gửi email cho email của bạn"], 200);
+    }
+
+    public function handleResetPasswordForCompany(Request $request){
+        $id = $request->id;
+        $newPassword = $request->newPassword;
+        if(!$id){
+            return response()->json(['error' => 1, 'message' => "id is required"], 400);
+        }
+        if(!$newPassword){
+            return response()->json(['error' => 1, 'message' => "newPassword is required"], 400);
+        }
+        try{
+            $admin = Admins::find($id);
+            if(!$admin){
+                return response()->json(['error' => 1, 'message' => "xảy ra lỗi với id"], 201);
+            }
+            $admin->password = Hash::make($newPassword);
+            $admin->update();
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
+        }
+        return response()->json(['success' => true, 'message' => "cập nhật mật khẩu thành công"], 200);
     }
 }

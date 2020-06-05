@@ -35,6 +35,10 @@ Route::post('employee/reset/send/password', 'Api\AccountController@resetPassword
 
 Route::post('employee/reset/handle/password', 'Api\AccountController@handleResetPasswordForEmployee');
 
+Route::post('company/reset/send/password', 'Api\CompanyController@resetPasswordForCompany');
+
+Route::post('company/reset/handle/password', 'Api\CompanyController@handleResetPasswordForCompany');
+
 Route::group(['middleware' => 'jwt-auth-system'], function () {
     // all routes of system role to protected resources are registered here
     Route::get('system/registration', 'Api\SystemController@getRegistrationListOfCompanies');
@@ -209,6 +213,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/template/process/{idProcess}','Api\CompanyController@getProcessTempalateWithId');
     //check token of company
     Route::get('company/check/token/{token}','Api\CompanyController@checkTokenOfCompany');
+    //get account of company information
+    Route::get('company/account/information/{token}','Api\CompanyController@getAccountOfCompanyInformation');
+    //update account of company information
+    Route::post('company/update/account','Api\CompanyController@updateAccountOfCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {
