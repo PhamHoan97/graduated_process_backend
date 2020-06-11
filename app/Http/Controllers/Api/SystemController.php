@@ -6,10 +6,12 @@ use App\Admins;
 use App\Companies;
 use App\Departments;
 use App\Emails;
+use App\Fields;
 use App\Mail\Reject;
 use App\Mail\ResendEmail;
 use App\Mail\SendAdminAccount;
 use App\Processes;
+use App\ProcessesFields;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -520,6 +522,111 @@ class SystemController extends Controller
             'success' => true,
             'message' => "Kiểm tra token thành công",
             "systemLoggedIn" => $isSystemLoggedIn],
+            200);
+    }
+    public function searchCompaniesInSystem(Request $request){
+        $search = $request->search;
+        try{
+            if(!$search){
+                $companies = Companies::all();
+            }else{
+                $companies = Companies::where('active',1)
+                    ->where('name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('ceo', 'LIKE', '%' . $search . '%')
+                    ->orWhere('contact', 'LIKE', '%' . $search . '%')
+                    ->get();
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Tìm kiếm thành công",
+            "companies" => $companies],
+            200);
+    }
+
+    public function searchCompaniesRegistrationInSystem(Request $request){
+        $search = $request->search;
+        try{
+            if(!$search){
+                $registration = Waitings::all();
+            }else{
+                $registration = Waitings::where('approve', '<', 1)
+                    ->where('name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('ceo', 'LIKE', '%' . $search . '%')
+                    ->orWhere('contact', 'LIKE', '%' . $search . '%')
+                    ->get();
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Tìm kiếm thành công",
+            "registration" => $registration],
+            200);
+    }
+
+    public function searchEmailInSystem(Request $request){
+        $search = $request->search;
+        try{
+            if(!$search){
+                $email = Emails::all();
+            }else{
+                $email = Emails::where('type', 'LIKE', '%' . $search . '%')
+                    ->orWhere('to', 'LIKE', '%' . $search . '%')
+                    ->get();
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Tìm kiếm thành công",
+            "email" => $email],
+            200);
+    }
+
+    public function searchTemplateInField(Request $request){
+        $search = $request->search;
+        $fieldId = $request->fieldId;
+        try{
+            if(!$fieldId){
+                return response()->json(['error' => 1, 'message' => "Xảy ra lỗi với lĩnh vực"], 201);
+            }
+            if(!$search){
+                $processes = ProcessesFields::where('field_id',$fieldId)->get();
+            }else{
+                $processes = ProcessesFields::where('field_id', $fieldId)
+                    ->where('name', 'LIKE', '%' . $search . '%')
+                    ->get();
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Tìm kiếm thành công",
+            "processes" => $processes],
+            200);
+    }
+
+    public function searchFieldInSystem(Request $request){
+        $search = $request->search;
+        try{
+            if(!$search){
+                $field = Fields::all();
+            }else{
+                $field = Fields::where('name', 'LIKE', '%' . $search . '%')->get();
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Tìm kiếm thành công",
+            "field" => $field],
             200);
     }
 }

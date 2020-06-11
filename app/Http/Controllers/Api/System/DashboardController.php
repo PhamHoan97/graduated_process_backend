@@ -28,6 +28,7 @@ class DashboardController extends Controller
                     ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
                     ->select('processes.id as id',
+                        'processes.code as code',
                         'processes.name as process_name',
                         'companies.name as company_name',
                         'processes.description as description',
@@ -40,6 +41,7 @@ class DashboardController extends Controller
                     ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
                     ->select('processes.id as id',
+                        'processes.code as code',
                         'processes.name as process_name',
                         'companies.name as company_name',
                         'processes.description as description',
@@ -52,6 +54,7 @@ class DashboardController extends Controller
                     ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
                     ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                     ->select('processes.id as id',
+                        'processes.code as code',
                         'processes.name as process_name',
                         'companies.name as company_name',
                         'processes.description as description',
@@ -63,6 +66,7 @@ class DashboardController extends Controller
                     ->join('processes_roles', 'roles.id', '=', 'processes_roles.role_id')
                     ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
                     ->select('processes.id as id',
+                        'processes.code as code',
                         'processes.name as process_name',
                         'companies.name as company_name',
                         'processes.description as description',
@@ -104,6 +108,7 @@ class DashboardController extends Controller
                 ->where('companies.id', $idCompany)
                 ->orderBy('processes.id', 'ASC')
                 ->select('processes.id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.update_at as date',
@@ -119,6 +124,7 @@ class DashboardController extends Controller
                 ->where('companies.id', $idCompany)
                 ->orderBy('processes.id', 'ASC')
                 ->select('processes.id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.update_at as date',
@@ -155,6 +161,7 @@ class DashboardController extends Controller
                 ->orderBy('processes.id', 'ASC')
                 ->select(
                     'processes.id as id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.update_at as date',
@@ -175,6 +182,7 @@ class DashboardController extends Controller
                 ->orderBy('processes.id', 'ASC')
                 ->select(
                     'processes.id as id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.update_at as date',

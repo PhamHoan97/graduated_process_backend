@@ -109,6 +109,17 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::post('system/notification/statistic','Api\System\ManageNotificationController@getInformationStatistic');
     // get all response of notification which send from system
     Route::get('system/notification/response/{idNotificationFromSystem}','Api\System\ManageNotificationController@getInformationResponses');
+    //search companies in system
+    Route::get('system/search/company/{search}','Api\SystemController@searchCompaniesInSystem');
+    //search companies registration in system
+    Route::get('system/search/registration/{search}','Api\SystemController@searchCompaniesRegistrationInSystem');
+    //search emails in system
+    Route::get('system/search/email/{search}','Api\SystemController@searchEmailInSystem');
+    //search templates in field
+    Route::get('system/search/template/{fieldId}/{search}','Api\SystemController@searchTemplateInField');
+    //search  fields in system
+    Route::get('system/search/field/{search}','Api\SystemController@searchFieldInSystem');
+
 });
 
 Route::group(['middleware' => 'jwt-auth-company'], function () {
@@ -217,6 +228,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/account/information/{token}','Api\CompanyController@getAccountOfCompanyInformation');
     //update account of company information
     Route::post('company/update/account','Api\CompanyController@updateAccountOfCompany');
+    //search processes template in company
+    Route::get('company/search/template/{search}','Api\CompanyController@searchProcessesTemplateInCompany');
+    //search processes template of field in company
+    Route::get('company/search/template/{fieldId}/{search}','Api\CompanyController@searchProcessesTemplateOfFieldInCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

@@ -53,7 +53,7 @@ class CompanyController extends Controller
         $record = DB::table('waitings')->where('contact', $contact)->first();
 
         if($record){
-            return response()->json(["error" => "This email contact is used by someone"], 400);
+            return response()->json(["success" => true, "message" => "This email contact is used by someone"], 201);
         }
 
         try{
@@ -789,5 +789,57 @@ class CompanyController extends Controller
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 201);
         }
         return response()->json(['success' => true, 'message' => "cập nhật mật khẩu thành công"], 200);
+    }
+
+    public function searchProcessesTemplateInCompany(Request $request){
+        $search = $request->search;
+        try{
+            if(!$search){
+                $processes = ProcessesFields::all();
+            }else{
+                $processes = ProcessesFields::where('name', 'LIKE', '%' . $search . '%')->get();
+            }
+            $data = [];
+            foreach ($processes as $process){
+                $process->field;
+                $data []= $process;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Tìm kiếm thành công",
+            "processes" => $data],
+            200);
+    }
+
+    public function searchProcessesTemplateOfFieldInCompany(Request $request){
+        $search = $request->search;
+        $fieldId = $request->fieldId;
+        try{
+            if(!$fieldId){
+                return response()->json(['error' => 1, 'message' => "Xảy ra lỗi với lĩnh vực"], 201);
+            }
+            if(!$search){
+                $processes = ProcessesFields::where('field_id',$fieldId)->get();
+            }else{
+                $processes = ProcessesFields::where('field_id', $fieldId)
+                    ->where('name', 'LIKE', '%' . $search . '%')
+                    ->get();
+            }
+            $data = [];
+            foreach ($processes as $process){
+                $process->field;
+                $data []= $process;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Tìm kiếm thành công",
+            "processes" => $data],
+            200);
     }
 }

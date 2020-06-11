@@ -264,11 +264,9 @@ class CreateAllTable extends Migration
         //create process of employee table
         Schema::create('processes', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('code');
             $table->string('name');
             $table->longText('description');
-            $table->string('image')->nullable();
-            $table->string('svg')->nullable();
-            $table->string('bpmn')->nullable();
             $table->longText('xml')->nullable();
             $table->integer('type')->nullable();
             $table->string('deadline')->nullable();
