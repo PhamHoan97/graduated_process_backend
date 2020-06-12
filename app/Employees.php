@@ -30,6 +30,11 @@ class Employees extends Model
         return $this->belongsToMany('\App\Processes', 'processes_roles', 'role_id', 'process_id');
     }
 
+    public function processesDepartments()
+    {
+        return $this->belongsToMany('\App\Processes', 'processes_departments', 'department_id', 'process_id');
+    }
+
     /**
      *
      * Scope a query to only include users of a given type.

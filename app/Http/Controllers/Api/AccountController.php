@@ -113,9 +113,25 @@ class AccountController extends Controller
             $employee->role;
             $employee->processesEmployees;
             $employee->processesRoles;
+            $employee->processesDepartments;
             $department_id = $employee['department_id'];
             $department = Departments::find($department_id);
             $company = Companies::find($department['company_id']);
+            $processes_companies = DB::table('processes')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$account->employee_id)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $employee->processes_companies = $processes_companies;
 
         }catch ( \Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
@@ -184,10 +200,21 @@ class AccountController extends Controller
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
-                ->where('employees.id',$employee->id)->orWhere('roles.id', $employee->role_id)
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->leftJoin('departments as departments1', 'companies.id', '=', 'departments1.company_id')
+                ->leftJoin('employees as employees1', 'departments.id', '=', 'employees1.department_id')
+                ->where('employees.id',$employee->id)
+                ->orWhere('roles.id', $employee->role_id)
+                ->orWhere('departments.id', $employee->department_id)
+                ->orWhere('employees1.id', $employee->id)
                 ->select('processes.id as id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
+                    'processes.type as type',
                     'processes.created_at as created_at')
                 ->forPage($page, 6)->get();
 
@@ -247,7 +274,16 @@ class AccountController extends Controller
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
-                ->where('employees.id',$employee->id)->orWhere('roles.id', $employee->role_id)
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->leftJoin('departments as departments1', 'companies.id', '=', 'departments1.company_id')
+                ->leftJoin('employees as employees1', 'departments.id', '=', 'employees1.department_id')
+                ->where('employees.id',$employee->id)
+                ->orWhere('roles.id', $employee->role_id)
+                ->orWhere('departments.id', $employee->department_id)
+                ->orWhere('employees1.id', $employee->id)
                 ->select('processes.id as id',
                     'processes.name as name',
                     'processes.created_at as created_at')->take(5)->orderBy('created_at', 'desc')
