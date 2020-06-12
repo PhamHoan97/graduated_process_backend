@@ -232,6 +232,14 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/search/template/{search}','Api\CompanyController@searchProcessesTemplateInCompany');
     //search processes template of field in company
     Route::get('company/search/template/{fieldId}/{search}','Api\CompanyController@searchProcessesTemplateOfFieldInCompany');
+    //search employees in company
+    Route::get('company/search/employee/{token}/{search}','Api\CompanyController@searchEmployeesInCompany');
+    //search employees in department in company
+    Route::get('company/search/employee/department/{idDepartment}/{search}','Api\CompanyController@searchEmployeesInDepartmentInCompany');
+    //search processes of employee in company
+    Route::get('company/employee/{idEmployee}/search/process/{search}','Api\CompanyController@searchProcessesOfEmployeeInCompany');
+    //search processes in company
+    Route::get('company/process/search/{token}/{search}','Api\CompanyController@searchProcessesInCompany');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

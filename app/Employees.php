@@ -21,6 +21,10 @@ class Employees extends Model
         return $this->belongsTo('App\Roles', 'role_id', 'id');
     }
 
+    public function department(){
+        return $this->belongsTo('App\Departments', 'department_id', 'id');
+    }
+
     public function processesRoles()
     {
         return $this->belongsToMany('\App\Processes', 'processes_roles', 'role_id', 'process_id');
