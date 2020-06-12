@@ -11,6 +11,7 @@ use App\Emails;
 use App\Employees;
 use App\Fields;
 use App\Processes;
+use App\ProcessesDepartments;
 use App\ProcessesEmployees;
 use App\ProcessesFields;
 use App\ProcessesRoles;
@@ -188,6 +189,7 @@ class CompanyController extends Controller
             }
             //create process
             $process = new Processes();
+            $process->code = $information->code;
             $process->name = $information->name;
             $process->description = $information->description;
             $process->type = $information->type;
@@ -214,12 +216,20 @@ class CompanyController extends Controller
                     $link->employee_id = $value->value;
                     $link->save();
                 }
-            }else{
+            }else if($information->type === 2){
                 $assign = $information->assign;
                 foreach ($assign as $value){
                     $link = new ProcessesRoles();
                     $link->process_id = $process->id;
                     $link->role_id = $value->value;
+                    $link->save();
+                }
+            }else if($information->type === 3){
+                $assign = $information->assign;
+                foreach ($assign as $value){
+                    $link = new ProcessesDepartments();
+                    $link->process_id = $process->id;
+                    $link->department_id = $value->value;
                     $link->save();
                 }
             }
@@ -271,6 +281,7 @@ class CompanyController extends Controller
                 $comments = $process->elementComments;
                 $process->elements;
                 $process->roles;
+                $process->departments;
                 $newComments = [];
                 foreach ($comments as $comment){
                     if($comment->employee_id){
@@ -323,6 +334,8 @@ class CompanyController extends Controller
             $deleteAssignsEmployee = ProcessesEmployees::where('process_id', $processId)->delete();
             //remove assign role
             $deleteAssignsEmployee = ProcessesRoles::where('process_id', $processId)->delete();
+            //remove assign department
+            $deleteAssignsDepartment= ProcessesDepartments::where('process_id', $processId)->delete();
             //remove old elements
             $deletedElements = Elements::where('process_id', $processId)->delete();
             //update processes_employees
@@ -334,12 +347,20 @@ class CompanyController extends Controller
                     $link->employee_id = $value->value;
                     $link->save();
                 }
-            }else{
+            }else if($information->type === 2){
                 $assign = $information->assign;
                 foreach ($assign as $value){
                     $link = new ProcessesRoles();
                     $link->process_id = $process->id;
                     $link->role_id = $value->value;
+                    $link->save();
+                }
+            }else if($information->type === 3){
+                $assign = $information->assign;
+                foreach ($assign as $value){
+                    $link = new ProcessesDepartments();
+                    $link->process_id = $process->id;
+                    $link->department_id = $value->value;
                     $link->save();
                 }
             }
@@ -418,7 +439,20 @@ class CompanyController extends Controller
                     'departments.id as id_department',
                     'departments.name as department_name')
                 ->get();
-            return response()->json(['message'=>'Got all users and roles in company ','employees'=>$employees, 'roles' => $roles],200);
+
+            $departments = DB::table('companies')
+                ->join('departments', 'companies.id', '=', 'departments.company_id')
+                ->where('companies.id', $idCompany)
+                ->select(
+                    'departments.id as id_department',
+                    'departments.name as department_name')
+                ->get();
+            return response()->json([
+                    'message'=>'Got all users, roles and departments in company',
+                    'employees'=>$employees,
+                    'roles' => $roles,
+                    'departments' => $departments,
+                ],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
