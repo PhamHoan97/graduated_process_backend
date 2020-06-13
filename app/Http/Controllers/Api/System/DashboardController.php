@@ -27,6 +27,7 @@ class DashboardController extends Controller
                     ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
                     ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.type as type',
@@ -41,6 +42,7 @@ class DashboardController extends Controller
                     ->join('processes_roles', 'roles.id', '=', 'processes_roles.role_id')
                     ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.type as type',
@@ -54,6 +56,7 @@ class DashboardController extends Controller
                     ->join('processes_departments', 'departments.id', '=', 'processes_departments.department_id')
                     ->join('processes', 'processes_departments.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.type as type',
@@ -66,6 +69,7 @@ class DashboardController extends Controller
                     ->join('processes_companies', 'companies.id', '=', 'processes_companies.company_id')
                     ->join('processes', 'processes_companies.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.type as type',
