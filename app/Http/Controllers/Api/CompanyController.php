@@ -591,6 +591,30 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
+            $processes3 = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->where('departments.id',$idDepartment)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+
+            $processes4 = DB::table('processes')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->leftJoin('departments', 'companies.department_id', '=', 'departments.id')
+                ->where('departments.id',$idDepartment)
+                ->select('processes.id as id',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
         }catch (\Exception $e){
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -599,6 +623,8 @@ class CompanyController extends Controller
                 'message'=>'got all processes of a department of company',
                 'processes1' => $processes1,
                 'processes2' => $processes2,
+                'processes3' => $processes3,
+                'processes4' => $processes4,
             ],200);
     }
 
@@ -1118,6 +1144,42 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
+            $processes3 = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$employeeId)
+                ->where(function($query) use ($search) {
+                    $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                })
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+
+            $processes4 = DB::table('processes')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$employeeId)
+                ->where(function($query) use ($search) {
+                    $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                })
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
 
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
@@ -1127,7 +1189,10 @@ class CompanyController extends Controller
             'success' => true,
             'message' => "Tìm kiếm thành công",
             "processes1" => $processes1,
-            "processes2" => $processes2],
+            "processes2" => $processes2,
+            "processes3" => $processes3,
+            "processes4" => $processes4
+        ],
             200);
 
     }
@@ -1161,6 +1226,31 @@ class CompanyController extends Controller
                     ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                     ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                    ->where('companies.id',$idCompany)
+                    ->select('processes.id as id',
+                        'processes.code as code',
+                        'processes.name as name',
+                        'processes.description as description',
+                        'processes.type as type',
+                        'processes.created_at as created_at'
+                    )->distinct()
+                    ->get();
+                $processes3 = DB::table('processes')
+                    ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                    ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                    ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                    ->where('companies.id',$idCompany)
+                    ->select('processes.id as id',
+                        'processes.name as name',
+                        'processes.code as code',
+                        'processes.description as description',
+                        'processes.type as type',
+                        'processes.created_at as created_at'
+                    )->distinct()
+                    ->get();
+                $processes4 = DB::table('processes')
+                    ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                    ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
                     ->select('processes.id as id',
                         'processes.code as code',
@@ -1207,6 +1297,39 @@ class CompanyController extends Controller
                         'processes.created_at as created_at'
                     )->distinct()
                     ->get();
+                $processes3 = DB::table('processes')
+                    ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                    ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                    ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                    ->where('companies.id',$idCompany)
+                    ->where(function($query) use ($search) {
+                        $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                    })
+                    ->select('processes.id as id',
+                        'processes.name as name',
+                        'processes.code as code',
+                        'processes.description as description',
+                        'processes.type as type',
+                        'processes.created_at as created_at'
+                    )->distinct()
+                    ->get();
+                $processes4 = DB::table('processes')
+                    ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                    ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                    ->where('companies.id',$idCompany)
+                    ->where(function($query) use ($search) {
+                        $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                    })
+                    ->select('processes.id as id',
+                        'processes.code as code',
+                        'processes.name as name',
+                        'processes.description as description',
+                        'processes.type as type',
+                        'processes.created_at as created_at'
+                    )->distinct()
+                    ->get();
             }
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
@@ -1215,7 +1338,10 @@ class CompanyController extends Controller
             'success' => true,
             'message' => "Tìm kiếm thành công",
             "processes1" => $processes1,
-            "processes2" => $processes2],
+            "processes2" => $processes2,
+            "processes3" => $processes3,
+            "processes4" => $processes4
+        ],
             200);
     }
 }
