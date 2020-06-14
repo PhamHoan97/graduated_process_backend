@@ -303,10 +303,20 @@ class CreateAllTable extends Migration
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
             $table->timestamps();
         });
+        //create link table between process and department
+        Schema::create('processes_companies', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('process_id')->unsigned();
+            $table->integer('company_id')->unsigned();
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->timestamps();
+        });
         //create element of process table
         Schema::create('elements', function (Blueprint $table) {
             $table->increments('id');
             $table->string('element');
+            $table->string('name')->nullable();
             $table->string('type');
             $table->integer('process_id')->unsigned();
             $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
@@ -329,6 +339,8 @@ class CreateAllTable extends Migration
             $table->integer('element_id')->unsigned();
             $table->integer('admin_id')->unsigned()->nullable();
             $table->longText('content');
+            $table->string('assign')->nullable();
+            $table->string('document')->nullable();
             $table->foreign('element_id')->references('id')->on('elements')->onDelete('cascade');
             $table->timestamps();
         });
@@ -368,6 +380,10 @@ class CreateAllTable extends Migration
         Schema::dropIfExists('element_notes');
 
         Schema::dropIfExists('elements');
+
+        Schema::dropIfExists('processes_companies');
+
+        Schema::dropIfExists('processes_departments');
 
         Schema::dropIfExists('processes_roles');
 
