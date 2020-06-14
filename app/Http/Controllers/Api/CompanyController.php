@@ -606,7 +606,7 @@ class CompanyController extends Controller
             $processes4 = DB::table('processes')
                 ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
-                ->leftJoin('departments', 'companies.department_id', '=', 'departments.id')
+                ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
                 ->where('departments.id',$idDepartment)
                 ->select('processes.id as id',
                     'processes.name as name',
