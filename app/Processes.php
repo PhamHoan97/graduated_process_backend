@@ -33,4 +33,8 @@ class Processes extends Model
     public function roles(){
         return $this->belongsToMany('\App\Roles','processes_roles', 'process_id', 'role_id');
     }
+
+    public function departments(){
+        return $this->belongsToMany('\App\Departments','processes_departments', 'process_id', 'department_id');
+    }
 }

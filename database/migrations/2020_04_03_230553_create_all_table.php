@@ -294,6 +294,15 @@ class CreateAllTable extends Migration
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->timestamps();
         });
+        //create link table between process and department
+        Schema::create('processes_departments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('process_id')->unsigned();
+            $table->integer('department_id')->unsigned();
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
+            $table->timestamps();
+        });
         //create element of process table
         Schema::create('elements', function (Blueprint $table) {
             $table->increments('id');

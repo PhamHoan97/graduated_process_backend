@@ -27,8 +27,10 @@ class DashboardController extends Controller
                     ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
                     ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
                     ->select('processes.id as id',
                         'processes.code as code',
+                        'processes.type as type',
                         'processes.name as process_name',
                         'companies.name as company_name',
                         'processes.description as description',
@@ -40,8 +42,37 @@ class DashboardController extends Controller
                     ->join('processes_roles', 'roles.id', '=', 'processes_roles.role_id')
                     ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
                     ->select('processes.id as id',
                         'processes.code as code',
+                        'processes.type as type',
+                        'processes.name as process_name',
+                        'companies.name as company_name',
+                        'processes.description as description',
+                        'processes.update_at as date')->distinct()
+                    ->get();
+                $processes3 = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('processes_departments', 'departments.id', '=', 'processes_departments.department_id')
+                    ->join('processes', 'processes_departments.process_id', '=', 'processes.id')
+                    ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
+                    ->select('processes.id as id',
+                        'processes.code as code',
+                        'processes.type as type',
+                        'processes.name as process_name',
+                        'companies.name as company_name',
+                        'processes.description as description',
+                        'processes.update_at as date')->distinct()
+                    ->get();
+                $processes4 = DB::table('companies')
+                    ->join('processes_companies', 'companies.id', '=', 'processes_companies.company_id')
+                    ->join('processes', 'processes_companies.process_id', '=', 'processes.id')
+                    ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
+                    ->select('processes.id as id',
+                        'processes.code as code',
+                        'processes.type as type',
                         'processes.name as process_name',
                         'companies.name as company_name',
                         'processes.description as description',
@@ -55,6 +86,7 @@ class DashboardController extends Controller
                     ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
                     ->select('processes.id as id',
                         'processes.code as code',
+                        'processes.type as type',
                         'processes.name as process_name',
                         'companies.name as company_name',
                         'processes.description as description',
@@ -67,6 +99,30 @@ class DashboardController extends Controller
                     ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
                     ->select('processes.id as id',
                         'processes.code as code',
+                        'processes.type as type',
+                        'processes.name as process_name',
+                        'companies.name as company_name',
+                        'processes.description as description',
+                        'processes.update_at as date')->distinct()
+                    ->get();
+                $processes3 = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('processes_departments', 'departments.id', '=', 'processes_departments.department_id')
+                    ->join('processes', 'processes_departments.process_id', '=', 'processes.id')
+                    ->select('processes.id as id',
+                        'processes.code as code',
+                        'processes.type as type',
+                        'processes.name as process_name',
+                        'companies.name as company_name',
+                        'processes.description as description',
+                        'processes.update_at as date')->distinct()
+                    ->get();
+                $processes4 = DB::table('companies')
+                    ->join('processes_companies', 'companies.id', '=', 'processes_companies.company_id')
+                    ->join('processes', 'processes_companies.process_id', '=', 'processes.id')
+                    ->select('processes.id as id',
+                        'processes.code as code',
+                        'processes.type as type',
                         'processes.name as process_name',
                         'companies.name as company_name',
                         'processes.description as description',
@@ -74,7 +130,13 @@ class DashboardController extends Controller
                     ->get();
             }
 
-            return response()->json(['message'=>'Get success all process','processes1'=>$processes1, 'processes2'=>$processes2],200);
+            return response()->json([
+                'message'=>'Get success all process',
+                'processes1'=>$processes1,
+                'processes2'=>$processes2,
+                'processes3'=>$processes3,
+                'processes4'=>$processes4,
+            ],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -109,11 +171,11 @@ class DashboardController extends Controller
                 ->orderBy('processes.id', 'ASC')
                 ->select('processes.id',
                     'processes.code as code',
+                    'processes.type as type',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.update_at as date',
-                    'processes.deadline as deadline',
-                    'processes.type as type'
+                    'processes.deadline as deadline'
                 )->distinct()
                 ->get();
             $processes2 = DB::table('companies')
@@ -125,14 +187,45 @@ class DashboardController extends Controller
                 ->orderBy('processes.id', 'ASC')
                 ->select('processes.id',
                     'processes.code as code',
+                    'processes.type as type',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.update_at as date',
-                    'processes.deadline as deadline',
-                    'processes.type as type'
+                    'processes.deadline as deadline'
                 )->distinct()
                 ->get();
-            return response()->json(['message'=>'Get success all processes of a company','processes1'=>$processes1,'processes2'=>$processes2],200);
+            $processes3 = DB::table('companies')
+                ->join('departments', 'companies.id', '=', 'departments.company_id')
+                ->join('processes_departments', 'departments.id', '=', 'processes_departments.department_id')
+                ->join('processes', 'processes_departments.process_id', '=', 'processes.id')
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.type as type',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.update_at as date',
+                    'processes.deadline as deadline'
+                )->distinct()
+                ->get();
+            $processes4 = DB::table('companies')
+                ->join('processes_companies', 'companies.id', '=', 'processes_companies.company_id')
+                ->join('processes', 'processes_companies.process_id', '=', 'processes.id')
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.type as type',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.update_at as date',
+                    'processes.deadline as deadline'
+                )->distinct()
+                ->get();
+            return response()->json([
+                'message'=>'Get success all processes of a company',
+                'processes1'=>$processes1,
+                'processes2'=>$processes2,
+                'processes3'=>$processes3,
+                'processes4'=>$processes4,
+            ],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }

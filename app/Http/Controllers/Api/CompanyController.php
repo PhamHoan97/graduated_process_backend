@@ -11,6 +11,8 @@ use App\Emails;
 use App\Employees;
 use App\Fields;
 use App\Processes;
+use App\ProcessesCompanies;
+use App\ProcessesDepartments;
 use App\ProcessesEmployees;
 use App\ProcessesFields;
 use App\ProcessesRoles;
@@ -188,6 +190,7 @@ class CompanyController extends Controller
             }
             //create process
             $process = new Processes();
+            $process->code = $information->code;
             $process->name = $information->name;
             $process->description = $information->description;
             $process->type = $information->type;
@@ -214,7 +217,7 @@ class CompanyController extends Controller
                     $link->employee_id = $value->value;
                     $link->save();
                 }
-            }else{
+            }else if($information->type === 2){
                 $assign = $information->assign;
                 foreach ($assign as $value){
                     $link = new ProcessesRoles();
@@ -222,6 +225,19 @@ class CompanyController extends Controller
                     $link->role_id = $value->value;
                     $link->save();
                 }
+            }else if($information->type === 3){
+                $assign = $information->assign;
+                foreach ($assign as $value){
+                    $link = new ProcessesDepartments();
+                    $link->process_id = $process->id;
+                    $link->department_id = $value->value;
+                    $link->save();
+                }
+            }else if($information->type === 4){
+                $link = new ProcessesCompanies();
+                $link->process_id = $process->id;
+                $link->company_id = $admin->company_id;
+                $link->save();
             }
             //save elements
             foreach ($elements as $value){
@@ -271,6 +287,7 @@ class CompanyController extends Controller
                 $comments = $process->elementComments;
                 $process->elements;
                 $process->roles;
+                $process->departments;
                 $newComments = [];
                 foreach ($comments as $comment){
                     if($comment->employee_id){
@@ -323,6 +340,10 @@ class CompanyController extends Controller
             $deleteAssignsEmployee = ProcessesEmployees::where('process_id', $processId)->delete();
             //remove assign role
             $deleteAssignsEmployee = ProcessesRoles::where('process_id', $processId)->delete();
+            //remove assign department
+            $deleteAssignsDepartment= ProcessesDepartments::where('process_id', $processId)->delete();
+            //remove assign company
+            $deleteAssignsCompany= ProcessesCompanies::where('process_id', $processId)->delete();
             //remove old elements
             $deletedElements = Elements::where('process_id', $processId)->delete();
             //update processes_employees
@@ -334,7 +355,7 @@ class CompanyController extends Controller
                     $link->employee_id = $value->value;
                     $link->save();
                 }
-            }else{
+            }else if($information->type === 2){
                 $assign = $information->assign;
                 foreach ($assign as $value){
                     $link = new ProcessesRoles();
@@ -342,6 +363,19 @@ class CompanyController extends Controller
                     $link->role_id = $value->value;
                     $link->save();
                 }
+            }else if($information->type === 3){
+                $assign = $information->assign;
+                foreach ($assign as $value){
+                    $link = new ProcessesDepartments();
+                    $link->process_id = $process->id;
+                    $link->department_id = $value->value;
+                    $link->save();
+                }
+            }else if($information->type === 4){
+                $link = new ProcessesCompanies();
+                $link->process_id = $process->id;
+                $link->company_id = $admin->company_id;
+                $link->save();
             }
             //update elements
             foreach ($elements as $value){
@@ -418,7 +452,20 @@ class CompanyController extends Controller
                     'departments.id as id_department',
                     'departments.name as department_name')
                 ->get();
-            return response()->json(['message'=>'Got all users and roles in company ','employees'=>$employees, 'roles' => $roles],200);
+
+            $departments = DB::table('companies')
+                ->join('departments', 'companies.id', '=', 'departments.company_id')
+                ->where('companies.id', $idCompany)
+                ->select(
+                    'departments.id as id_department',
+                    'departments.name as department_name')
+                ->get();
+            return response()->json([
+                    'message'=>'Got all users, roles and departments in company',
+                    'employees'=>$employees,
+                    'roles' => $roles,
+                    'departments' => $departments,
+                ],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -460,6 +507,31 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
+            $processes3 = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $processes4 = DB::table('processes')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
          }catch (\Exception $e){
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -467,7 +539,9 @@ class CompanyController extends Controller
             [
                 'message'=>'got all processes of company',
                 'processes1' => $processes1,
-                'processes2' => $processes2
+                'processes2' => $processes2,
+                'processes3' => $processes3,
+                'processes4' => $processes4,
             ],200);
     }
 
@@ -562,6 +636,35 @@ class CompanyController extends Controller
                 )->distinct()
                 ->get();
 
+            $processes3 = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$idEmployee)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+
+            $processes4 = DB::table('processes')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$idEmployee)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+
         }catch (\Exception $e){
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -570,6 +673,8 @@ class CompanyController extends Controller
                 'message'=>'got all processes of a department of company',
                 'processes1' => $processes1,
                 'processes2' => $processes2,
+                'processes3' => $processes3,
+                'processes4' => $processes4,
                 'employee' => $employee
             ],200);
     }
@@ -648,8 +753,8 @@ class CompanyController extends Controller
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
                 ->select('processes.id as id',
-                    'processes.code as code',
                     'processes.name as name',
+                    'processes.code as code',
                     'processes.description as description',
                     'processes.type as type',
                     'processes.created_at as created_at'
@@ -669,6 +774,31 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
+            $processes3 = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $processes4 = DB::table('processes')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
         }catch (\Exception $e){
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -676,7 +806,9 @@ class CompanyController extends Controller
             [
                 'message'=>'Xóa quy trình thành công',
                 'processes1' => $processes1,
-                'processes2' => $processes2
+                'processes2' => $processes2,
+                'processes3' => $processes3,
+                'processes4' => $processes4,
             ],200);
     }
 
