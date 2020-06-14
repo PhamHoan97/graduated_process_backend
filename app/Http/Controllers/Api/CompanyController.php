@@ -572,6 +572,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                 ->where('departments.id',$idDepartment)
                 ->select('processes.id as id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.type as type',
@@ -585,6 +586,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                 ->where('departments.id',$idDepartment)
                 ->select('processes.id as id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.type as type',
@@ -596,6 +598,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->where('departments.id',$idDepartment)
                 ->select('processes.id as id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.type as type',
@@ -609,6 +612,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
                 ->where('departments.id',$idDepartment)
                 ->select('processes.id as id',
+                    'processes.code as code',
                     'processes.name as name',
                     'processes.description as description',
                     'processes.type as type',
