@@ -344,11 +344,17 @@ class ManageNotificationController extends Controller
                 ->join('admin_notifications', 'admin_notifications.id', '=', 'admin_responses.notification_id')
                 ->join('system_notifications', 'system_notifications.id', '=', 'admin_notifications.notification_id')
                 ->join('admins', 'admins.id', '=', 'admin_notifications.admin_id')
+                ->join('companies', 'companies.id', '=', 'admins.company_id')
                 ->where('system_notifications.id', '=', $idNotificationFromSystem)
-                ->select('admin_responses.content as content','admins.username as username','admin_responses.update_at as update_at')
+                ->select(
+                    'admin_responses.content as content',
+                    'admins.username as username',
+                    'companies.contact as email',
+                    'admin_responses.update_at as update_at')
                 ->get();
             foreach ($responseCompanies as $responseCompany){
                 $dataCompanyResponses = json_decode($responseCompany->content);
+                $dataCompanyResponses->{"Email"} = $responseCompany->email;
                 $dataCompanyResponses->{"Tài khoản công ty"} = $responseCompany->username;
                 $dataCompanyResponses->{"Tài khoản nhân viên"} = 'Không';
                 $dataCompanyResponses->{"Ngày Gửi"} = $responseCompany->update_at;
@@ -363,11 +369,17 @@ class ManageNotificationController extends Controller
                 ->join('system_user_notifications', 'system_user_notifications.id', '=', 'user_responses.notification_id')
                 ->join('system_notifications', 'system_notifications.id', '=', 'system_user_notifications.notification_id')
                 ->join('accounts', 'accounts.id', '=', 'system_user_notifications.account_id')
+                ->join('employees', 'employees.id', '=', 'accounts.employee_id')
                 ->where('system_notifications.id', '=', $idNotificationFromSystem)
-                ->select('user_responses.content','accounts.username as username','user_responses.update_at as update_at')
+                ->select(
+                    'user_responses.content',
+                    'accounts.username as username',
+                    'employees.email as email',
+                    'user_responses.update_at as update_at')
                 ->get();
             foreach ($responseEmployees as $responseEmployee){
                 $dataEmployeeResponses = json_decode($responseEmployee->content);
+                $dataEmployeeResponses->{"Email"} = $responseEmployee->email;
                 $dataEmployeeResponses->{"Tài khoản công ty"} = 'Không';
                 $dataEmployeeResponses->{"Tài khoản nhân viên"} = $responseEmployee->username;
                 $dataEmployeeResponses->{"Ngày Gửi"} = $responseEmployee->update_at;

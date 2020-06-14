@@ -342,7 +342,8 @@ class OrganizationController extends Controller
     // New item role
     public function addRole(Request $request){
         $name = $request->newNameRole;
-        $isProcess = $request->newIsProcessRole;
+        $isCreateProcess = $request->newIsCreateProcessRole;
+        $isEditProcess = $request->newIsEditProcessRole;
         $description = $request->newDescriptionRole;
         $idChooseDepartment = $request->newDepartmentRole;
         try {
@@ -350,7 +351,8 @@ class OrganizationController extends Controller
                 [
                     'name' => $name,
                     'description'=>$description,
-                    'is_process' => $isProcess,
+                    'is_create_process' => $isCreateProcess,
+                    'is_edit_process' => $isEditProcess,
                     'department_id' => $idChooseDepartment
                 ]
             );
@@ -376,7 +378,8 @@ class OrganizationController extends Controller
     // update item role
     public function updateRole(Request $request){
         $newName = $request->editNameRole;
-        $newIsProcess = $request->editIsProcessRole;
+        $newIsCreateProcess = $request->editIsCreateProcessRole;
+        $newIsEditProcess = $request->editIsEditProcessRole;
         $newDescription = $request->editDescriptionRole;
         $idChooseRole = $request->idChooseRole;
         $idChooseDepartment = $request->idChooseDepartment;
@@ -386,7 +389,8 @@ class OrganizationController extends Controller
                 ->update([
                     'name' => $newName,
                     'description' => $newDescription,
-                    'is_process' => $newIsProcess,
+                    'is_create_process' => $newIsCreateProcess,
+                    'is_edit_process' => $newIsEditProcess,
                     'department_id'=>$idChooseDepartment
                 ]);
             return response()->json(['message'=>'update success role'],200);
@@ -453,7 +457,8 @@ class OrganizationController extends Controller
                         'roles.id as id',
                         'roles.name as name',
                         'roles.description as description',
-                        'roles.is_process as is_process',
+                        'roles.is_create_process as is_create_process',
+                        'roles.is_edit_process as is_edit_process',
                         'roles.department_id as department_id',
                         'companies.name as company_name',
                         'departments.name as department_name')
@@ -634,7 +639,8 @@ class OrganizationController extends Controller
                         'roles.id as id',
                         'roles.name as name',
                         'roles.description as description',
-                        'roles.is_process as is_process',
+                        'roles.is_create_process as is_create_process',
+                        'roles.is_edit_process as is_edit_process',
                         'roles.department_id as department_id',
                         'companies.name as company_name',
                         'departments.name as department_name')

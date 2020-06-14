@@ -97,7 +97,8 @@ class AccountEmployeeController extends Controller
                         'accounts.username as username',
                         'accounts.initial_password as initial_password',
                         'employees.name as name',
-                        'departments.name as department_name'
+                        'employees.gender as gender',
+                        'employees.avatar as avatar'
                     )
                     ->get();
                 return response()->json(['message'=>'get success all accounts in company ','accounts'=>$accounts],200);

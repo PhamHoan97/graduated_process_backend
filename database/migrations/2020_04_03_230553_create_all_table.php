@@ -114,7 +114,8 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('description');
-            $table->boolean('is_process');
+            $table->boolean('is_create_process');
+            $table->boolean('is_edit_process');
             $table->integer('department_id')->unsigned();
             $table->foreign('department_id')->references('id')->on('departments')->onDelete('cascade');
             $table->timestamps();
