@@ -119,6 +119,10 @@ Route::group(['middleware' => 'jwt-auth-system'], function () {
     Route::get('system/search/template/{fieldId}/{search}','Api\SystemController@searchTemplateInField');
     //search  fields in system
     Route::get('system/search/field/{search}','Api\SystemController@searchFieldInSystem');
+    // get processes in a company with type
+    Route::post('system/company/detail/type/filter','Api\System\DashboardController@getAllProcessByType');
+    // search processes in company
+    Route::post('system/company/detail/search','Api\System\DashboardController@searchProcessesInCompany');
 
 });
 
