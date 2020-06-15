@@ -170,6 +170,22 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/organization/employee/search','Api\Company\OrganizationController@searchEmployeeCompany');
     //remove process in company
     Route::post('company/process/remove','Api\CompanyController@removeProcessCompany');
+    // MANAGE PROCESS COMPANY
+    // get all processes with type company
+    Route::get('company/process/type/all/{token}','Api\Company\OrganizationController@getAllProcessTypeCompany');
+    // get all processes with type department
+    Route::post('company/process/type/department','Api\Company\OrganizationController@getAllProcessTypeDepartment');
+    // get all processes with type roles
+    Route::post('company/process/type/role','Api\Company\OrganizationController@getAllProcessTypeRole');
+    // delete process with type company
+    Route::post('company/process/type/all/delete','Api\Company\OrganizationController@deleteProcessTypeCompany');
+    // delete process with type department
+    Route::post('company/process/type/department/delete','Api\Company\OrganizationController@deleteProcessTypeDepartment');
+    // delete process with type role
+    Route::post('company/process/type/role/delete','Api\Company\OrganizationController@deleteProcessTypeRole');
+    // delete process with type employee
+    Route::post('company/process/type/employee/delete','Api\Company\OrganizationController@deleteProcessTypeEmployee');
+
 // API MANAGE ACCOUNT EMPLOYEE IN A COMPANY
     // get all employee no account in company
     Route::get('company/account/employee/{token}','Api\Company\AccountEmployeeController@getAllEmployee');
@@ -195,7 +211,6 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/notification/create/list/{token}','Api\Company\ManageNotificationController@getListCreateNotifications');
     Route::post('company/notification/create','Api\Company\ManageNotificationController@addNotificationCompany');
     Route::post('company/notification/create/delete','Api\Company\ManageNotificationController@deleteNotificationCreate');
-
     // get all employee and role in department
     Route::get('company/department/{idDepartment}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfDepartment');
     //save process
