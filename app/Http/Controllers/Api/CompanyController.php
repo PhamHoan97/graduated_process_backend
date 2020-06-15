@@ -245,6 +245,7 @@ class CompanyController extends Controller
                     $element = new Elements();
                     $element->element = $value->id;
                     $element->type = $value->type;
+                    $element->name = $value->name;
                     $element->process_id = $process->id;
                     $element->save();
                     //save note element
@@ -253,6 +254,8 @@ class CompanyController extends Controller
                         $note->element_id = $element->id;
                         $note->admin_id = $admin->id;
                         $note->content = $value->note;
+                        $note->document = $value->file;
+                        $note->assign = json_encode($value->assign);
                         $note->save();
                     }
                     //save comment
@@ -1345,6 +1348,74 @@ class CompanyController extends Controller
             "processes2" => $processes2,
             "processes3" => $processes3,
             "processes4" => $processes4
+        ],
+            200);
+    }
+
+    public function getAllEmployeesAssignedInProcess(Request $request){
+        $token = $request->token;
+        $type = $request->type;
+        $assign = $request->assign;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "Xảy ra lỗi với token"],201);
+        }
+        if(!$type || $type < 2 || $type >4){
+            return response()->json(['error' => true, 'message' => "Xảy ra lỗi với type"],201);
+        }
+        try{
+            $admin = Admins::where('auth_token', $token)->first();
+            $idCompany = $admin->company_id;
+            if(!$idCompany){
+                return response()->json(['error' => true, 'message' => "Xảy ra lỗi với idCompany"],201);
+            }
+            $idRole = [];
+            $idDepartment = [];
+            switch ($type) {
+                case 2:
+                    foreach ($assign as $item){
+                        $idRole[] = $item['value'];
+                    }
+                    $employees = DB::table('companies')
+                        ->join('departments', 'companies.id', '=', 'departments.company_id')
+                        ->join('employees', 'departments.id', '=', 'employees.department_id')
+                        ->join('roles', 'employees.role_id', '=', 'roles.id')
+                        ->whereIn('roles.id', $idRole)
+                        ->select('employees.id as id',
+                            'employees.name as name',
+                            'departments.name as department_name')
+                        ->get();
+                    break;
+                case 3:
+                    foreach ($assign as $item){
+                        $idDepartment[] = $item['value'];
+                    }
+                    $employees = DB::table('companies')
+                        ->join('departments', 'companies.id', '=', 'departments.company_id')
+                        ->join('employees', 'departments.id', '=', 'employees.department_id')
+                        ->whereIn('departments.id', $idDepartment)
+                        ->select('employees.id as id',
+                            'employees.name as name',
+                            'departments.name as department_name')
+                        ->get();
+                    break;
+                case 4:
+                    $employees = DB::table('companies')
+                        ->join('departments', 'companies.id', '=', 'departments.company_id')
+                        ->join('employees', 'departments.id', '=', 'employees.department_id')
+                        ->where('companies.id', $idCompany)
+                        ->select('employees.id as id',
+                            'employees.name as name',
+                            'departments.name as department_name')
+                        ->get();
+                    break;
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Lấy dữ liệu thành công",
+            "employees" => $employees,
         ],
             200);
     }

@@ -240,6 +240,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/employee/{idEmployee}/search/process/{search}','Api\CompanyController@searchProcessesOfEmployeeInCompany');
     //search processes in company
     Route::get('company/process/search/{token}/{search}','Api\CompanyController@searchProcessesInCompany');
+    //get all employees assigned in process
+    Route::post('company/process/employee/assigned','Api\CompanyController@getAllEmployeesAssignedInProcess');
+    //upload document for element in process
+    Route::post('company/element/upload/document','Api\ElementController@uploadDocumentForElement');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {
