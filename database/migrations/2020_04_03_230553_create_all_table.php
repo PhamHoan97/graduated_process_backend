@@ -363,6 +363,16 @@ class CreateAllTable extends Migration
             $table->timestamps();
         });
 
+        //create templates of process table
+        Schema::create('processes_templates', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('link');
+            $table->integer('process_id')->unsigned();
+            $table->foreign('process_id')->references('id')->on('processes')->onDelete('cascade');
+            $table->timestamps();
+        });
+
     }
 
     /**
@@ -372,6 +382,8 @@ class CreateAllTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('processes_templates');
+
         Schema::dropIfExists('processes_fields');
 
         Schema::dropIfExists('fields');

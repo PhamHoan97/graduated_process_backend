@@ -16,6 +16,7 @@ use App\ProcessesDepartments;
 use App\ProcessesEmployees;
 use App\ProcessesFields;
 use App\ProcessesRoles;
+use App\ProcessesTemplates;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -182,6 +183,7 @@ class CompanyController extends Controller
         $information = json_decode($request->information);
         $xml = $request->xml;
         $elements = json_decode($request->elements);
+        $templates = json_decode($request->templates);
 
         try{
             $admin = Admins::where('auth_token',$tọken)->first();
@@ -271,7 +273,16 @@ class CompanyController extends Controller
                     }
                 }
             }
-
+            //save templates for process
+            if($templates){
+                foreach ($templates as $value) {
+                    $template = new ProcessesTemplates();
+                    $template->name = $value->name;
+                    $template->link = $value->link;
+                    $template->process_id = $process->id;
+                    $template->save();
+                }
+            }
         }catch (\Exception $e){
             return response()->json(['error' => true, 'message' =>$e->getMessage()]);
         }
@@ -291,6 +302,7 @@ class CompanyController extends Controller
                 $process->elements;
                 $process->roles;
                 $process->departments;
+                $process->templates;
                 $newComments = [];
                 foreach ($comments as $comment){
                     if($comment->employee_id){
@@ -316,7 +328,7 @@ class CompanyController extends Controller
         $information = json_decode($request->information);
         $xml = $request->xml;
         $elements =  json_decode($request->elements);
-
+        $templates =  json_decode($request->templates);
         try{
             $admin = Admins::where('auth_token',$tọken)->first();
             if(!$admin){
@@ -349,6 +361,8 @@ class CompanyController extends Controller
             $deleteAssignsCompany= ProcessesCompanies::where('process_id', $processId)->delete();
             //remove old elements
             $deletedElements = Elements::where('process_id', $processId)->delete();
+             //remove old templates
+            $deletedTemplates = ProcessesTemplates::where('process_id', $processId)->delete();
             //update processes_employees
             if($information->type === 1){
                 $assign = $information->assign;
@@ -414,6 +428,16 @@ class CompanyController extends Controller
                             $comment->save();
                         }
                     }
+                }
+            }
+            // update Templates
+            if($templates){
+                foreach ($templates as $value){
+                   $template = new ProcessesTemplates();
+                   $template->name = $value->name;
+                   $template->link = $value->link;
+                   $template->process_id = $process->id;
+                   $template->save();
                 }
             }
         }catch (\Exception $e){

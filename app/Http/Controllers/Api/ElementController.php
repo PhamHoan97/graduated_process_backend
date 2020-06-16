@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Admins;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -16,6 +17,10 @@ class ElementController extends Controller
             return response()->json(['error' => 1, 'message' => "Không tồn tại file"], 201);
         }
         try{
+            $admin = Admins::where('auth_token', $tọken)->first();
+            if(!$admin){
+                return response()->json(['error' => 1, 'message' => "Xảy ra lỗi với xác thực người dùng"], 201);
+            }
             $file = $request->file('file');
             $photo_name = mt_rand();
             $type = $file->getClientOriginalExtension();

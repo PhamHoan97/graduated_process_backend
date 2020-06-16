@@ -263,6 +263,8 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/process/employee/assigned','Api\CompanyController@getAllEmployeesAssignedInProcess');
     //upload document for element in process
     Route::post('company/element/upload/document','Api\ElementController@uploadDocumentForElement');
+    //upload templates for process
+    Route::post('company/process/upload/template','Api\TemplateController@uploadTemplatesForProcess');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

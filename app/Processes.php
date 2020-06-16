@@ -37,4 +37,8 @@ class Processes extends Model
     public function departments(){
         return $this->belongsToMany('\App\Departments','processes_departments', 'process_id', 'department_id');
     }
+
+    public function templates(){
+        return $this->hasMany('App\ProcessesTemplates', 'process_id', 'id');
+    }
 }
