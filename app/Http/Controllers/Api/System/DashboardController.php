@@ -334,4 +334,79 @@ class DashboardController extends Controller
         }
     }
 
+    // filter process with type in detail company
+    public function getAllProcessByType(Request $request){
+        $idCompany = $request->idCompany;
+        $type = $request->type;
+        if($type == 0){
+            try {
+                // get all processes in company
+                $processes = DB::table('processes')
+                    ->join('admins', 'admins.id', '=', 'processes.admin_id')
+                    ->join('companies', 'companies.id', '=', 'admins.company_id')
+                    ->where('companies.id',$idCompany)
+                    ->select('processes.id as id',
+                        'processes.code as code',
+                        'processes.type as type',
+                        'processes.name as name',
+                        'processes.description as description',
+                        'processes.update_at as date',
+                        'processes.deadline as deadline'
+                    )
+                    ->distinct()
+                    ->get();
+                return response()->json(['message'=>'get all process of company','processes'=>$processes],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
+        }else{
+            try {
+                // get all processes in company
+                $processes = DB::table('processes')
+                    ->join('admins', 'admins.id', '=', 'processes.admin_id')
+                    ->join('companies', 'companies.id', '=', 'admins.company_id')
+                    ->where('companies.id',$idCompany)
+                    ->where('processes.type',$type)
+                    ->select('processes.id as id',
+                        'processes.code as code',
+                        'processes.type as type',
+                        'processes.name as name',
+                        'processes.description as description',
+                        'processes.update_at as date',
+                        'processes.deadline as deadline'
+                    )
+                    ->distinct()
+                    ->get();
+                return response()->json(['message'=>'get processes with type','processes'=>$processes],200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
+        }
+    }
+
+    public function searchProcessesInCompany(Request $request){
+        $searchText = $request->searchText;
+        $idCompany = $request->idCompany;
+        try {
+            $processes = DB::table('processes')
+                ->join('admins', 'admins.id', '=', 'processes.admin_id')
+                ->join('companies', 'companies.id', '=', 'admins.company_id')
+                ->where('companies.id',$idCompany)
+                ->where('processes.name','LIKE', '%' . $searchText . '%')
+                ->orWhere('processes.code','LIKE', '%' . $searchText . '%')
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.type as type',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.update_at as date',
+                    'processes.deadline as deadline'
+                )
+                ->distinct()
+                ->get();
+            return response()->json(['message'=>'search processes with text','processes'=>$processes],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
 }

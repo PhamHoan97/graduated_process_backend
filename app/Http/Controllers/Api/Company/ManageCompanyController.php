@@ -49,10 +49,15 @@ class ManageCompanyController extends Controller
                     ->join('admins', 'admins.id', '=', 'admin_notifications.admin_id')
                     ->join('companies', 'companies.id', '=', 'admins.company_id')
                     ->where('companies.id',$idCompany)->distinct()->count();
+                $processes = DB::table('processes')
+                    ->join('admins', 'admins.id', '=', 'processes.admin_id')
+                    ->join('companies', 'companies.id', '=', 'admins.company_id')
+                    ->where('companies.id',$idCompany)->distinct()->count();
                 $statistics = array(
                     'employees'=>$employees,
                     'departments'=>$departments,
-                    'notifications'=>$notifications
+                    'notifications'=>$notifications,
+                    'processes'=>$processes
                 );
                 return response()->json(['message'=>'get success detail company ','statisticsCompany'=>$statistics],200);
             }catch(\Exception $e) {
