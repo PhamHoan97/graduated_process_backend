@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Roles extends Model
 {
     protected $fillable = [
-        'name','description','is_process','department_id'
+        'name','description','is_create_process','is_edit_process','department_id'
     ];
 
     public $table = "roles";
