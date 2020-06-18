@@ -379,15 +379,15 @@ class AccountController extends Controller
         try{
             $element = Elements::where('process_id', $idProcess)->where('element', $element_name)->first();
             $account = Accounts::where('auth_token', $token)->first();
+            if(!$account){
+                return response()->json(['error' => 1, 'message' => "Xẩy ra lỗi với token"]);
+            }
             if(!$element){
                 $element = new Elements();
                 $element->element = $element_name;
                 $element->type = $type;
                 $element->process_id = $idProcess;
                 $element->save();
-            }
-            if(!$account){
-                return response()->json(['error' => 1, 'message' => "Xẩy ra lỗi với token"]);
             }
             $comment = new ElementComments();
             $comment->element_id = $element->id;

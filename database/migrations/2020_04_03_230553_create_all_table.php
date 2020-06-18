@@ -103,7 +103,6 @@ class CreateAllTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->text('description');
-            $table->string('role')->nullable();
             $table->string('signature')->nullable();
             $table->integer('company_id')->unsigned();
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
