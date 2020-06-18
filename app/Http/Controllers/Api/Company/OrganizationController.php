@@ -103,7 +103,7 @@ class OrganizationController extends Controller
                 DB::table('departments')->insert(
                     ['name' => $name, 'description' => $description,'signature'=>$signature,'company_id' => $idCompany]
                 );
-                return response()->json(['message'=>'Add success new department'],200);
+                return response()->json(['message'=>'Thêm phòng ban : '.$name],200);
             }catch(\Exception $e) {
                 return response()->json(["error" => $e->getMessage()],400);
             }
@@ -114,10 +114,13 @@ class OrganizationController extends Controller
     public function deleteDepartment(Request $request){
         $idDeleteDepartment = $request->idDeleteDepartment;
         try {
+            $department = DB::table('departments')
+                ->where('id', $idDeleteDepartment)
+                ->first();
             DB::table('departments')
                 ->where('id', $idDeleteDepartment)
                 ->delete();
-            return response()->json(['message'=>'delete success department'],200);
+            return response()->json(['message'=>'Xóa phòng ban :'.$department->name],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -207,7 +210,7 @@ class OrganizationController extends Controller
                             'department_id' => $idChooseDepartment
                         ]
                     );
-                    return response()->json(['message' => 'add success employee'], 200);
+                    return response()->json(['message' => 'Thêm nhân viên : '.$name], 200);
                 } catch (\Exception $e) {
                     return response()->json(["error" => $e->getMessage()], 400);
                 }
@@ -226,7 +229,7 @@ class OrganizationController extends Controller
                         ]
                     );
                     \Image::make($request->get('newAvatarEmployee'))->save(public_path('avatar/employee/') . $nameImage);
-                    return response()->json(['message' => 'add success employee'], 200);
+                    return response()->json(['message' => 'Thêm nhân viên : '.$name], 200);
                 } catch (\Exception $e) {
                     return response()->json(["error" => $e->getMessage()], 400);
                 }
@@ -240,10 +243,12 @@ class OrganizationController extends Controller
     public function deleteEmployee(Request $request){
         $idDeleteEmployee= $request->idDeleteEmployee;
         try {
+            $employee = DB::table('employees')
+                ->where('id', $idDeleteEmployee)->first();
             DB::table('employees')
                 ->where('id', $idDeleteEmployee)
                 ->delete();
-            return response()->json(['message'=>'delete success user'],200);
+            return response()->json(['message'=>'Xóa nhân viên : '.$employee->name],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -357,7 +362,7 @@ class OrganizationController extends Controller
                     'department_id' => $idChooseDepartment
                 ]
             );
-            return response()->json(['message'=>'Add success new role'],200);
+            return response()->json(['message'=>'Thêm chức vụ :'.$name],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -367,10 +372,13 @@ class OrganizationController extends Controller
     public function deleteRole(Request $request){
         $idDeleteRole= $request->idDeleteRole;
         try {
+            $role = DB::table('roles')
+                ->where('id', $idDeleteRole)
+                ->first();
             DB::table('roles')
                 ->where('id', $idDeleteRole)
                 ->delete();
-            return response()->json(['message'=>'delete success roles'],200);
+            return response()->json(['message'=>'Xóa chức vụ :'.$role->name],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
