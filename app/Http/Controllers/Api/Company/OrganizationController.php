@@ -671,7 +671,6 @@ class OrganizationController extends Controller
                 $processes = DB::table("processes")
                     ->join('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                     ->where('processes.admin_id',$admin->id)
-                    ->where('.processes.type',4)
                     ->where('processes_companies.company_id',$admin->company_id)
                     ->distinct()
                     ->select('processes.id as id',
@@ -698,7 +697,6 @@ class OrganizationController extends Controller
                 $processes = DB::table("processes")
                     ->join('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
                     ->where('processes.admin_id',$admin->id)
-                    ->where('.processes.type',3)
                     ->where('processes_departments.department_id',$idDepartment)
                     ->distinct()
                     ->select('processes.id as id',
@@ -726,7 +724,6 @@ class OrganizationController extends Controller
                 $processes = DB::table("processes")
                     ->join('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                     ->where('processes.admin_id',$admin->id)
-                    ->where('.processes.type',2)
                     ->where('processes_roles.role_id',$idRole)
                     ->distinct()
                     ->select('processes.id as id',
@@ -754,10 +751,13 @@ class OrganizationController extends Controller
                     ->where('process_id', $idProcess)
                     ->where('company_id', $admin->company_id)
                     ->delete();
+                $process = DB::table('processes')
+                    ->where('id', $idProcess)
+                    ->first();
                 DB::table('processes')
                     ->where('id', $idProcess)
                     ->delete();
-                return response()->json(['message'=>'delete success process type company'],200);
+                return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
             }catch(\Exception $e) {
                 return response()->json(["error" => $e->getMessage()],400);
             }
@@ -773,10 +773,13 @@ class OrganizationController extends Controller
                 ->where('process_id', $idProcess)
                 ->where('department_id', $idDepartment)
                 ->delete();
+            $process = DB::table('processes')
+                ->where('id', $idProcess)
+                ->first();
             DB::table('processes')
                 ->where('id', $idProcess)
                 ->delete();
-            return response()->json(['message'=>'delete success process type department'],200);
+            return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -791,10 +794,13 @@ class OrganizationController extends Controller
                 ->where('process_id', $idProcess)
                 ->where('role_id', $idRole)
                 ->delete();
+            $process = DB::table('processes')
+                ->where('id', $idProcess)
+                ->first();
             DB::table('processes')
                 ->where('id', $idProcess)
                 ->delete();
-            return response()->json(['message'=>'delete success process type role'],200);
+            return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
@@ -811,33 +817,108 @@ class OrganizationController extends Controller
         if(!$token){
             return response()->json(['error' => true, 'message' => "token is required"]);
         }
-        try{
+        try {
+            DB::table('processes_employees')
+                ->where('process_id', $idProcess)
+                ->where('employee_id', $idEmployee)
+                ->delete();
+            $process =  DB::table('processes')
+                ->where('id', $idProcess)
+                ->first();
+            DB::table('processes')
+                ->where('id', $idProcess)
+                ->delete();
+            return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // delete process type employee
+    public function deleteProcessTypeSpecial(Request $request){
+        $idProcess = $request->idProcess;
+        $token = $request->token;
+        if(!$idProcess){
+            return response()->json(['error' => true, 'message' => "idProcess is required"]);
+        }
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "token is required"]);
+        }
+        try {
+            DB::table('processes_employees')
+                ->where('process_id', $idProcess)
+                ->delete();
+            DB::table('processes_roles')
+                ->where('process_id', $idProcess)
+                ->delete();
+            DB::table('processes_departments')
+                ->where('process_id', $idProcess)
+                ->delete();
+            $process =  DB::table('processes')
+                ->where('id', $idProcess)
+                ->first();
+            DB::table('processes')
+                ->where('id', $idProcess)
+                ->delete();
+            return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+    // delete process type employee
+    public function deleteProcessDetailEmployee(Request $request){
+        $idProcess = $request->idProcess;
+        $token = $request->token;
+        if(!$idProcess){
+            return response()->json(['error' => true, 'message' => "idProcess is required"]);
+        }
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "token is required"]);
+        }
+        try {
             $process =  DB::table('processes')
                 ->where('id', $idProcess)
                 ->first();
             if($process->type === 1){
-                try {
-                    DB::table('processes_employees')
-                        ->where('process_id', $idProcess)
-                        ->where('employee_id', $idEmployee)
-                        ->delete();
-                    return response()->json(['message'=>'delete success process in detail employee'],200);
-                }catch(\Exception $e) {
-                    return response()->json(["error" => $e->getMessage()],400);
-                }
-            }else{
-                try {
-                    DB::table('processes')
-                        ->where('id', $idProcess)
-                        ->delete();
-                    return response()->json(['message'=>'delete success process in detail employee'],200);
-                }catch(\Exception $e) {
-                    return response()->json(["error" => $e->getMessage()],400);
-                }
+                DB::table('processes_employees')
+                    ->where('process_id', $idProcess)
+                    ->delete();
             }
-        }catch (\Exception $e){
+            if($process->type === 2){
+                DB::table('processes_roles')
+                    ->where('process_id', $idProcess)
+                    ->delete();
+            }
+            if($process->type === 3){
+                DB::table('processes_departments')
+                    ->where('process_id', $idProcess)
+                    ->delete();
+            }
+            if($process->type === 4){
+                DB::table('processes_companies')
+                    ->where('process_id', $idProcess)
+                    ->delete();
+            }
+            if($process->type === 5){
+                DB::table('processes_employees')
+                    ->where('process_id', $idProcess)
+                    ->delete();
+                DB::table('processes_roles')
+                    ->where('process_id', $idProcess)
+                    ->delete();
+                DB::table('processes_departments')
+                    ->where('process_id', $idProcess)
+                    ->delete();
+            }
+            DB::table('processes')
+                ->where('id', $idProcess)
+                ->delete();
+            return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
+        }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
     }
+
+
 
 }

@@ -187,8 +187,10 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/process/type/department/delete','Api\Company\OrganizationController@deleteProcessTypeDepartment');
     // delete process with type role
     Route::post('company/process/type/role/delete','Api\Company\OrganizationController@deleteProcessTypeRole');
-    // delete process with type employee
+    // delete process with type special
     Route::post('company/process/type/employee/delete','Api\Company\OrganizationController@deleteProcessTypeEmployee');
+    // delete process in detail employee
+    Route::post('company/process/employee/delete','Api\Company\OrganizationController@deleteProcessDetailEmployee');
 
 // API MANAGE ACCOUNT EMPLOYEE IN A COMPANY
     // get all employee no account in company
