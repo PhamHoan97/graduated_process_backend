@@ -200,6 +200,9 @@ class CompanyController extends Controller
             $process->update_at = $information->time;
             $process->xml = $xml;
             $process->admin_id = $admin->id;
+            if($information->type === 5){
+                $process->collabration =  $information->collabration;
+            }
             if($request->hasFile('file')){
                 $file = $request->file('file');
                     $photo_name = mt_rand();
@@ -240,6 +243,32 @@ class CompanyController extends Controller
                 $link->process_id = $process->id;
                 $link->company_id = $admin->company_id;
                 $link->save();
+            } else if($information->type === 5){
+                $assign = $information->assign;
+                $employeesAssign = $assign->employees;
+                foreach ($employeesAssign as $value){
+                    $link = new ProcessesEmployees();
+                    $link->process_id = $process->id;
+                    $link->employee_id = $value->value;
+                    $link->save();
+                }
+                if(isset($assign->roles)){
+                    $rolesAssign = $assign->roles;
+                    foreach ($rolesAssign as $value){
+                        $link = new ProcessesRoles();
+                        $link->process_id = $process->id;
+                        $link->role_id = $value->value;
+                        $link->save();
+                    }
+                }else{
+                    $departmentsAssign = $assign->departments;
+                    foreach ($departmentsAssign as $value){
+                        $link = new ProcessesDepartments();
+                        $link->process_id = $process->id;
+                        $link->department_id = $value->value;
+                        $link->save();
+                    }
+                }
             }
             //save elements
             foreach ($elements as $value){
@@ -292,17 +321,46 @@ class CompanyController extends Controller
     public function getAllInformationOfProcess(Request $request){
         $idProcess = $request->idProcess;
         if(!isset($idProcess)){
-            return response()->json(['error' => 1, 'message' => "idProcess is required"], 400);
+            return response()->json(['error' => 1, 'message' => "idProcess is required"], 201);
         }else{
             try{
                 $process = Processes::find($idProcess);
-                $process->employees;
+                $employees = $process->employees;
                 $process->elementNotes;
                 $comments = $process->elementComments;
                 $process->elements;
-                $process->roles;
+                $roles = $process->roles;
                 $process->departments;
                 $process->templates;
+                $newEmployees = [];
+                $newRoles = [];
+
+                foreach ($employees as $item){
+                    $employee = DB::table('employees')
+                        ->join('departments', 'employees.department_id', '=', 'departments.id')
+                        ->join('roles', 'employees.role_id', '=', 'roles.id')
+                        ->where('employees.id', $item->id)
+                        ->select('employees.id as id_employee',
+                            'employees.name as name',
+                            'departments.id as id_department',
+                            'departments.name as department_name',
+                            'roles.name as role_name')
+                        ->first();
+                    $newEmployees[] = ["id" => $employee->id_employee, "name" => $employee->name.' ('.$employee->department_name.'-'.$employee->role_name.')'];
+                }
+
+                foreach ($roles as $item){
+                    $role = DB::table('roles')
+                        ->join('departments', 'roles.department_id', '=', 'departments.id')
+                        ->where('roles.id', $item->id)
+                        ->select('roles.id as id_role',
+                            'departments.id as id_department',
+                            'departments.name as department_name',
+                            'roles.name as role_name')
+                        ->first();
+                    $newRoles[] = ["id" => $role->id_role, "name" => $role->role_name.' ('.$role->department_name.')'];
+                }
+
                 $newComments = [];
                 foreach ($comments as $comment){
                     if($comment->employee_id){
@@ -312,6 +370,8 @@ class CompanyController extends Controller
                     $newComments[] = $comment;
                 }
                 $process->element_comments = $newComments;
+                $process->employeesDetail = $newEmployees;
+                $process->rolesDetail = $newRoles;
             }catch (\Exception $e){
                 return response()->json(['error' => true, 'message' =>$e->getMessage()]);
             }
@@ -350,6 +410,9 @@ class CompanyController extends Controller
             $process->deadline = $information->deadline;
             $process->type = $information->type;
             $process->admin_id = $admin->id;
+            if($information->type === 5){
+                $process->collabration =  $information->collabration;
+            }
             $process->save();
             //remove assign employee
             $deleteAssignsEmployee = ProcessesEmployees::where('process_id', $processId)->delete();
@@ -393,6 +456,32 @@ class CompanyController extends Controller
                 $link->process_id = $process->id;
                 $link->company_id = $admin->company_id;
                 $link->save();
+            }else if($information->type === 5){
+                $assign = $information->assign;
+                $employeesAssign = $assign->employees;
+                foreach ($employeesAssign as $value){
+                    $link = new ProcessesEmployees();
+                    $link->process_id = $process->id;
+                    $link->employee_id = $value->value;
+                    $link->save();
+                }
+                if(isset($assign->roles)){
+                    $rolesAssign = $assign->roles;
+                    foreach ($rolesAssign as $value){
+                        $link = new ProcessesRoles();
+                        $link->process_id = $process->id;
+                        $link->role_id = $value->value;
+                        $link->save();
+                    }
+                }else{
+                    $departmentsAssign = $assign->departments;
+                    foreach ($departmentsAssign as $value){
+                        $link = new ProcessesDepartments();
+                        $link->process_id = $process->id;
+                        $link->department_id = $value->value;
+                        $link->save();
+                    }
+                }
             }
             //update elements
             foreach ($elements as $value){
@@ -446,7 +535,7 @@ class CompanyController extends Controller
         return response()->json(['success' => true, 'message' => "Sửa quy trình thành công", "process" => $process]);
     }
 
-    public function getAllEmployeeAndRoleOfCompany(Request $request){
+    public function getAllEmployeeRoleAndDepartmentOfCompany(Request $request){
         $token = $request->token;
         if(!$token){
             return response()->json(['error' => true, 'message' => "token is required"]);
@@ -1386,7 +1475,7 @@ class CompanyController extends Controller
         if(!$token){
             return response()->json(['error' => true, 'message' => "Xảy ra lỗi với token"],201);
         }
-        if(!$type || $type < 2 || $type >4){
+        if(!$type || $type < 2 || $type >5){
             return response()->json(['error' => true, 'message' => "Xảy ra lỗi với type"],201);
         }
         try{
@@ -1409,7 +1498,9 @@ class CompanyController extends Controller
                         ->whereIn('roles.id', $idRole)
                         ->select('employees.id as id',
                             'employees.name as name',
-                            'departments.name as department_name')
+                            'departments.name as department_name',
+                            'roles.name as role_name'
+                        )
                         ->get();
                     break;
                 case 3:
@@ -1419,21 +1510,95 @@ class CompanyController extends Controller
                     $employees = DB::table('companies')
                         ->join('departments', 'companies.id', '=', 'departments.company_id')
                         ->join('employees', 'departments.id', '=', 'employees.department_id')
+                        ->join('roles', 'employees.role_id', '=', 'roles.id')
                         ->whereIn('departments.id', $idDepartment)
                         ->select('employees.id as id',
                             'employees.name as name',
-                            'departments.name as department_name')
+                            'departments.name as department_name',
+                            'roles.name as role_name'
+                        )
                         ->get();
                     break;
                 case 4:
                     $employees = DB::table('companies')
                         ->join('departments', 'companies.id', '=', 'departments.company_id')
                         ->join('employees', 'departments.id', '=', 'employees.department_id')
+                        ->join('roles', 'employees.role_id', '=', 'roles.id')
                         ->where('companies.id', $idCompany)
                         ->select('employees.id as id',
                             'employees.name as name',
-                            'departments.name as department_name')
+                            'departments.name as department_name',
+                            'roles.name as role_name'
+                        )
                         ->get();
+                    break;
+                case 5:
+                    $employees = [];
+                    $idEmployeesCollab = [];
+                    $idRolesCollab = [];
+                    $idDepartmentsCollab = [];
+                    $assignEmployees = $assign['employees'];
+                    foreach ($assignEmployees as $item){
+                        $idEmployeesCollab[] = $item['value'];
+                    }
+                    $employees1 = DB::table('companies')
+                        ->join('departments', 'companies.id', '=', 'departments.company_id')
+                        ->join('employees', 'departments.id', '=', 'employees.department_id')
+                        ->join('roles', 'employees.role_id', '=', 'roles.id')
+                        ->where('companies.id', $idCompany)
+                        ->whereIn('employees.id', $idEmployeesCollab)
+                        ->select('employees.id as id',
+                            'employees.name as name',
+                            'departments.name as department_name',
+                            'roles.name as role_name'
+                        )
+                        ->get();
+                    if(isset($assign['roles'])){
+                        $assignCollab = $assign['roles'];
+                        foreach ($assignCollab as $item){
+                            $idRolesCollab[] = $item['value'];
+                        }
+                        $employees2 = DB::table('companies')
+                            ->join('departments', 'companies.id', '=', 'departments.company_id')
+                            ->join('employees', 'departments.id', '=', 'employees.department_id')
+                            ->join('roles', 'employees.role_id', '=', 'roles.id')
+                            ->whereIn('roles.id', $idRolesCollab)
+                            ->select('employees.id as id',
+                                'employees.name as name',
+                                'departments.name as department_name',
+                                'roles.name as role_name'
+                            )
+                            ->get();
+                        foreach ($employees1 as $item){
+                            $employees[] = $item;
+                        }
+                        foreach ($employees2 as $item){
+                            $employees[] = $item;
+                        }
+                    }else{
+                        $assignCollab = $assign['departments'];
+                        foreach ($assignCollab as $item){
+                            $idDepartmentsCollab[] = $item['value'];
+                        }
+                        $employees3 = DB::table('companies')
+                            ->join('departments', 'companies.id', '=', 'departments.company_id')
+                            ->join('employees', 'departments.id', '=', 'employees.department_id')
+                            ->join('roles', 'employees.role_id', '=', 'roles.id')
+                            ->whereIn('departments.id', $idDepartmentsCollab)
+                            ->select('employees.id as id',
+                                'employees.name as name',
+                                'departments.name as department_name',
+                                'roles.name as role_name'
+                            )
+                            ->get();
+                        foreach ($employees1 as $item){
+                            $employees[] = $item;
+                        }
+                        foreach ($employees3 as $item){
+                            $employees[] = $item;
+                        }
+                    }
+
                     break;
             }
         }catch (\Exception $e){
@@ -1445,5 +1610,115 @@ class CompanyController extends Controller
             "employees" => $employees,
         ],
             200);
+    }
+
+    public function getRolesAndDepartmentsWhichEmployeesAreNotBellongTo(Request $request){
+        $listEmployees = $request->listEmployees;
+        $token = $request->token;
+        if(!$token){
+            return response()->json(['error' => true, 'message' => "Xảy ra lỗi với token"],201);
+        }
+        try {
+            $admin = Admins::where('auth_token', $token)->first();
+            $idCompany = $admin->company_id;
+            if(!$idCompany){
+                return response()->json(['error' => true, 'message' => "Xảy ra lỗi với idCompany"],201);
+            }
+            if(!$listEmployees){
+                $roles = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('roles', 'departments.id', '=', 'roles.department_id')
+                    ->where('companies.id', $idCompany)
+                    ->select(
+                        'roles.name as role',
+                        'roles.id as id_role',
+                        'departments.id as id_department',
+                        'departments.name as department_name')
+                    ->get();
+
+                $departments = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->where('companies.id', $idCompany)
+                    ->select(
+                        'departments.id as id_department',
+                        'departments.name as department_name')
+                    ->get();
+            }else{
+                $idEmployees = [];
+                $idRolesNotBelong = [];
+                $idDepartmentsNotBelong = [];
+                foreach ($listEmployees as $employee){
+                    $idEmployees[]= $employee['value'];
+                }
+                //departments is different from employees department
+                $employeeDepartments = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('employees', 'departments.id', '=', 'employees.department_id')
+                    ->where('companies.id', $idCompany)
+                    ->whereIn('employees.id', $idEmployees)
+                    ->select(
+                        'departments.id as id_department',
+                        'departments.name as department_name')
+                    ->distinct()
+                    ->get();
+
+                foreach ($employeeDepartments as $department){
+                    $idDepartmentsNotBelong[]= $department->id_department;
+                }
+
+                //roles is different from employees role
+                $employeeRoles = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('roles', 'departments.id', '=', 'roles.department_id')
+                    ->join('employees', 'roles.id', '=', 'employees.role_id')
+                    ->where('companies.id', $idCompany)
+                    ->whereIn('employees.id', $idEmployees)
+                    ->select(
+                        'roles.name as role',
+                        'roles.id as id_role',
+                        'departments.id as id_department',
+                        'departments.name as department_name')
+                    ->distinct()
+                    ->get();
+
+                foreach ($employeeRoles as $role){
+                    $idRolesNotBelong[]= $role->id_role;
+                }
+
+                //employees can't collabrates with their colleages (same role or department)
+                $roles = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('roles', 'departments.id', '=', 'roles.department_id')
+                    ->where('companies.id', $idCompany)
+                    ->whereNotIn('departments.id', $idDepartmentsNotBelong)
+                    ->whereNotIn('roles.id', $idRolesNotBelong)
+                    ->select(
+                        'roles.name as role',
+                        'roles.id as id_role',
+                        'departments.id as id_department',
+                        'departments.name as department_name')
+                    ->distinct()
+                    ->get();
+
+                //employees can't collabrates with their colleages (same department)
+                $departments = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->where('companies.id', $idCompany)
+                    ->whereNotIn('departments.id', $idDepartmentsNotBelong)
+                    ->select(
+                        'departments.id as id_department',
+                        'departments.name as department_name')
+                    ->distinct()
+                    ->get();
+
+            }
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+        }
+        return response()->json([
+            'message'=>'Got all roles and departments in company which employees are not belong to',
+            'roles' => $roles,
+            'departments' => $departments,
+        ],200);
     }
 }

@@ -224,7 +224,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     //edit process
     Route::post('company/process/edit','Api\CompanyController@editProcessCompany')->middleware('create-or-edit-process');
     // get all employee, role and department in company
-    Route::get('company/{token}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfCompany');
+    Route::get('company/{token}/employee/role/department','Api\CompanyController@getAllEmployeeRoleAndDepartmentOfCompany');
     // get all processes in company
     Route::get('company/processes/{token}','Api\CompanyController@getAllProcessesOfCompany');
     // get all employees in company
@@ -265,6 +265,9 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::post('company/element/upload/document','Api\ElementController@uploadDocumentForElement');
     //upload templates for process
     Route::post('company/process/upload/template','Api\TemplateController@uploadTemplatesForProcess');
+    //get all roles and departments in company which employees aren't belongs to
+    Route::post('company/organization/department/role/except/employee',
+        'Api\CompanyController@getRolesAndDepartmentsWhichEmployeesAreNotBellongTo');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {
@@ -298,7 +301,6 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     Route::post('employee/notification/system/status/update','Api\Employee\ManageNotificationController@updateStatusNotificationFormSystem');
     Route::post('employee/notification/system/delete','Api\Employee\ManageNotificationController@deleteNotificationFormSystem');
     Route::post('employee/notification/company/delete','Api\Employee\ManageNotificationController@deleteNotificationFormCompany');
-
 });
 
 

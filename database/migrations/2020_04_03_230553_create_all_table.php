@@ -269,6 +269,7 @@ class CreateAllTable extends Migration
             $table->longText('description');
             $table->longText('xml')->nullable();
             $table->integer('type')->nullable();
+            $table->integer('collabration')->nullable();
             $table->string('deadline')->nullable();
             $table->text('document')->nullable();
             $table->string('update_at');
