@@ -185,7 +185,7 @@ class OrganizationController extends Controller
     }
 
     // New item employee
-    public function addEmployee(Request $request){
+        public function addEmployee(Request $request){
         $name = $request->newNameEmployee;
         $email = $request->newEmailEmployee;
         $gender = $request->newGender;
