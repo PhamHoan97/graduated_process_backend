@@ -71,7 +71,7 @@ class AccountEmployeeController extends Controller
                             'employee_id'=>$employeeId
                         ]
                     );
-                    return response()->json(['message'=>'Add success new account'],200);
+                    return response()->json(['message'=>'Thêm tài khoản : '.$username],200);
                 }catch(\Exception $e) {
                     return response()->json(["error" => $e->getMessage()],400);
                 }
@@ -111,10 +111,13 @@ class AccountEmployeeController extends Controller
     public function deleteAccountEmployee(Request $request){
         $idDeleteAccount= $request->idDeleteAccount;
         try {
+            $account = DB::table('accounts')
+                ->where('id', $idDeleteAccount)
+                ->first();
             DB::table('accounts')
                 ->where('id', $idDeleteAccount)
                 ->delete();
-                return response()->json(['message'=>'delete success account'],200);
+                return response()->json(['message'=>'Xóa tài khoản : '.$account->username],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
