@@ -612,12 +612,26 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
+            $processesDuplicate = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+                ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->where('processes.type',5)
+                ->select('processes.id as id')->distinct()
+                ->get();
+            $idDuplicate = [];
+            foreach ($processesDuplicate as $item){
+                $idDuplicate []= $item->id;
+            }
             $processes2 = DB::table('processes')
                 ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                 ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
-                ->where('companies.id',$company_id)
+                ->where('companies.id', $company_id)
+                ->whereNotIn('processes.id', $idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -631,6 +645,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->whereNotIn('processes.id', $idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -685,20 +700,6 @@ class CompanyController extends Controller
             return response()->json(['error' => true, 'message' => "idDepartment is required"]);
         }
         try{
-            $processes1 = DB::table('processes')
-                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
-                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
-                ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
-                ->where('departments.id',$idDepartment)
-                ->select('processes.id as id',
-                    'processes.code as code',
-                    'processes.name as name',
-                    'processes.description as description',
-                    'processes.type as type',
-                    'processes.created_at as created_at'
-                )->distinct()
-                ->get();
-
             $processes2 = DB::table('processes')
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
@@ -712,10 +713,24 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
-            $processes3 = DB::table('processes')
-                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
-                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+            $processesDuplicate = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                 ->where('departments.id',$idDepartment)
+                ->where('processes.type',5)
+                ->select('processes.id as id')->distinct()
+                ->get();
+            $idDuplicate = [];
+            foreach ($processesDuplicate as $item){
+                $idDuplicate []= $item->id;
+            }
+            $processes1 = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
+                ->where('departments.id',$idDepartment)
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -724,7 +739,19 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
-
+            $processes3 = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->where('departments.id',$idDepartment)
+                ->whereNotIn('processes.id',$idDuplicate)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
             $processes4 = DB::table('processes')
                 ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
@@ -758,20 +785,6 @@ class CompanyController extends Controller
         }
         try{
             $employee = Employees::find($idEmployee);
-            $processes1 = DB::table('processes')
-                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
-                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
-                ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
-                ->where('employees.id',$idEmployee)
-                ->select('processes.id as id',
-                    'processes.code as code',
-                    'processes.name as name',
-                    'processes.description as description',
-                    'processes.type as type',
-                    'processes.created_at as created_at'
-                )->distinct()
-                ->get();
-
             $processes2 = DB::table('processes')
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
@@ -784,12 +797,23 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
-
-            $processes3 = DB::table('processes')
-                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
-                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
-                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+            $processesDuplicate = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$idEmployee)
+                ->where('processes.id',5)
+                ->select('processes.id as id')->distinct()
+                ->get();
+            $idDuplicate = [];
+            foreach ($processesDuplicate as $item){
+                $idDuplicate []= $item->id;
+            }
+            $processes1 = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
+                ->where('employees.id',$idEmployee)
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -798,7 +822,20 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
-
+            $processes3 = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$idEmployee)
+                ->whereNotIn('processes.id',$idDuplicate)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
             $processes4 = DB::table('processes')
                 ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
@@ -909,12 +946,26 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
+            $processesDuplicate = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+                ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                ->where('companies.id',$company_id)
+                ->where('processes.type',5)
+                ->select('processes.id as id')->distinct()
+                ->get();
+            $idDuplicate = [];
+            foreach ($processesDuplicate as $item){
+                $idDuplicate []= $item->id;
+            }
             $processes2 = DB::table('processes')
                 ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                 ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -928,6 +979,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -1233,10 +1285,9 @@ class CompanyController extends Controller
             if(!$employeeId){
                 return response()->json(['error' => 1, 'message' => "Xảy ra lỗi với Id của nhân viên"], 201);
             }
-            $processes1 = DB::table('processes')
-                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
-                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
-                ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
+            $processes2 = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$employeeId)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
@@ -1250,8 +1301,7 @@ class CompanyController extends Controller
                     'processes.created_at as created_at'
                 )->distinct()
                 ->get();
-
-            $processes2 = DB::table('processes')
+            $processesDuplicate = DB::table('processes')
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$employeeId)
@@ -1259,6 +1309,24 @@ class CompanyController extends Controller
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
                 })
+                ->where('processes.type',5)
+                ->select('processes.id as id')->distinct()
+                ->get();
+
+            $idDuplicate = [];
+            foreach ($processesDuplicate as $item){
+                $idDuplicate []= $item->id;
+            }
+            $processes1 = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
+                ->where('employees.id',$employeeId)
+                ->where(function($query) use ($search) {
+                    $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                })
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -1276,6 +1344,7 @@ class CompanyController extends Controller
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
                 })
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -1329,7 +1398,7 @@ class CompanyController extends Controller
         try {
             $admin = Admins::where('auth_token', $token)->first();
             $idCompany = $admin->company_id;
-            if(!$search){
+            if($search === "all"){
                 $processes1 = DB::table('processes')
                     ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                     ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
@@ -1344,12 +1413,26 @@ class CompanyController extends Controller
                         'processes.created_at as created_at'
                     )->distinct()
                     ->get();
+                $processesDuplicate = DB::table('processes')
+                    ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                    ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                    ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+                    ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                    ->where('companies.id',$idCompany)
+                    ->where('processes.type',5)
+                    ->select('processes.id as id')->distinct()
+                    ->get();
+                $idDuplicate = [];
+                foreach ($processesDuplicate as $item){
+                    $idDuplicate []= $item->id;
+                }
                 $processes2 = DB::table('processes')
                     ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                     ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                     ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.name as name',
@@ -1363,6 +1446,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.name as name',
                         'processes.code as code',
@@ -1402,12 +1486,36 @@ class CompanyController extends Controller
                         'processes.created_at as created_at'
                     )->distinct()
                     ->get();
+                $processesDuplicate = DB::table('processes')
+                    ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                    ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                    ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+                    ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
+                    ->where('companies.id',$idCompany)
+                    ->where(function($query) use ($search) {
+                        $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                            ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                    })
+                    ->where('processes.type', 5)
+                    ->select('processes.id as id',
+                        'processes.name as name',
+                        'processes.code as code',
+                        'processes.description as description',
+                        'processes.type as type',
+                        'processes.created_at as created_at'
+                    )->distinct()
+                    ->get();
+                $idDuplicate = [];
+                foreach ($processesDuplicate as $item){
+                    $idDuplicate []= $item->id;
+                }
                 $processes2 = DB::table('processes')
                     ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                     ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                     ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->whereNotIn('processes.id',$idDuplicate)
                     ->where(function($query) use ($search) {
                         $query->where('processes.name', 'LIKE', '%' . $search . '%')
                             ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1429,6 +1537,7 @@ class CompanyController extends Controller
                         $query->where('processes.name', 'LIKE', '%' . $search . '%')
                             ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
                     })
+                    ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.name as name',
                         'processes.code as code',

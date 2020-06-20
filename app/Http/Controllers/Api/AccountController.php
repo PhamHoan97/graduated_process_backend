@@ -156,7 +156,7 @@ class AccountController extends Controller
         $about_me = $request->about_me;
         $checkEmployee = Accounts::where('auth_token',$token)->first();
         if(!$checkEmployee){
-            return response()->json(['error' => 1, 'message' => "something was wrong with token"], 400);
+            return response()->json(['error' => 1, 'message' => "Xảy ra lỗi với token"], 400);
         }else{
             try{
                 $employee = Employees::find($checkEmployee->employee_id);
@@ -179,7 +179,7 @@ class AccountController extends Controller
             }catch ( \Exception $e){
                 return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
             }
-            return response()->json(['success'=>true, 'message' => 'updated employee']);
+            return response()->json(['success'=>true, 'message' => 'Cập nhật thông tin thành công']);
         }
     }
 
@@ -197,19 +197,19 @@ class AccountController extends Controller
             $employee = Employees::find($account->employee_id);
             $processes = DB::table('processes')
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
-                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->leftJoin('employees as employees1', 'processes_employees.employee_id', '=', 'employees1.id')
                 ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                 ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
-                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('departments as departments1', 'processes_departments.department_id', '=', 'departments1.id')
                 ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
-                ->leftJoin('departments as departments1', 'companies.id', '=', 'departments1.company_id')
-                ->leftJoin('employees as employees1', 'departments.id', '=', 'employees1.department_id')
-                ->where('employees.id',$employee->id)
+                ->leftJoin('departments as departments2', 'companies.id', '=', 'departments2.company_id')
+                ->leftJoin('employees as employees2', 'departments2.id', '=', 'employees2.department_id')
+                ->where('employees1.id',$employee->id)
                 ->orWhere('roles.id', $employee->role_id)
-                ->orWhere('departments.id', $employee->department_id)
-                ->orWhere('employees1.id', $employee->id)
+                ->orWhere('departments1.id', $employee->department_id)
+                ->orWhere('employees2.id', $employee->id)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -250,15 +250,117 @@ class AccountController extends Controller
 
     public function searchProcesses(Request $request){
         $search = $request->search;
+        $token = $request->token;
         if(!$search){
-            return response()->json(['error' => 1, 'message' => "search is required"], 400);
+            return response()->json(['error' => 1, 'message' => "Xảy ra lỗi với kí tự tìm kiếm"], 201);
+        }
+        if(!$token){
+            return response()->json(['error' => 1, 'message' => "Xảy ra lỗi với token"], 201);
         }
         try{
-            $processes = Processes::where('name',  'LIKE', '%' . $search . '%')->get();
+            $account = Accounts::where('auth_token', $token)->first();
+            $employeeId = $account->employee_id;
+            if(!$employeeId){
+                return response()->json(['error' => 1, 'message' => "Xảy ra lỗi với Id của nhân viên"], 201);
+            }
+            $processes2 = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->where('employees.id',$employeeId)
+                ->where(function($query) use ($search) {
+                    $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                })
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $processesDuplicate = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->where('employees.id',$employeeId)
+                ->where(function($query) use ($search) {
+                    $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                })
+                ->where('processes.type',5)
+                ->select('processes.id as id')->distinct()
+                ->get();
+
+            $idDuplicate = [];
+            foreach ($processesDuplicate as $item){
+                $idDuplicate []= $item->id;
+            }
+            $processes1 = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
+                ->where('employees.id',$employeeId)
+                ->where(function($query) use ($search) {
+                    $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                })
+                ->whereNotIn('processes.id',$idDuplicate)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $processes3 = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$employeeId)
+                ->where(function($query) use ($search) {
+                    $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                })
+                ->whereNotIn('processes.id',$idDuplicate)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+
+            $processes4 = DB::table('processes')
+                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+                ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$employeeId)
+                ->where(function($query) use ($search) {
+                    $query->where('processes.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
+                })
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
         }
-        return response()->json(['success'=>true, 'message' => 'search processes', 'processes' => $processes]);
+        return response()->json([
+            'success'=>true,
+            'message' => 'Tìm kiếm thành công',
+            "processes1" => $processes1,
+            "processes2" => $processes2,
+            "processes3" => $processes3,
+            "processes4" => $processes4,
+        ]);
     }
 
     public function getFiveNotification(Request $request){

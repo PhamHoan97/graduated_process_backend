@@ -280,7 +280,7 @@ Route::group(['middleware' => 'jwt-auth-account'], function () {
     //update account of employee
     Route::post('employee/update/account','Api\AccountController@updateAccountOfEmployee');
     // search Process
-    Route::get('employee/search/process/{search}','Api\AccountController@searchProcesses');
+    Route::get('employee/search/process/{token}/{search}','Api\AccountController@searchProcesses');
     //get 5 notification about system
     Route::get('employee/five/process/notification/{token}','Api\AccountController@getFiveNotification');
     //add comment in process

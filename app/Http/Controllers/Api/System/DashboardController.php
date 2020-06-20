@@ -36,6 +36,20 @@ class DashboardController extends Controller
                         'processes.description as description',
                         'processes.update_at as date')->distinct()
                     ->get();
+                $processesDuplicate = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('employees', 'departments.id', '=', 'employees.department_id')
+                    ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
+                    ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
+                    ->where('processes.name','LIKE','%'.$textSearch.'%')
+                    ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
+                    ->where('processes.type',5)
+                    ->select('processes.id as id')->distinct()
+                    ->get();
+                $idDuplicate = [];
+                foreach ($processesDuplicate as $item){
+                    $idDuplicate []= $item->id;
+                }
                 $processes2 = DB::table('companies')
                     ->join('departments', 'companies.id', '=', 'departments.company_id')
                     ->join('roles', 'departments.id', '=', 'roles.department_id')
@@ -43,6 +57,7 @@ class DashboardController extends Controller
                     ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
                     ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
+                    ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.type as type',
@@ -57,6 +72,7 @@ class DashboardController extends Controller
                     ->join('processes', 'processes_departments.process_id', '=', 'processes.id')
                     ->where('processes.name','LIKE','%'.$textSearch.'%')
                     ->orwhere('processes.code','LIKE','%'.$textSearch.'%')
+                    ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.type as type',
@@ -92,11 +108,24 @@ class DashboardController extends Controller
                         'processes.description as description',
                         'processes.update_at as date')->distinct()
                     ->get();
+                $processesDuplicate = DB::table('companies')
+                    ->join('departments', 'companies.id', '=', 'departments.company_id')
+                    ->join('employees', 'departments.id', '=', 'employees.department_id')
+                    ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
+                    ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
+                    ->where('processes.type',5)
+                    ->select('processes.id as id')->distinct()
+                    ->get();
+                $idDuplicate = [];
+                foreach ($processesDuplicate as $item){
+                    $idDuplicate []= $item->id;
+                }
                 $processes2 = DB::table('companies')
                     ->join('departments', 'companies.id', '=', 'departments.company_id')
                     ->join('roles', 'departments.id', '=', 'roles.department_id')
                     ->join('processes_roles', 'roles.id', '=', 'processes_roles.role_id')
                     ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
+                    ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.type as type',
@@ -109,6 +138,7 @@ class DashboardController extends Controller
                     ->join('departments', 'companies.id', '=', 'departments.company_id')
                     ->join('processes_departments', 'departments.id', '=', 'processes_departments.department_id')
                     ->join('processes', 'processes_departments.process_id', '=', 'processes.id')
+                    ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.type as type',
@@ -178,12 +208,26 @@ class DashboardController extends Controller
                     'processes.deadline as deadline'
                 )->distinct()
                 ->get();
+            $processesDuplicate = DB::table('companies')
+                ->join('departments', 'companies.id', '=', 'departments.company_id')
+                ->join('employees', 'departments.id', '=', 'employees.department_id')
+                ->join('processes_employees', 'employees.id', '=', 'processes_employees.employee_id')
+                ->join('processes', 'processes_employees.process_id', '=', 'processes.id')
+                ->where('companies.id', $idCompany)
+                ->where('processes.type',5)
+                ->select('processes.id')->distinct()
+                ->get();
+            $idDuplicate = [];
+            foreach ($processesDuplicate as $item){
+                $idDuplicate []= $item->id;
+            }
             $processes2 = DB::table('companies')
                 ->join('departments', 'companies.id', '=', 'departments.company_id')
                 ->join('roles', 'departments.id', '=', 'roles.department_id')
                 ->join('processes_roles', 'roles.id', '=', 'processes_roles.role_id')
                 ->join('processes', 'processes_roles.process_id', '=', 'processes.id')
                 ->where('companies.id', $idCompany)
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->orderBy('processes.id', 'ASC')
                 ->select('processes.id',
                     'processes.code as code',
@@ -198,6 +242,8 @@ class DashboardController extends Controller
                 ->join('departments', 'companies.id', '=', 'departments.company_id')
                 ->join('processes_departments', 'departments.id', '=', 'processes_departments.department_id')
                 ->join('processes', 'processes_departments.process_id', '=', 'processes.id')
+                ->where('companies.id', $idCompany)
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.type as type',
@@ -210,6 +256,8 @@ class DashboardController extends Controller
             $processes4 = DB::table('companies')
                 ->join('processes_companies', 'companies.id', '=', 'processes_companies.company_id')
                 ->join('processes', 'processes_companies.process_id', '=', 'processes.id')
+                ->where('companies.id', $idCompany)
+                ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.type as type',
