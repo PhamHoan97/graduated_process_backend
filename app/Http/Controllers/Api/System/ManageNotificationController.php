@@ -338,7 +338,8 @@ class ManageNotificationController extends Controller
 
     // Get information response in notification system
     public function getInformationResponses (Request $request,$idNotificationFromSystem){
-        $result = array();
+        $resultExcel = array();
+        $resultChart = array();
         try {
             $responseCompanies = DB::table('admin_responses')
                 ->join('admin_notifications', 'admin_notifications.id', '=', 'admin_responses.notification_id')
@@ -354,11 +355,12 @@ class ManageNotificationController extends Controller
                 ->get();
             foreach ($responseCompanies as $responseCompany){
                 $dataCompanyResponses = json_decode($responseCompany->content);
+                $resultChart[] = json_decode($responseCompany->content);
                 $dataCompanyResponses->{"Email"} = $responseCompany->email;
                 $dataCompanyResponses->{"Tài khoản công ty"} = $responseCompany->username;
                 $dataCompanyResponses->{"Tài khoản nhân viên"} = 'Không';
                 $dataCompanyResponses->{"Ngày Gửi"} = $responseCompany->update_at;
-                $result[]=$dataCompanyResponses;
+                $resultExcel[]=$dataCompanyResponses;
             }
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
@@ -379,16 +381,21 @@ class ManageNotificationController extends Controller
                 ->get();
             foreach ($responseEmployees as $responseEmployee){
                 $dataEmployeeResponses = json_decode($responseEmployee->content);
+                $resultChart[] = json_decode($responseEmployee->content);
                 $dataEmployeeResponses->{"Email"} = $responseEmployee->email;
                 $dataEmployeeResponses->{"Tài khoản công ty"} = 'Không';
                 $dataEmployeeResponses->{"Tài khoản nhân viên"} = $responseEmployee->username;
                 $dataEmployeeResponses->{"Ngày Gửi"} = $responseEmployee->update_at;
-                $result[]=$dataEmployeeResponses;
+                $resultExcel[]=$dataEmployeeResponses;
             }
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
-        return response()->json(['message'=>'get success all response of system notification','responseNotificationSystem'=>$result],200);
+        return response()->json([
+            'message'=>'get success all response of system notification',
+            'responseNotificationSystem'=>$resultExcel,
+            'responseDataChartNotification'=>$resultChart
+        ],200);
     }
 
 }

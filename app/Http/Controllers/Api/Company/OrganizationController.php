@@ -500,11 +500,11 @@ class OrganizationController extends Controller
                         "id"=>1,
                         "email"=>$company->contact,
                         "tags"=>array(
-                            'Company'
+                            'Công ty'
                         ),
-                        "title"=>"Công ty",
-                        "img" => $avatarCompany,
-                        "name"=>$company->signature
+                        "tiêu đề"=>"Công ty",
+                        "ảnh" => $avatarCompany,
+                        "tên"=>$company->signature
                     );
                     array_push($dataOrganization, $organizationCompany);
                     $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments()->get(['name','id']);
@@ -515,10 +515,10 @@ class OrganizationController extends Controller
                                 "id"=>$id,
                                 "pid"=>1,
                                 "tags"=>array(
-                                    'Department'
+                                    'Phòng ban'
                                 ),
-                                "name"=>$department->name,
-                                'title'=>"Department",
+                                "tên"=>$department->name,
+                                'tiêu đề'=>"Phòng ban",
                             );
                             array_push($dataOrganization, $organizationDepartment);
                             $idDepartment = $id;
@@ -530,10 +530,10 @@ class OrganizationController extends Controller
                                         "id"=>$id,
                                         "pid"=>$idDepartment,
                                         "tags"=>array(
-                                            'Role'
+                                            'Chức vụ'
                                         ),
-                                        "name"=>$role->name,
-                                        "title"=>"Role"
+                                        "tên"=>$role->name,
+                                        "tiêu đề"=>"Chức vụ"
                                     );
                                     array_push($dataOrganization, $organizationRole);
                                     $idRole = $id;
@@ -555,12 +555,12 @@ class OrganizationController extends Controller
                                                 "id"=>$id,
                                                 "pid"=>$idRole,
                                                 "tags"=>array(
-                                                    'Employee'
+                                                    'Nhân viên'
                                                 ),
-                                                "name"=>$employee->name,
-                                                "title"=>$detailRole->name,
+                                                "tên"=>$employee->name,
+                                                "tiêu đề"=>$detailRole->name,
                                                 "email"=>$employee->email,
-                                                "img"=>$avatarEmployee
+                                                "ảnh"=>$avatarEmployee
                                             );
                                             array_push($dataOrganization, $organizationEmployee);
                                             $id++;
@@ -579,6 +579,226 @@ class OrganizationController extends Controller
             return response()->json(["error" => $e->getMessage()],400);
         }
     }
+
+    // Get JSON which support to display chart organization
+    public function searchNameEmployeeOrganization(Request $request){
+        try {
+            $textNameSearch = $request->textNameSearch;
+            $token = $request->token;
+            $idCompany = $this->getIdCompanyByToken($token);
+            if(!$idCompany){
+                return response()->json(['error'=>'Error get idCompany with token'],400);
+            }else{
+                try {
+                    $dataOrganization = [];
+                    $url = "https://pms.khanhlq.com/";
+                    $company = DB::table('companies')->where('id',$idCompany)->first();
+                    if($company->avatar !== null && $company->avatar !== ""){
+                        $avatarCompany = $url.$company->avatar;
+                    }else{
+                        $avatarCompany = $url."/organization/company.png";
+                    }
+                    $organizationCompany =  array(
+                        "id"=>1,
+                        "email"=>$company->contact,
+                        "tags"=>array(
+                            'Công ty'
+                        ),
+                        "tiêu đề"=>"Công ty",
+                        "ảnh" => $avatarCompany,
+                        "tên"=>$company->signature
+                    );
+                    array_push($dataOrganization, $organizationCompany);
+                    $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments()->get(['name','id']);
+                    $id = 2;
+                    if($departments !==null){
+                        foreach($departments as $keyDepartment=>$department) {
+                            $flagPushedEmployee = false;
+                            $organizationDepartment =  array(
+                                "id"=>$id,
+                                "pid"=>1,
+                                "tags"=>array(
+                                    'Phòng ban'
+                                ),
+                                "tên"=>$department->name,
+                                'tiêu đề'=>"Phòng ban",
+                            );
+                            $idDepartment = $id;
+                            $id++;
+                            $roles = \App\Departments::where('id', '=', $department->id)->first()->roles()->get(['name','id']);
+                            if($roles !==null){
+                                foreach ($roles as $keyRole =>$role){
+                                    $flagPushedRole = false;
+                                    $organizationRole = array(
+                                        "id"=>$id,
+                                        "pid"=>$idDepartment,
+                                        "tags"=>array(
+                                            'Chức vụ'
+                                        ),
+                                        "tên"=>$role->name,
+                                        "tiêu đề"=>"Chức vụ"
+                                    );
+                                    $idRole = $id;
+                                    $id++;
+                                    $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','email','id','avatar','gender']);
+                                    if($employees !==null){
+                                        foreach ($employees as $keyEmployee => $employee){
+                                            if($employee->name === $textNameSearch){
+                                                $flagPushedEmployee = true;
+                                                $flagPushedRole =  true;
+                                                $detailRole = DB::table('roles')->where('id',$role->id)->first();
+                                                if($employee->avatar !== null && $employee->avatar !==""){
+                                                    $avatarEmployee = $url.$employee->avatar;
+                                                }else{
+                                                    if($employee->gender === 'Nam'){
+                                                        $avatarEmployee = $url."/organization/avatar-man.png";
+                                                    }else{
+                                                        $avatarEmployee = $url."/organization/avatar-female.png";
+                                                    }
+                                                }
+                                                $organizationEmployee = array(
+                                                    "id"=>$id,
+                                                    "pid"=>$idRole,
+                                                    "tags"=>array(
+                                                        'Nhân viên'
+                                                    ),
+                                                    "tên"=>$employee->name,
+                                                    "tiêu đề"=>$detailRole->name,
+                                                    "email"=>$employee->email,
+                                                    "ảnh"=>$avatarEmployee
+                                                );
+                                                array_push($dataOrganization, $organizationEmployee);
+                                                $id++;
+                                            }
+                                        }
+                                    }
+                                    if($flagPushedRole){
+                                        array_push($dataOrganization, $organizationRole);
+                                    }
+                                }
+                            }
+                            if($flagPushedEmployee){
+                                array_push($dataOrganization, $organizationDepartment);
+                            }
+                        }
+                    }
+                    return response()->json(['message'=>'Get success all data json organization','dataOrganization'=>$dataOrganization],200);
+                }catch(\Exception $e) {
+                    return response()->json(["error" => $e->getMessage()],400);
+                }
+            }
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+    // Get JSON which support to display chart organization
+    public function searchDepartmentOrganization(Request $request){
+        try {
+            $idDepartmentSearch = $request->idDepartmentSearch;
+            $token = $request->token;
+            $idCompany = $this->getIdCompanyByToken($token);
+            if(!$idCompany){
+                return response()->json(['error'=>'Error get idCompany with token'],400);
+            }else{
+                try {
+                    $dataOrganization = [];
+                    $url = "https://pms.khanhlq.com/";
+                    $company = DB::table('companies')->where('id',$idCompany)->first();
+                    if($company->avatar !== null && $company->avatar !== ""){
+                        $avatarCompany = $url.$company->avatar;
+                    }else{
+                        $avatarCompany = $url."/organization/company.png";
+                    }
+                    $organizationCompany =  array(
+                        "id"=>1,
+                        "email"=>$company->contact,
+                        "tags"=>array(
+                            'Công ty'
+                        ),
+                        "tiêu đề"=>"Công ty",
+                        "ảnh" => $avatarCompany,
+                        "tên"=>$company->signature
+                    );
+                    array_push($dataOrganization, $organizationCompany);
+                    $departments = \App\Companies::where('id', '=', $idCompany)->first()->departments()->get(['name','id']);
+                    $id = 2;
+                    if($departments !==null){
+                        foreach($departments as $keyDepartment=>$department) {
+                            if($department->id == $idDepartmentSearch){
+                                $organizationDepartment =  array(
+                                    "id"=>$id,
+                                    "pid"=>1,
+                                    "tags"=>array(
+                                        'Phòng ban'
+                                    ),
+                                    "tên"=>$department->name,
+                                    'tiêu đề'=>"Phòng ban",
+                                );
+                                array_push($dataOrganization, $organizationDepartment);
+                                $idDepartment = $id;
+                                $id++;
+                                $roles = \App\Departments::where('id', '=', $department->id)->first()->roles()->get(['name','id']);
+                                if($roles !==null){
+                                    foreach ($roles as $keyRole =>$role){
+                                        $organizationRole = array(
+                                            "id"=>$id,
+                                            "pid"=>$idDepartment,
+                                            "tags"=>array(
+                                                'Chức vụ'
+                                            ),
+                                            "tên"=>$role->name,
+                                            "tiêu đề"=>"Chức vụ"
+                                        );
+                                        array_push($dataOrganization, $organizationRole);
+                                        $idRole = $id;
+                                        $id++;
+                                        $employees = \App\Roles::where('id', '=', $role->id)->first()->employees()->get(['name','email','id','avatar','gender']);
+                                        if($employees !==null){
+                                            foreach ($employees as $keyEmployee => $employee){
+                                                $detailRole = DB::table('roles')->where('id',$role->id)->first();
+                                                if($employee->avatar !== null && $employee->avatar !==""){
+                                                    $avatarEmployee = $url.$employee->avatar;
+                                                }else{
+                                                    if($employee->gender === 'Nam'){
+                                                        $avatarEmployee = $url."/organization/avatar-man.png";
+                                                    }else{
+                                                        $avatarEmployee = $url."/organization/avatar-female.png";
+                                                    }
+                                                }
+                                                $organizationEmployee = array(
+                                                    "id"=>$id,
+                                                    "pid"=>$idRole,
+                                                    "tags"=>array(
+                                                        'Nhân viên'
+                                                    ),
+                                                    "tên"=>$employee->name,
+                                                    "tiêu đề"=>$detailRole->name,
+                                                    "email"=>$employee->email,
+                                                    "ảnh"=>$avatarEmployee
+                                                );
+                                                array_push($dataOrganization, $organizationEmployee);
+                                                $id++;
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+
+                        }
+                    }
+                    return response()->json(['message'=>'Get success all data json organization','dataOrganization'=>$dataOrganization],200);
+                }catch(\Exception $e) {
+                    return response()->json(["error" => $e->getMessage()],400);
+                }
+            }
+        }catch(\Exception $e) {
+            return response()->json(["error" => $e->getMessage()],400);
+        }
+    }
+
+
 
     // get all role in a department
     public function getRolesDepartment(Request $request,$idDepartment){
