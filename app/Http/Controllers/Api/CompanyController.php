@@ -604,6 +604,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.name as name',
                     'processes.code as code',
@@ -618,6 +619,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->where('processes.type',5)
                 ->select('processes.id as id')->distinct()
                 ->get();
@@ -631,6 +633,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id', $company_id)
+                ->where('processes.is_delete', 1)
                 ->whereNotIn('processes.id', $idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
@@ -645,6 +648,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->whereNotIn('processes.id', $idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
@@ -658,6 +662,7 @@ class CompanyController extends Controller
                 ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -705,6 +710,7 @@ class CompanyController extends Controller
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                 ->where('departments.id',$idDepartment)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -718,6 +724,7 @@ class CompanyController extends Controller
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                 ->where('departments.id',$idDepartment)
+                ->where('processes.is_delete', 1)
                 ->where('processes.type',5)
                 ->select('processes.id as id')->distinct()
                 ->get();
@@ -730,6 +737,7 @@ class CompanyController extends Controller
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                 ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                 ->where('departments.id',$idDepartment)
+                ->where('processes.is_delete', 1)
                 ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
@@ -743,6 +751,7 @@ class CompanyController extends Controller
                 ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->where('departments.id',$idDepartment)
+                ->where('processes.is_delete', 1)
                 ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
@@ -757,6 +766,7 @@ class CompanyController extends Controller
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
                 ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
                 ->where('departments.id',$idDepartment)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -789,6 +799,7 @@ class CompanyController extends Controller
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$idEmployee)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -801,6 +812,7 @@ class CompanyController extends Controller
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$idEmployee)
+                ->where('processes.is_delete', 1)
                 ->where('processes.id',5)
                 ->select('processes.id as id')->distinct()
                 ->get();
@@ -813,6 +825,7 @@ class CompanyController extends Controller
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                 ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
                 ->where('employees.id',$idEmployee)
+                ->where('processes.is_delete', 1)
                 ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
@@ -827,6 +840,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
                 ->where('employees.id',$idEmployee)
+                ->where('processes.is_delete', 1)
                 ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
@@ -842,6 +856,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
                 ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
                 ->where('employees.id',$idEmployee)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -923,13 +938,15 @@ class CompanyController extends Controller
         $idProcess = $request->idProcess;
         $token = $request->token;
         if(!$idProcess){
-            return response()->json(['error' => true, 'message' => "idProcess is required"]);
+            return response()->json(['error' => true, 'message' => "idProcess không được trống"]);
         }
         if(!$token){
-            return response()->json(['error' => true, 'message' => "token is required"]);
+            return response()->json(['error' => true, 'message' => "token không được trống"]);
         }
         try{
-            $deleteProcess = Processes::find($idProcess)->delete();
+            $deleteProcess = Processes::find($idProcess);
+            $deleteProcess->is_delete = 2;
+            $deleteProcess->update();
             $admin = Admins::where('auth_token', $token)->first();
             $company_id = $admin->company_id;
             $processes1 = DB::table('processes')
@@ -938,6 +955,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.name as name',
                     'processes.code as code',
@@ -952,6 +970,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->where('processes.type',5)
                 ->select('processes.id as id')->distinct()
                 ->get();
@@ -965,6 +984,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
@@ -979,6 +999,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->whereNotIn('processes.id',$idDuplicate)
                 ->select('processes.id as id',
                     'processes.code as code',
@@ -992,6 +1013,7 @@ class CompanyController extends Controller
                 ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
                 ->where('companies.id',$company_id)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -1289,6 +1311,7 @@ class CompanyController extends Controller
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1305,6 +1328,7 @@ class CompanyController extends Controller
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1322,6 +1346,7 @@ class CompanyController extends Controller
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                 ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1340,6 +1365,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1360,6 +1386,7 @@ class CompanyController extends Controller
                 ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
                 ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1405,6 +1432,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->select('processes.id as id',
                         'processes.name as name',
                         'processes.code as code',
@@ -1419,6 +1447,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->where('processes.type',5)
                     ->select('processes.id as id')->distinct()
                     ->get();
@@ -1432,6 +1461,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.code as code',
@@ -1446,6 +1476,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->whereNotIn('processes.id',$idDuplicate)
                     ->select('processes.id as id',
                         'processes.name as name',
@@ -1459,6 +1490,7 @@ class CompanyController extends Controller
                     ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                     ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->select('processes.id as id',
                         'processes.code as code',
                         'processes.name as name',
@@ -1474,6 +1506,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->where(function($query) use ($search) {
                         $query->where('processes.name', 'LIKE', '%' . $search . '%')
                             ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1492,6 +1525,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->where(function($query) use ($search) {
                         $query->where('processes.name', 'LIKE', '%' . $search . '%')
                             ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1515,6 +1549,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'roles.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->whereNotIn('processes.id',$idDuplicate)
                     ->where(function($query) use ($search) {
                         $query->where('processes.name', 'LIKE', '%' . $search . '%')
@@ -1533,6 +1568,7 @@ class CompanyController extends Controller
                     ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                     ->leftJoin('companies', 'departments.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->where(function($query) use ($search) {
                         $query->where('processes.name', 'LIKE', '%' . $search . '%')
                             ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -1550,6 +1586,7 @@ class CompanyController extends Controller
                     ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                     ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
                     ->where('companies.id',$idCompany)
+                    ->where('processes.is_delete', 1)
                     ->where(function($query) use ($search) {
                         $query->where('processes.name', 'LIKE', '%' . $search . '%')
                             ->orWhere('processes.code', 'LIKE', '%' . $search . '%');

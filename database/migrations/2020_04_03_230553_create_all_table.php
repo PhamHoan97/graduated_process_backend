@@ -274,6 +274,7 @@ class CreateAllTable extends Migration
             $table->text('document')->nullable();
             $table->string('update_at');
             $table->integer('admin_id')->unsigned();
+            $table->integer('is_delete')->nullable(1);
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');
             $table->timestamps();
         });
