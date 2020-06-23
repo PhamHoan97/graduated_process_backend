@@ -111,18 +111,68 @@ class AccountController extends Controller
             $account = Accounts::where('auth_token', $token)->first();
             $employee = Employees::find($account->employee_id);
             $employee->role;
-            $employee->processesEmployees;
-            $employee->processesRoles;
-            $employee->processesDepartments;
-            $department_id = $employee['department_id'];
-            $department = Departments::find($department_id);
-            $company = Companies::find($department['company_id']);
+            $processes_employees = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->where('employees.id',$account->employee_id)
+                ->where('processes.is_delete', 1)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $processesDuplicate = DB::table('processes')
+                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+                ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
+                ->where('employees.id',$account->employee_id)
+                ->where('processes.is_delete', 1)
+                ->where('processes.id',5)
+                ->select('processes.id as id')->distinct()
+                ->get();
+            $idDuplicate = [];
+            foreach ($processesDuplicate as $item){
+                $idDuplicate []= $item->id;
+            }
+            $processes_roles = DB::table('processes')
+                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+                ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
+                ->where('employees.id',$account->employee_id)
+                ->where('processes.is_delete', 1)
+                ->whereNotIn('processes.id',$idDuplicate)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
+            $processes_departments = DB::table('processes')
+                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+                ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
+                ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
+                ->where('employees.id',$account->employee_id)
+                ->where('processes.is_delete', 1)
+                ->whereNotIn('processes.id',$idDuplicate)
+                ->select('processes.id as id',
+                    'processes.code as code',
+                    'processes.name as name',
+                    'processes.description as description',
+                    'processes.type as type',
+                    'processes.created_at as created_at'
+                )->distinct()
+                ->get();
             $processes_companies = DB::table('processes')
                 ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
                 ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
                 ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
                 ->where('employees.id',$account->employee_id)
+                ->where('processes.is_delete', 1)
                 ->select('processes.id as id',
                     'processes.code as code',
                     'processes.name as name',
@@ -132,7 +182,12 @@ class AccountController extends Controller
                 )->distinct()
                 ->get();
             $employee->processes_companies = $processes_companies;
+            $employee->processes_employees = $processes_employees;
+            $employee->processes_roles = $processes_roles;
+            $employee->processes_departments = $processes_departments;
 
+            $department = Departments::find($employee->department_id);
+            $company = Companies::find($department->company_id);
         }catch ( \Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
         }
@@ -183,46 +238,46 @@ class AccountController extends Controller
         }
     }
 
-    public function getProcessOfEmployeePaginate(Request $request){
-        $token = $request->token;
-        $page = $request->page;
-        if(!isset($token)){
-            return response()->json(['error' => 1, 'message' => "token is required"], 400);
-        }
-        if(!isset($page)){
-            return response()->json(['error' => 1, 'message' => "page is required"], 400);
-        }
-        try{
-            $account = Accounts::where('auth_token', $token)->first();
-            $employee = Employees::find($account->employee_id);
-            $processes = DB::table('processes')
-                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
-                ->leftJoin('employees as employees1', 'processes_employees.employee_id', '=', 'employees1.id')
-                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
-                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
-                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
-                ->leftJoin('departments as departments1', 'processes_departments.department_id', '=', 'departments1.id')
-                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
-                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
-                ->leftJoin('departments as departments2', 'companies.id', '=', 'departments2.company_id')
-                ->leftJoin('employees as employees2', 'departments2.id', '=', 'employees2.department_id')
-                ->where('employees1.id',$employee->id)
-                ->orWhere('roles.id', $employee->role_id)
-                ->orWhere('departments1.id', $employee->department_id)
-                ->orWhere('employees2.id', $employee->id)
-                ->select('processes.id as id',
-                    'processes.code as code',
-                    'processes.name as name',
-                    'processes.description as description',
-                    'processes.type as type',
-                    'processes.created_at as created_at')
-                ->forPage($page, 6)->get();
-
-        }catch ( \Exception $e){
-            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
-        }
-        return response()->json(['success'=>true, 'message' => 'got paginate process', 'processes' => $processes]);
-    }
+//    public function getProcessOfEmployeePaginate(Request $request){
+//        $token = $request->token;
+//        $page = $request->page;
+//        if(!isset($token)){
+//            return response()->json(['error' => 1, 'message' => "token is required"], 400);
+//        }
+//        if(!isset($page)){
+//            return response()->json(['error' => 1, 'message' => "page is required"], 400);
+//        }
+//        try{
+//            $account = Accounts::where('auth_token', $token)->first();
+//            $employee = Employees::find($account->employee_id);
+//            $processes = DB::table('processes')
+//                ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
+//                ->leftJoin('employees as employees1', 'processes_employees.employee_id', '=', 'employees1.id')
+//                ->leftJoin('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
+//                ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
+//                ->leftJoin('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
+//                ->leftJoin('departments as departments1', 'processes_departments.department_id', '=', 'departments1.id')
+//                ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
+//                ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
+//                ->leftJoin('departments as departments2', 'companies.id', '=', 'departments2.company_id')
+//                ->leftJoin('employees as employees2', 'departments2.id', '=', 'employees2.department_id')
+//                ->where('employees1.id',$employee->id)
+//                ->orWhere('roles.id', $employee->role_id)
+//                ->orWhere('departments1.id', $employee->department_id)
+//                ->orWhere('employees2.id', $employee->id)
+//                ->select('processes.id as id',
+//                    'processes.code as code',
+//                    'processes.name as name',
+//                    'processes.description as description',
+//                    'processes.type as type',
+//                    'processes.created_at as created_at')
+//                ->forPage($page, 6)->get();
+//
+//        }catch ( \Exception $e){
+//            return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
+//        }
+//        return response()->json(['success'=>true, 'message' => 'got paginate process', 'processes' => $processes]);
+//    }
 
     public function updateAccountOfEmployee(Request $request){
         $username = $request->username;
@@ -267,6 +322,7 @@ class AccountController extends Controller
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -283,6 +339,7 @@ class AccountController extends Controller
                 ->leftJoin('processes_employees', 'processes.id', '=', 'processes_employees.process_id')
                 ->leftJoin('employees', 'processes_employees.employee_id', '=', 'employees.id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -300,6 +357,7 @@ class AccountController extends Controller
                 ->leftJoin('roles', 'processes_roles.role_id', '=', 'roles.id')
                 ->leftJoin('employees', 'roles.id', '=', 'employees.role_id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -318,6 +376,7 @@ class AccountController extends Controller
                 ->leftJoin('departments', 'processes_departments.department_id', '=', 'departments.id')
                 ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -338,6 +397,7 @@ class AccountController extends Controller
                 ->leftJoin('departments', 'companies.id', '=', 'departments.company_id')
                 ->leftJoin('employees', 'departments.id', '=', 'employees.department_id')
                 ->where('employees.id',$employeeId)
+                ->where('processes.is_delete', 1)
                 ->where(function($query) use ($search) {
                     $query->where('processes.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('processes.code', 'LIKE', '%' . $search . '%');
@@ -381,11 +441,20 @@ class AccountController extends Controller
                 ->leftJoin('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                 ->leftJoin('companies', 'processes_companies.company_id', '=', 'companies.id')
                 ->leftJoin('departments as departments1', 'companies.id', '=', 'departments1.company_id')
-                ->leftJoin('employees as employees1', 'departments.id', '=', 'employees1.department_id')
+                ->leftJoin('employees as employees1', 'departments1.id', '=', 'employees1.department_id')
                 ->where('employees.id',$employee->id)
-                ->orWhere('roles.id', $employee->role_id)
-                ->orWhere('departments.id', $employee->department_id)
-                ->orWhere('employees1.id', $employee->id)
+                ->orwhere(function ($query)use ($employee) {
+                    $query->where('roles.id', $employee->role_id)
+                        ->where('processes.is_delete', 1);
+                })
+                ->orwhere(function ($query)use ($employee) {
+                    $query->where('employees1.id', $employee->id)
+                        ->where('processes.is_delete', 1);
+                })
+                ->orwhere(function ($query)use ($employee) {
+                    $query->where('departments.id', $employee->department_id)
+                        ->where('processes.is_delete', 1);
+                })
                 ->select('processes.id as id',
                     'processes.name as name',
                     'processes.created_at as created_at')->take(5)->orderBy('created_at', 'desc')
@@ -393,7 +462,7 @@ class AccountController extends Controller
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => $e->getMessage()], 400);
         }
-        return response()->json(['success' => true, 'message' => "got 3 notifications", "notifications"=> $notifications], 200);
+        return response()->json(['success' => true, 'message' => "got 5 notifications", "notifications"=> $notifications], 200);
     }
 
     public function resetPasswordForEmployee(Request $request){

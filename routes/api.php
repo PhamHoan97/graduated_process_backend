@@ -173,7 +173,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     // search employee in company
     Route::post('company/organization/employee/search','Api\Company\OrganizationController@searchEmployeeCompany');
     //remove process in company
-    Route::post('company/process/remove','Api\CompanyController@');
+    Route::post('company/process/remove','Api\CompanyController@removeProcessCompany');
     // MANAGE PROCESS COMPANY
     // get all processes with type company
     Route::get('company/process/type/all/{token}','Api\Company\OrganizationController@getAllProcessTypeCompany');
