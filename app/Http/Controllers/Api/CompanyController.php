@@ -285,8 +285,17 @@ class CompanyController extends Controller
                         $note->element_id = $element->id;
                         $note->admin_id = $admin->id;
                         $note->content = $value->note;
-                        $note->document = $value->file;
-                        $note->assign = json_encode($value->assign, JSON_UNESCAPED_UNICODE);
+                        if($value->file){
+                            $note->document = json_encode($value->file, JSON_UNESCAPED_UNICODE);
+                        }else{
+                            $note->document = null;
+                        }
+                        if($value->assign){
+                            $note->assign = json_encode($value->assign, JSON_UNESCAPED_UNICODE);
+                        }else{
+                            $note->assign = null;
+                        }
+
                         $note->save();
                     }
                     //save comment
@@ -499,7 +508,16 @@ class CompanyController extends Controller
                         $note->admin_id = $admin->id;
                         $note->content = $value->note;
                         $note->document = $value->file;
-                        $note->assign = json_encode($value->assign, JSON_UNESCAPED_UNICODE);
+                        if($value->file){
+                            $note->document = json_encode($value->file, JSON_UNESCAPED_UNICODE);
+                        }else{
+                            $note->document = null;
+                        }
+                        if($value->assign){
+                            $note->assign = json_encode($value->assign, JSON_UNESCAPED_UNICODE);
+                        }else{
+                            $note->assign = null;
+                        }
                         $note->save();
                     }
                     //update comment
