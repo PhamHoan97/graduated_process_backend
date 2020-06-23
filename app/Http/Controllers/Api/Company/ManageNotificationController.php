@@ -251,4 +251,32 @@ class ManageNotificationController extends Controller
             return response()->json(["error" => $e->getMessage()],400);
         }
     }
+
+    // get all notification no see
+    public function getNotificationNoSee(Request $request){
+        $token = $request->token;
+        $idAdmin = $this->getIdAccountByToken($token);
+        if(!$idAdmin){
+            return response()->json(["error" => 'Error get id admin with token'],400);
+        }else{
+            try {
+                $notifications = DB::table('admin_notifications')
+                    ->join('system_notifications', 'system_notifications.id', '=', 'admin_notifications.notification_id')
+                    ->where('admin_notifications.admin_id',$idAdmin)
+                    ->where('admin_notifications.status',0)
+                    ->select(
+                        'admin_notifications.id as id',
+                        'system_notifications.name as name',
+                        'admin_notifications.update_at as date'
+                    )
+                    ->get();
+                return response()->json([
+                    'message'=>'Lấy thông công chi tiết thông báo chưa xem',
+                    'notifications'=>$notifications]
+                    ,200);
+            }catch(\Exception $e) {
+                return response()->json(["error" => $e->getMessage()],400);
+            }
+        }
+    }
 }

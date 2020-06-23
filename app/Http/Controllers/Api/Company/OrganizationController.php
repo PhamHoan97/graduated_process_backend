@@ -891,6 +891,7 @@ class OrganizationController extends Controller
                 $processes = DB::table("processes")
                     ->join('processes_companies', 'processes.id', '=', 'processes_companies.process_id')
                     ->where('processes.admin_id',$admin->id)
+                    ->where('processes.is_delete',1)
                     ->where('processes_companies.company_id',$admin->company_id)
                     ->distinct()
                     ->select('processes.id as id',
@@ -917,6 +918,7 @@ class OrganizationController extends Controller
                 $processes = DB::table("processes")
                     ->join('processes_departments', 'processes.id', '=', 'processes_departments.process_id')
                     ->where('processes.admin_id',$admin->id)
+                    ->where('processes.is_delete',1)
                     ->where('processes_departments.department_id',$idDepartment)
                     ->distinct()
                     ->select('processes.id as id',
@@ -944,6 +946,7 @@ class OrganizationController extends Controller
                 $processes = DB::table("processes")
                     ->join('processes_roles', 'processes.id', '=', 'processes_roles.process_id')
                     ->where('processes.admin_id',$admin->id)
+                    ->where('processes.is_delete',1)
                     ->where('processes_roles.role_id',$idRole)
                     ->distinct()
                     ->select('processes.id as id',
@@ -967,16 +970,12 @@ class OrganizationController extends Controller
             return response()->json(["error" => 'Error get id admin with token'],400);
         }else{
             try {
-                DB::table('processes_companies')
-                    ->where('process_id', $idProcess)
-                    ->where('company_id', $admin->company_id)
-                    ->delete();
                 $process = DB::table('processes')
                     ->where('id', $idProcess)
                     ->first();
                 DB::table('processes')
                     ->where('id', $idProcess)
-                    ->delete();
+                    ->update(['is_delete' => 2]);
                 return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
             }catch(\Exception $e) {
                 return response()->json(["error" => $e->getMessage()],400);
@@ -989,16 +988,12 @@ class OrganizationController extends Controller
         $idProcess = $request->idProcess;
         $idDepartment = $request->idDepartment;
         try {
-            DB::table('processes_departments')
-                ->where('process_id', $idProcess)
-                ->where('department_id', $idDepartment)
-                ->delete();
             $process = DB::table('processes')
                 ->where('id', $idProcess)
                 ->first();
             DB::table('processes')
                 ->where('id', $idProcess)
-                ->delete();
+                ->update(['is_delete' => 2]);
             return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
@@ -1010,16 +1005,12 @@ class OrganizationController extends Controller
         $idProcess = $request->idProcess;
         $idRole = $request->idRole;
         try {
-            DB::table('processes_roles')
-                ->where('process_id', $idProcess)
-                ->where('role_id', $idRole)
-                ->delete();
             $process = DB::table('processes')
                 ->where('id', $idProcess)
                 ->first();
             DB::table('processes')
                 ->where('id', $idProcess)
-                ->delete();
+                ->update(['is_delete' => 2]);
             return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
@@ -1096,43 +1087,12 @@ class OrganizationController extends Controller
             return response()->json(['error' => true, 'message' => "token is required"]);
         }
         try {
-            $process =  DB::table('processes')
+            $process = DB::table('processes')
                 ->where('id', $idProcess)
                 ->first();
-            if($process->type === 1){
-                DB::table('processes_employees')
-                    ->where('process_id', $idProcess)
-                    ->delete();
-            }
-            if($process->type === 2){
-                DB::table('processes_roles')
-                    ->where('process_id', $idProcess)
-                    ->delete();
-            }
-            if($process->type === 3){
-                DB::table('processes_departments')
-                    ->where('process_id', $idProcess)
-                    ->delete();
-            }
-            if($process->type === 4){
-                DB::table('processes_companies')
-                    ->where('process_id', $idProcess)
-                    ->delete();
-            }
-            if($process->type === 5){
-                DB::table('processes_employees')
-                    ->where('process_id', $idProcess)
-                    ->delete();
-                DB::table('processes_roles')
-                    ->where('process_id', $idProcess)
-                    ->delete();
-                DB::table('processes_departments')
-                    ->where('process_id', $idProcess)
-                    ->delete();
-            }
             DB::table('processes')
                 ->where('id', $idProcess)
-                ->delete();
+                ->update(['is_delete' => 2]);
             return response()->json(['message'=>'Xóa thành công quy trình : '.$process->code],200);
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);

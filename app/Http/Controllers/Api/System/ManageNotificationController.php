@@ -388,13 +388,21 @@ class ManageNotificationController extends Controller
                 $dataEmployeeResponses->{"Ngày Gửi"} = $responseEmployee->update_at;
                 $resultExcel[]=$dataEmployeeResponses;
             }
+            $template = DB::table('system_notifications')
+                ->join('forms', 'forms.id', '=', 'system_notifications.form_id')
+                ->join('templates', 'templates.id', '=', 'forms.template_id')
+                ->where('system_notifications.id', '=', $idNotificationFromSystem)
+                ->select(
+                    'templates.content as content')
+                ->first();
         }catch(\Exception $e) {
             return response()->json(["error" => $e->getMessage()],400);
         }
         return response()->json([
             'message'=>'get success all response of system notification',
             'responseNotificationSystem'=>$resultExcel,
-            'responseDataChartNotification'=>$resultChart
+            'responseDataChartNotification'=>$resultChart,
+            'templateContentNotification'=>json_decode($template->content)
         ],200);
     }
 
