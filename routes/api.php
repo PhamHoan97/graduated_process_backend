@@ -217,6 +217,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     Route::get('company/notification/create/list/{token}','Api\Company\ManageNotificationController@getListCreateNotifications');
     Route::post('company/notification/create','Api\Company\ManageNotificationController@addNotificationCompany');
     Route::post('company/notification/create/delete','Api\Company\ManageNotificationController@deleteNotificationCreate');
+    Route::post('company/notification/list/header','Api\Company\ManageNotificationController@getNotificationNoSee');
     // get all employee and role in department
     Route::get('company/department/{idDepartment}/employee/role','Api\CompanyController@getAllEmployeeAndRoleOfDepartment');
     //save process
@@ -234,7 +235,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     // get all processes of a department in company
     Route::get('company/processes/department/{idDepartment}','Api\CompanyController@getAllProcessesOfADepartmentOfCompany');
     // get all processes of a employee in company
-    Route::get('company/processes/employee/{idEmployee}','Api\CompanyController@getAllProcessesOfAEmployeeOfCompany');
+    Route::get('company/processes/employee/{idEmployee}','Api\CompanyController@df');
     // get all fields in company
     Route::get('company/field','Api\CompanyController@getAllFields');
     // get all processes of template in company
