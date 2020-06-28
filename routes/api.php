@@ -265,7 +265,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     //get all employees assigned in process
     Route::post('company/process/employee/assigned','Api\CompanyController@getAllEmployeesAssignedInProcess');
     //upload document for element in process
-    Route::post('company/element/upload/document','Api\ElementController@uploadDocumentForElement');
+    Route::post('company/element/upload/document','Api\UploadController@uploadDocumentForElement');
     //upload templates for process
     Route::post('company/process/upload/template','Api\TemplateController@uploadTemplatesForProcess');
     //get all roles and departments in company which employees aren't belongs to
@@ -274,6 +274,8 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     // search in organization with name
     Route::post('company/organization/detail/search/employee','Api\Company\OrganizationController@searchNameEmployeeOrganization');
     Route::post('company/organization/detail/search/department','Api\Company\OrganizationController@searchDepartmentOrganization');
+    //upload document for process
+    Route::post('company/process/upload/document','Api\UploadController@uploadDocumentForProcess');
 });
 
 Route::group(['middleware' => 'jwt-auth-account'], function () {

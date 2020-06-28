@@ -203,14 +203,9 @@ class CompanyController extends Controller
             if($information->type === 5){
                 $process->collabration =  $information->collabration;
             }
-            if($request->hasFile('file')){
-                $file = $request->file('file');
-                    $photo_name = mt_rand();
-                    $type = $file->getClientOriginalExtension();
-                    $link = "file/";
-                    $file->move($link,$photo_name.".".$type);
-                    $url = $link.$photo_name.".".$type;
-                    $process->document = $url;
+            if($request->file){
+                $url = $request->file;
+                $process->document = $url;
             }
             $process->save();
             //save processes_employees or process_roles
@@ -422,7 +417,11 @@ class CompanyController extends Controller
             if($information->type === 5){
                 $process->collabration =  $information->collabration;
             }
-            $process->save();
+            if($request->file){
+                $url = $request->file;
+                $process->document = $url;
+            }
+            $process->update();
             //remove assign employee
             $deleteAssignsEmployee = ProcessesEmployees::where('process_id', $processId)->delete();
             //remove assign role
