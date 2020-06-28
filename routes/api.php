@@ -235,7 +235,7 @@ Route::group(['middleware' => 'jwt-auth-company'], function () {
     // get all processes of a department in company
     Route::get('company/processes/department/{idDepartment}','Api\CompanyController@getAllProcessesOfADepartmentOfCompany');
     // get all processes of a employee in company
-    Route::get('company/processes/employee/{idEmployee}','Api\CompanyController@df');
+    Route::get('company/processes/employee/{idEmployee}','Api\CompanyController@getAllProcessesOfAEmployeeOfCompany');
     // get all fields in company
     Route::get('company/field','Api\CompanyController@getAllFields');
     // get all processes of template in company
